@@ -167,7 +167,10 @@ body.no-grain::after{opacity:0}
 .manifesto .thesis{font-weight:900;letter-spacing:-.03em;line-height:.98;font-size:calc(clamp(1.7rem,min(4.4vw,6vh),4.6rem)*var(--fz));max-width:20ch;color:var(--ink)}
 .thesis > span{display:block}
 .thesis .w3{font-weight:300}
-.thesis .acc{font-style:italic;color:var(--ink)}
+.thesis .acc{font-style:italic}
+/* second sentence ("Culture happens in the margins") reads white over the
+   photo, matching the designer; first sentence stays ink */
+.thesis .wht{color:var(--white)}
 /* one continuous top line across all three beats. It's always present (dim);
    a single .lfill bar is scaled left→right by the scrub timeline, so the line
    "draws" smoothly as you scroll — width is driven by scroll, not a timer. */
@@ -358,7 +361,7 @@ body.no-grain::after{opacity:0}
   <section class="card blue manifesto" id="manifesto" data-nav="light" data-navbg="#084CA1" data-fit>
     <img class="sec-bg" src="assets/manifesto-still.jpg" alt="" decoding="async">
     <div class="wrap">
-      <h2 class="thesis reveal d1" data-m><span class="w3">The algorithm shows you</span><span>the highlights.</span><span class="w3">Culture happens</span><span class="acc">in the margins.</span></h2>
+      <h2 class="thesis reveal d1" data-m><span class="w3">The algorithm shows you</span><span>the highlights.</span><span class="w3 wht">Culture happens</span><span class="acc wht">in the margins.</span></h2>
       <div class="beats">
         <i class="lfill"></i>
         <div class="beat" data-m><h3>Culture gets flattened.</h3><p>Stories get reduced into trend language, aesthetic shorthand, and easy labels. The lived complexity disappears first.</p></div>
@@ -911,12 +914,13 @@ if(!reduce){
         scrollTrigger:{
           trigger:'.manifesto',
           start:'top top',
-          end:()=>'+='+(dwells[mi]+cards[mi].offsetHeight),
+          // +0.7vh reading pad so the last beat holds long enough to read
+          end:()=>'+='+(dwells[mi]+cards[mi].offsetHeight+vh()*.7),
           pin:true,pinSpacing:false,scrub:.4,invalidateOnRefresh:true,
           snap:{
             /* snap to each beat's hold inside the dwell portion, or the end */
             snapTo:(v)=>{
-              const frac=dwells[mi]/(dwells[mi]+cards[mi].offsetHeight);
+              const frac=dwells[mi]/(dwells[mi]+cards[mi].offsetHeight+vh()*.7);
               const pts=beats.map((_,i)=>((i+0.75)/beats.length)*frac);
               pts.push(1);
               let best=pts[0];for(const p of pts)if(Math.abs(p-v)<Math.abs(best-v))best=p;
@@ -930,7 +934,7 @@ if(!reduce){
         // each beat's text steps in at its point in the scrub
         tl.to(beatText[i],{autoAlpha:1,y:0,duration:.45,ease:'power1.out'},i*.9+.2);
       });
-      tl.to({},{duration:.6});                 // hold before the cover starts
+      tl.to({},{duration:1.6});                // dwell: reading time on the last beat before the cover starts
       anchorTargets['manifesto']=()=>tl.scrollTrigger.start;
 
       // the continuous line has its OWN scrub tied to the manifesto pin range,
