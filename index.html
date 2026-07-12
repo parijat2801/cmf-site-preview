@@ -926,19 +926,22 @@ if(!reduce){
           },
         },
       });
-      // the single continuous line draws left→right across the whole beats
-      // block, its width scrubbed by scroll (fills smoothly, no timer). It
-      // spans the beats' step window so each third completes as its beat lands.
-      const lfill=document.querySelector('.manifesto .beats .lfill');
-      gsap.set(lfill,{scaleX:0});
       beats.forEach((b,i)=>{
         // each beat's text steps in at its point in the scrub
         tl.to(beatText[i],{autoAlpha:1,y:0,duration:.45,ease:'power1.out'},i*.9+.2);
-        // grow the shared line to (i+1)/n by the time this beat has landed
-        tl.to(lfill,{scaleX:(i+1)/beats.length,duration:.9,ease:'none'},i*.9+.2);
       });
       tl.to({},{duration:.6});                 // hold before the cover starts
       anchorTargets['manifesto']=()=>tl.scrollTrigger.start;
+
+      // the continuous line has its OWN scrub tied to the manifesto pin range,
+      // so it draws 0→1 exactly as the section scrolls (decoupled from the beat
+      // step timeline, which guarantees it completes). Ends a touch before the
+      // pin's tail so the full line is visible while the beats hold.
+      const lfill=document.querySelector('.manifesto .beats .lfill');
+      gsap.fromTo(lfill,{scaleX:0},{scaleX:1,ease:'none',
+        scrollTrigger:{trigger:'.manifesto',start:'top top',
+          end:()=>'+='+Math.round((dwells[mi]+cards[mi].offsetHeight)*.82),
+          scrub:.4,invalidateOnRefresh:true}});
     }else{
       // tall fallback: text steps in with a stagger; the continuous line draws
       // across as the block enters. The dim base line is always present (CSS).
