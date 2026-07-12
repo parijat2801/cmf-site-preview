@@ -157,31 +157,28 @@ body.no-grain::after{opacity:0}
 @keyframes open{0%,30%{clip-path:inset(50% 0 50% 0)}46%{clip-path:inset(49.6% 0 49.6% 0)}60%,100%{clip-path:inset(0 0 0 0)}}
 @media(prefers-reduced-motion:reduce){.hero .flash,.tv .roll{display:none}.hero .content{clip-path:none;animation:none}}
 
-/* ============ MANIFESTO — brand blue, cream type, white accent ============ */
-/* designer photo background — covers the section; the blue class stays as a
-   load fallback behind it. Image biased right (like the designer); scrim keeps
-   the thesis + small beat copy legible. */
-.manifesto{isolation:isolate}
+/* ============ MANIFESTO — designer photo bg, natural colour, INK type ============ */
+/* Photo covers the section at its natural brightness (no scrim, like the
+   designer). Text is ink/black so it reads on the bright image. The .blue
+   class stays only as a load fallback behind the photo. */
+.manifesto{isolation:isolate;color:var(--ink)}
 .manifesto .sec-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:right center;z-index:0;pointer-events:none}
-.manifesto .scrim{position:absolute;inset:0;z-index:1;pointer-events:none;
-  background:linear-gradient(90deg,rgba(0,0,0,.72) 0%,rgba(0,0,0,.5) 45%,rgba(0,0,0,.28) 100%)}
 .manifesto .wrap{position:relative;z-index:2}
-.manifesto .thesis{font-weight:900;letter-spacing:-.03em;line-height:.98;font-size:calc(clamp(1.7rem,min(4.4vw,6vh),4.6rem)*var(--fz));max-width:20ch}
+.manifesto .thesis{font-weight:900;letter-spacing:-.03em;line-height:.98;font-size:calc(clamp(1.7rem,min(4.4vw,6vh),4.6rem)*var(--fz));max-width:20ch;color:var(--ink)}
 .thesis > span{display:block}
 .thesis .w3{font-weight:300}
-.thesis .acc{font-style:italic;color:var(--white)}
-.beats{margin-top:calc(clamp(32px,6vh,80px)*var(--fz));display:grid;grid-template-columns:repeat(3,1fr)}
-/* The 3-segment top line is ALWAYS present (dim). As each beat activates,
-   its .fill bar draws left→right in solid ink, so the line "completes" one
-   segment at a time in sync with the text stepping in. */
-.beat{position:relative;border-top:var(--hair) solid rgba(255,255,255,.28);
-  padding:calc(clamp(16px,2.4vh,32px)*var(--fz)) clamp(20px,2vw,40px) 0 0}
-.beat .fill{position:absolute;top:calc(-1*var(--hair));left:0;height:var(--hair);width:100%;
-  background:currentColor;transform:scaleX(0);transform-origin:left;
-  transition:transform .5s var(--ease)}
-.beat.lit .fill{transform:scaleX(1)}
-.beat h3{margin-top:.35em;font-weight:900;font-size:calc(var(--t-lead)*var(--fz));letter-spacing:-.02em;line-height:1}
-.beat p{margin-top:.6em;font-weight:400;font-size:var(--t-body);line-height:1.4;max-width:42ch}
+.thesis .acc{font-style:italic;color:var(--ink)}
+/* one continuous top line across all three beats. It's always present (dim);
+   a single .lfill bar is scaled left→right by the scrub timeline, so the line
+   "draws" smoothly as you scroll — width is driven by scroll, not a timer. */
+.beats{position:relative;margin-top:calc(clamp(32px,6vh,80px)*var(--fz));
+  display:grid;grid-template-columns:repeat(3,1fr);
+  border-top:var(--hair) solid rgba(35,31,32,.28)}
+.beats .lfill{position:absolute;top:calc(-1*var(--hair));left:0;height:var(--hair);width:100%;
+  background:var(--ink);transform:scaleX(0);transform-origin:left}
+.beat{padding:calc(clamp(16px,2.4vh,32px)*var(--fz)) clamp(20px,2vw,40px) 0 0}
+.beat h3{margin-top:.35em;font-weight:900;font-size:calc(var(--t-lead)*var(--fz));letter-spacing:-.02em;line-height:1;color:var(--ink)}
+.beat p{margin-top:.6em;font-weight:400;font-size:var(--t-body);line-height:1.4;max-width:42ch;color:var(--ink)}
 @media(max-width:860px){.beats{grid-template-columns:1fr;gap:8px}}
 
 /* ============ QUOTE — the brand-book cover: cream, ink, red period ============ */
@@ -358,15 +355,15 @@ body.no-grain::after{opacity:0}
   </header>
 
   <!-- MANIFESTO — designer photo bg. Thesis + 3 beats stepped through the dwell. -->
-  <section class="card blue manifesto" id="manifesto" data-nav="dark" data-navbg="#084CA1" data-fit>
+  <section class="card blue manifesto" id="manifesto" data-nav="light" data-navbg="#084CA1" data-fit>
     <img class="sec-bg" src="assets/manifesto-still.jpg" alt="" decoding="async">
-    <div class="scrim"></div>
     <div class="wrap">
       <h2 class="thesis reveal d1" data-m><span class="w3">The algorithm shows you</span><span>the highlights.</span><span class="w3">Culture happens</span><span class="acc">in the margins.</span></h2>
       <div class="beats">
-        <div class="beat" data-m><i class="fill"></i><h3>Culture gets flattened.</h3><p>Stories get reduced into trend language, aesthetic shorthand, and easy labels. The lived complexity disappears first.</p></div>
-        <div class="beat" data-m><i class="fill"></i><h3>Systems decide who fits.</h3><p>Mainstream and fringe are not natural places. They are built by power, access, language, taste, money, and memory.</p></div>
-        <div class="beat" data-m><i class="fill"></i><h3>Misfits move culture forward.</h3><p>When systems cannot absorb difference, new voices relocate and form new aesthetics, identities, and communities.</p></div>
+        <i class="lfill"></i>
+        <div class="beat" data-m><h3>Culture gets flattened.</h3><p>Stories get reduced into trend language, aesthetic shorthand, and easy labels. The lived complexity disappears first.</p></div>
+        <div class="beat" data-m><h3>Systems decide who fits.</h3><p>Mainstream and fringe are not natural places. They are built by power, access, language, taste, money, and memory.</p></div>
+        <div class="beat" data-m><h3>Misfits move culture forward.</h3><p>When systems cannot absorb difference, new voices relocate and form new aesthetics, identities, and communities.</p></div>
       </div>
     </div>
   </section>
@@ -929,22 +926,29 @@ if(!reduce){
           },
         },
       });
+      // the single continuous line draws left→right across the whole beats
+      // block, its width scrubbed by scroll (fills smoothly, no timer). It
+      // spans the beats' step window so each third completes as its beat lands.
+      const lfill=document.querySelector('.manifesto .beats .lfill');
+      gsap.set(lfill,{scaleX:0});
       beats.forEach((b,i)=>{
-        // text steps in; the beat's line-segment fills (.lit) in sync, and
-        // un-fills on scrub-back so the effect tracks scroll direction
-        tl.to(beatText[i],{autoAlpha:1,y:0,duration:.45,ease:'power1.out',
-          onStart:()=>b.classList.add('lit'),
-          onReverseComplete:()=>b.classList.remove('lit')},i*.9+.2);
+        // each beat's text steps in at its point in the scrub
+        tl.to(beatText[i],{autoAlpha:1,y:0,duration:.45,ease:'power1.out'},i*.9+.2);
+        // grow the shared line to (i+1)/n by the time this beat has landed
+        tl.to(lfill,{scaleX:(i+1)/beats.length,duration:.9,ease:'none'},i*.9+.2);
       });
       tl.to({},{duration:.6});                 // hold before the cover starts
       anchorTargets['manifesto']=()=>tl.scrollTrigger.start;
     }else{
-      // tall fallback: text steps in with a stagger; each segment lights as
-      // its beat's text starts. The dim line is always present (CSS).
+      // tall fallback: text steps in with a stagger; the continuous line draws
+      // across as the block enters. The dim base line is always present (CSS).
+      const lfill=document.querySelector('.manifesto .beats .lfill');
       gsap.set(beatText.flatMap(nl=>[...nl]),{autoAlpha:0,y:44});
+      gsap.set(lfill,{scaleX:0});
+      gsap.to(lfill,{scaleX:1,duration:1.1,ease:'none',
+        scrollTrigger:{trigger:'.manifesto .beats',start:'top 85%',end:'top 40%',scrub:.4}});
       beats.forEach((b,i)=>{
         gsap.to(beatText[i],{autoAlpha:1,y:0,duration:.8,ease:'power2.out',delay:i*.15,
-          onStart:()=>b.classList.add('lit'),
           scrollTrigger:{trigger:'.manifesto .beats',start:'top 80%'}});
       });
       const st=ScrollTrigger.create({
