@@ -577,6 +577,32 @@ addEventListener('scroll',()=>{
 const mega=document.getElementById('mega');
 mega?.addEventListener('animationend',()=>document.querySelector('.hero').classList.add('settled'),{once:true});
 
+/* Safety net: the power-on animations use forwards-fill with delays. If the
+   tab loads backgrounded, the browser throttles rAF and can leave the hero
+   copy stuck on the first (hidden) keyframe. Guarantee the resting state
+   after the animation window, and retry the video autoplay. */
+(function heroFailsafe(){
+  const hero=document.querySelector('.hero');
+  if(!hero)return;
+  const lede=hero.querySelector('.lede');
+  const content=hero.querySelector('.content');
+  const vid=hero.querySelector('.hero-video');
+  const settle=()=>{
+    [mega,lede].forEach(el=>{ if(!el)return;
+      el.style.opacity='1'; el.style.transform='none';
+    });
+    if(content) content.style.clipPath='none';
+    hero.classList.add('settled');
+    if(vid) vid.play().catch(()=>{});
+  };
+  // if we ever come back to a visible tab and the copy is still hidden, settle now
+  document.addEventListener('visibilitychange',()=>{
+    if(!document.hidden && mega && getComputedStyle(mega).opacity==='0') settle();
+  });
+  // hard backstop well past the ~2.9s power-on sequence
+  setTimeout(()=>{ if(mega && getComputedStyle(mega).opacity==='0') settle(); },4000);
+})();
+
 /* ---------- offerings: hover auto-cycles; touch taps advance ---------- */
 function buildShot(shot){
   const srcs=(shot.dataset.photos||'').split(',').filter(Boolean);
