@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Cultural (Mis)fits</title>
-<link rel="preload" as="image" href="assets/mascot-hero.webp">
+<link rel="preload" as="image" href="assets/hero-bg.jpg">
 <style>
 @font-face{font-family:'NHG';src:url('fonts/NeueHaasDisplayLight.ttf') format('truetype');font-weight:300;font-style:normal;font-display:swap}
 @font-face{font-family:'NHG';src:url('fonts/NeueHaasDisplayRoman.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
@@ -104,28 +104,28 @@ body::after{content:"";position:fixed;inset:0;z-index:8000;pointer-events:none;o
 .nav.thm-light .contact:hover span{color:var(--cream)}
 @media(max-width:760px){.nav .lk a:not(.contact){display:none}}
 
-/* ============ HERO (CRT) — ink field, white type, red accent ============ */
+/* ============ HERO (CRT) — video field, white type, red accent ============ */
+.hero{position:relative;isolation:isolate}
+/* background video — fills the card, sits under every other hero layer */
+.hero .hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;z-index:0;pointer-events:none}
+/* legibility scrim — darker on the left where the copy sits, lighter on the right */
+.hero::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(95deg,rgba(0,0,0,.9) 0%,rgba(0,0,0,.68) 34%,rgba(0,0,0,.25) 62%,rgba(0,0,0,.5) 100%)}
+/* mobile: crop the video toward the key area */
+@media(max-width:760px){.hero .hero-video{object-position:66% 38%}}
 .hero .content{position:relative;z-index:10;display:flex;flex-direction:column;justify-content:center;flex:1;
   align-items:flex-start;text-align:left;padding-top:clamp(70px,8vh,120px)}
-.hero .balloon{position:absolute;left:50%;top:50%;z-index:6;pointer-events:none;
-  width:clamp(280px,42vw,620px);height:auto;transform:translate(-50%,-50%) scale(.72);transform-origin:center;opacity:0;
-  filter:drop-shadow(0 40px 90px rgba(0,0,0,.6)) saturate(1.05) brightness(.98);
-  animation:inflate var(--dur-slow) var(--ease) .8s forwards,
-            balloon-bg var(--dur-slow) var(--ease) 2.2s forwards}
-@keyframes inflate{
-  0%{transform:translate(-50%,-50%) scale(.72);opacity:0}
-  100%{transform:translate(-50%,-50%) scale(1);opacity:1}
-}
-@keyframes balloon-bg{
-  0%{transform:translate(-50%,-50%) scale(1);opacity:1;filter:drop-shadow(0 40px 90px rgba(0,0,0,.6)) saturate(1.05) blur(0)}
-  100%{transform:translate(-50%,-52%) scale(2);opacity:.16;filter:saturate(.4) blur(3px)}
-}
 .hero .mega{font-weight:900;letter-spacing:-.045em;line-height:.9;font-size:calc(var(--t-mega)*var(--fz));color:var(--white);
   text-shadow:-1.2px 0 0 rgba(255,0,60,.4),1.2px 0 0 rgba(0,180,255,.36),0 0 22px rgba(150,200,255,.32);
   transition:text-shadow 1.2s var(--ease);
   opacity:0;transform:translateY(38px);animation:rise var(--dur-slow) var(--ease) 2.3s forwards}
 .hero .mega > span{display:block}
-.hero .mega .cult{font-style:italic;font-size:1.45em;line-height:.95}
+/* the hand-drawn red ellipse ring around "culture" */
+.hero .mega .ring{position:relative;display:inline-block;color:var(--red);font-style:italic;
+  white-space:nowrap;padding:0 .4em;margin:0 .05em}
+.hero .mega .ring>svg{position:absolute;left:-1%;top:-12%;width:102%;height:124%;overflow:visible;pointer-events:none;z-index:-1}
+.hero .mega .ring>svg ellipse{fill:none;stroke:var(--red);stroke-width:4;vector-effect:non-scaling-stroke}
+.hero .mega .ring .cw{position:relative;left:-.12em;text-shadow:.07em .08em 0 #000}
 .hero .mega .dot{display:inline;color:var(--red)}
 .hero.settled .mega{text-shadow:0 0 14px rgba(255,255,255,.14)}
 .hero .lede{color:var(--white);text-shadow:0 0 10px rgba(150,200,255,.15);text-align:left;max-width:32ch;
@@ -133,10 +133,9 @@ body::after{content:"";position:fixed;inset:0;z-index:8000;pointer-events:none;o
 .hero .lede .mis{font-style:italic;color:var(--red)}
 @keyframes rise{to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){
-  .hero .balloon{animation:none;transform:translate(-50%,-52%) scale(2);opacity:.16;filter:saturate(.4) blur(3px)}
   .hero .mega,.hero .lede{animation:none;opacity:1;transform:none}
 }
-@media(max-width:760px){.hero .balloon{width:clamp(220px,70vw,360px)}.hero .mega{max-width:100%}}
+@media(max-width:760px){.hero .mega{max-width:100%}}
 .hero .scroll{position:absolute;bottom:clamp(24px,3vw,44px);left:var(--gutter);color:var(--white);font-size:var(--t-label);letter-spacing:.2em;text-transform:uppercase;opacity:.7;display:flex;align-items:center;gap:.8em;z-index:12}
 .hero .scroll::after{content:"";width:46px;height:1px;background:currentColor;animation:pull 1.8s ease-in-out infinite}
 @keyframes pull{0%,100%{transform:scaleX(.35);transform-origin:left;opacity:.4}50%{transform:scaleX(1);opacity:1}}
@@ -328,11 +327,11 @@ body::after{content:"";position:fixed;inset:0;z-index:8000;pointer-events:none;o
 
   <!-- HERO — CRT card. Ink field, white type, red accent word + red mascot. -->
   <header class="card dark hero wrap" data-nav="dark" data-navbg="#231F20" data-fit>
+    <video class="hero-video" src="assets/hero-bg.mp4" poster="assets/hero-bg.jpg" muted loop playsinline autoplay preload="auto"></video>
     <div class="tv"><div class="scan"></div><div class="roll"></div><div class="glass"></div></div>
     <div class="flash"></div>
-    <img class="balloon" src="assets/mascot-hero.webp" alt="" width="1000" height="1250" decoding="async">
     <div class="content">
-      <h1 class="mega" id="mega"><span>Dropping the word</span><span class="cult">&ldquo;culture&rdquo;</span><span>is cheap<span class="dot">.</span></span></h1>
+      <h1 class="mega" id="mega"><span>Dropping the word <span class="ring"><span class="cw">culture</span><svg viewBox="0 0 300 120" preserveAspectRatio="none" aria-hidden="true"><ellipse cx="150" cy="60" rx="148" ry="56"/></svg></span></span><span>loosely is cheap<span class="dot">.</span></span></h1>
       <p class="lede"><span class="mis">Cultural (Mis)fits</span> exists because culture deserves better than that.</p>
     </div>
     <div class="scroll">Scroll</div>
