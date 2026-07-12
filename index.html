@@ -60,12 +60,6 @@ body::after{content:"";position:fixed;inset:0;z-index:8000;pointer-events:none;o
 .spacer{height:0;pointer-events:none}
 .foot{box-shadow:none}
 
-/* section header unit */
-.top{border-top:var(--hair) solid currentColor;padding-top:clamp(14px,1.6vh,24px);
-  display:grid;grid-template-columns:auto 1fr auto;align-items:baseline;gap:clamp(16px,3vw,60px);margin-bottom:calc(clamp(32px,5vh,80px)*var(--fz))}
-.top .num{font-weight:900;font-style:italic;font-size:clamp(1.1rem,1.5vw,1.9rem);line-height:1}
-.top .lbl{font-size:var(--t-label);font-weight:600;letter-spacing:.24em;text-transform:uppercase;align-self:center}
-.top .kick{justify-self:end;align-self:center;font-size:var(--t-label);font-weight:500;letter-spacing:.18em;text-transform:uppercase;opacity:.55;text-align:right}
 .head{font-weight:900;letter-spacing:-.03em;line-height:.94;font-size:calc(var(--t-head)*var(--fz));max-width:18ch}
 .head .it{font-style:italic}
 .lede{margin-top:calc(clamp(18px,2.6vh,34px)*var(--fz));font-weight:300;font-size:calc(var(--t-lead)*var(--fz));line-height:1.15;max-width:26ch}
@@ -347,7 +341,6 @@ body::after{content:"";position:fixed;inset:0;z-index:8000;pointer-events:none;o
   <!-- MANIFESTO — brand blue. Thesis + 3 beats stepped through the dwell. -->
   <section class="card blue manifesto" id="manifesto" data-nav="dark" data-navbg="#084CA1" data-fit>
     <div class="wrap">
-      <div class="top reveal"><span class="num">01</span><span class="lbl">Manifesto</span><span class="kick">The margins</span></div>
       <h2 class="thesis reveal d1" data-m><span class="w3">The algorithm shows you</span><span>the highlights.</span><span class="w3">Culture happens</span><span class="acc">in the margins.</span></h2>
       <div class="beats">
         <div class="beat" data-m><div class="no">01</div><h3>Culture gets flattened.</h3><p>Stories get reduced into trend language, aesthetic shorthand, and easy labels. The lived complexity disappears first.</p></div>
@@ -368,7 +361,6 @@ body::after{content:"";position:fixed;inset:0;z-index:8000;pointer-events:none;o
   <!-- AUDIENCE — ink field, yellow accents. Editorial index + hover photo. -->
   <section class="card dark audience" id="audience" data-nav="dark" data-navbg="#231F20" data-fit>
     <div class="wrap">
-      <div class="top reveal"><span class="num">02</span><span class="lbl">Who we're for</span><span class="kick">Four kinds of misfit</span></div>
       <h2 class="head reveal d1" data-m>Who we <span class="mark" style="--hl:var(--yellow)">exist</span> for</h2>
       <div class="aidx peekzone">
         <div class="arow reveal d1" data-photo="assets/photo-rooftop.webp">
@@ -394,7 +386,6 @@ body::after{content:"";position:fixed;inset:0;z-index:8000;pointer-events:none;o
   <!-- OFFERINGS — ink field; pillar accents from the PRIMARIES: red / yellow / green. -->
   <section class="card dark offerings tall" id="offerings" data-nav="dark" data-navbg="#231F20">
     <div class="wrap">
-      <div class="top reveal"><span class="num">03</span><span class="lbl">What we do</span><span class="kick">Three pillars</span></div>
       <h2 class="head reveal d1" data-m style="margin-bottom:clamp(30px,4vw,64px)">Get to the heart of the <span class="mark" style="--hl:var(--yellow)">new culture.</span></h2>
 
       <article class="offer reveal" id="culturist-network" style="--co:var(--red)">
@@ -442,7 +433,6 @@ body::after{content:"";position:fixed;inset:0;z-index:8000;pointer-events:none;o
   <!-- WORK — brand red field, cream type. -->
   <section class="card red work tall" id="work" data-nav="dark" data-navbg="#DB1A21">
     <div class="wrap">
-      <div class="top reveal"><span class="num">04</span><span class="lbl">Our Work</span><span class="kick">Live culture, made</span></div>
       <h2 class="head reveal d1" data-m>Worlds we <span class="mark" style="--hl:var(--yellow)">built.</span></h2>
       <div class="witem reveal d1">
         <div class="txt" data-m><h3>Ruhbaru</h3><p>The sound of home, scaled into a cinematic live experience. From Sufi to cinematic pop, ghazal to qawwali — an intimate world of longing, devotion, memory, and renewal. <b>Come face to face · India tour 2026.</b></p><a class="fl" href="https://instagram.com/culturalmisfits" target="_blank" rel="noopener">Follow ↗</a></div>
@@ -465,7 +455,6 @@ body::after{content:"";position:fixed;inset:0;z-index:8000;pointer-events:none;o
        Names are PLACEHOLDER until the client supplies the real roster. -->
   <section class="card dark misfits" id="misfits" data-nav="dark" data-navbg="#231F20" data-fit>
     <div class="wrap">
-      <div class="top reveal"><span class="num">05</span><span class="lbl">The Misfits</span><span class="kick">The roster so far</span></div>
       <h2 class="head reveal d1" data-m>Who are these <span class="mark" style="--hl:var(--yellow)">misfits</span>?</h2>
       <div class="mwall peekzone reveal d1">
         <figure class="mcell" data-photo="assets/offer/live-1.webp" data-name="Zoya Firaq — ghazal, unarchived">
@@ -508,7 +497,6 @@ body::after{content:"";position:fixed;inset:0;z-index:8000;pointer-events:none;o
   <!-- PARTNER CTA — ink field; pink is the page's ONE spectrum moment. -->
   <section class="card dark cta" id="contact" data-nav="dark" data-navbg="#231F20" data-fit>
     <div class="wrap">
-      <div class="top reveal"><span class="num">06</span><span class="lbl">Partner with us</span><span class="kick">Start here</span></div>
       <h2 class="head reveal d1" data-m>Building something with <span class="it">cultural consequence?</span></h2>
       <a class="biglink reveal d2" href="mailto:hello@cmf.world">Start a conversation <span class="arr">↗</span></a>
     </div>
