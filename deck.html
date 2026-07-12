@@ -35,7 +35,10 @@ img{display:block;max-width:100%}
 /* Film grain: pre-baked 128px noise tile. Normal blend + its own layer —
    no per-frame SVG turbulence compositing. */
 body::after{content:"";position:fixed;inset:0;z-index:8000;pointer-events:none;opacity:.05;
-  background:url('assets/grain.png');background-size:128px 128px;transform:translateZ(0)}
+  background:url('assets/grain.png');background-size:128px 128px;transform:translateZ(0);
+  transition:opacity .4s var(--ease,ease)}
+/* suppress grain over photographic sections (e.g. manifesto) so the image reads clean */
+body.no-grain::after{opacity:0}
 @media(prefers-reduced-motion:reduce){body::after{display:none}}
 
 /* ============================================================
@@ -168,8 +171,15 @@ body::after{content:"";position:fixed;inset:0;z-index:8000;pointer-events:none;o
 .thesis .w3{font-weight:300}
 .thesis .acc{font-style:italic;color:var(--white)}
 .beats{margin-top:calc(clamp(32px,6vh,80px)*var(--fz));display:grid;grid-template-columns:repeat(3,1fr)}
-.beat{border-top:var(--hair) solid currentColor;padding:calc(clamp(16px,2.4vh,32px)*var(--fz)) clamp(20px,2vw,40px) 0 0}
-.beat .no{font-weight:900;font-style:italic;font-size:calc(clamp(1.6rem,min(2.8vw,3.6vh),3.1rem)*var(--fz))}
+/* The 3-segment top line is ALWAYS present (dim). As each beat activates,
+   its .fill bar draws left→right in solid ink, so the line "completes" one
+   segment at a time in sync with the text stepping in. */
+.beat{position:relative;border-top:var(--hair) solid rgba(255,255,255,.28);
+  padding:calc(clamp(16px,2.4vh,32px)*var(--fz)) clamp(20px,2vw,40px) 0 0}
+.beat .fill{position:absolute;top:calc(-1*var(--hair));left:0;height:var(--hair);width:100%;
+  background:currentColor;transform:scaleX(0);transform-origin:left;
+  transition:transform .5s var(--ease)}
+.beat.lit .fill{transform:scaleX(1)}
 .beat h3{margin-top:.35em;font-weight:900;font-size:calc(var(--t-lead)*var(--fz));letter-spacing:-.02em;line-height:1}
 .beat p{margin-top:.6em;font-weight:400;font-size:var(--t-body);line-height:1.4;max-width:42ch}
 @media(max-width:860px){.beats{grid-template-columns:1fr;gap:8px}}
@@ -354,9 +364,9 @@ body::after{content:"";position:fixed;inset:0;z-index:8000;pointer-events:none;o
     <div class="wrap">
       <h2 class="thesis reveal d1" data-m><span class="w3">The algorithm shows you</span><span>the highlights.</span><span class="w3">Culture happens</span><span class="acc">in the margins.</span></h2>
       <div class="beats">
-        <div class="beat" data-m><div class="no">01</div><h3>Culture gets flattened.</h3><p>Stories get reduced into trend language, aesthetic shorthand, and easy labels. The lived complexity disappears first.</p></div>
-        <div class="beat" data-m><div class="no">02</div><h3>Systems decide who fits.</h3><p>Mainstream and fringe are not natural places. They are built by power, access, language, taste, money, and memory.</p></div>
-        <div class="beat" data-m><div class="no">03</div><h3>Misfits move culture forward.</h3><p>When systems cannot absorb difference, new voices relocate and form new aesthetics, identities, and communities.</p></div>
+        <div class="beat" data-m><i class="fill"></i><h3>Culture gets flattened.</h3><p>Stories get reduced into trend language, aesthetic shorthand, and easy labels. The lived complexity disappears first.</p></div>
+        <div class="beat" data-m><i class="fill"></i><h3>Systems decide who fits.</h3><p>Mainstream and fringe are not natural places. They are built by power, access, language, taste, money, and memory.</p></div>
+        <div class="beat" data-m><i class="fill"></i><h3>Misfits move culture forward.</h3><p>When systems cannot absorb difference, new voices relocate and form new aesthetics, identities, and communities.</p></div>
       </div>
     </div>
   </section>
@@ -895,8 +905,10 @@ if(!reduce){
        clip it — fall back to a plain tall-card pin with staggered beat reveal. */
     const mi=cards.findIndex(c=>c.classList.contains('manifesto'));
     const beats=gsap.utils.toArray('.manifesto .beat');
+    // the beats (and their dim top line) stay visible; only the TEXT steps in.
+    const beatText=beats.map(b=>b.querySelectorAll('h3,p'));
     if(!talls[mi]){
-      gsap.set(beats,{autoAlpha:0,y:44});
+      gsap.set(beatText,{autoAlpha:0,y:44});
       const tl=gsap.timeline({
         defaults:{ease:'none'},
         scrollTrigger:{
@@ -918,13 +930,23 @@ if(!reduce){
         },
       });
       beats.forEach((b,i)=>{
-        tl.to(b,{autoAlpha:1,y:0,duration:.45,ease:'power1.out'},i*.9+.2);
+        // text steps in; the beat's line-segment fills (.lit) in sync, and
+        // un-fills on scrub-back so the effect tracks scroll direction
+        tl.to(beatText[i],{autoAlpha:1,y:0,duration:.45,ease:'power1.out',
+          onStart:()=>b.classList.add('lit'),
+          onReverseComplete:()=>b.classList.remove('lit')},i*.9+.2);
       });
       tl.to({},{duration:.6});                 // hold before the cover starts
       anchorTargets['manifesto']=()=>tl.scrollTrigger.start;
     }else{
-      gsap.from(beats,{autoAlpha:0,y:44,stagger:.15,duration:.8,ease:'power2.out',
-        scrollTrigger:{trigger:'.manifesto .beats',start:'top 80%'}});
+      // tall fallback: text steps in with a stagger; each segment lights as
+      // its beat's text starts. The dim line is always present (CSS).
+      gsap.set(beatText.flatMap(nl=>[...nl]),{autoAlpha:0,y:44});
+      beats.forEach((b,i)=>{
+        gsap.to(beatText[i],{autoAlpha:1,y:0,duration:.8,ease:'power2.out',delay:i*.15,
+          onStart:()=>b.classList.add('lit'),
+          scrollTrigger:{trigger:'.manifesto .beats',start:'top 80%'}});
+      });
       const st=ScrollTrigger.create({
         trigger:cards[mi],start:'bottom bottom',end:()=>'+='+(dwells[mi]+vh()),
         pin:true,pinSpacing:false,invalidateOnRefresh:true,
@@ -939,9 +961,11 @@ if(!reduce){
     function theme(i){
       i=Math.max(0,i);
       nav.classList.toggle('thm-light',themes[i]==='light');
-      // hero (card 0) wears a transparent bar so the video reads edge-to-edge;
-      // every other card keeps the solid field-colored bar
-      nav.classList.toggle('transparent',i===0);
+      // hero (0) + manifesto (1) wear a transparent bar so their video/photo
+      // reads edge-to-edge; every other card keeps the solid field bar
+      nav.classList.toggle('transparent',i===0||i===1);
+      // drop the film grain over the manifesto photo so the image reads clean
+      document.body.classList.toggle('no-grain',i===1);
       nav.style.setProperty('--navbg',navbgs[i]);
     }
     cards.forEach((card,i)=>{
