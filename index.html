@@ -65,6 +65,8 @@ body.no-grain::after{opacity:0}
 
 .head{font-weight:900;letter-spacing:-.03em;line-height:.94;font-size:calc(var(--t-head)*var(--fz));max-width:18ch}
 .head .it{font-style:italic}
+/* .klabel — small uppercase eyebrow under/near a .head (e.g. "Our Artists"). */
+.klabel{margin-top:.4em;font-weight:500;letter-spacing:.2em;text-transform:uppercase;font-size:var(--t-label);opacity:.6}
 .lede{margin-top:calc(clamp(18px,2.6vh,34px)*var(--fz));font-weight:300;font-size:calc(var(--t-lead)*var(--fz));line-height:1.15;max-width:26ch}
 .lede b{font-weight:900;font-style:italic}
 
@@ -324,6 +326,13 @@ body.no-grain::after{opacity:0}
 .offer .otext .onum{font-weight:900;font-style:italic;font-size:clamp(1.4rem,2vw,2.4rem);color:var(--co);line-height:1}
 .offer .otext h3{margin-top:.2em;font-weight:900;font-size:clamp(2rem,4.4vw,4.6rem);letter-spacing:-.03em;line-height:.92;color:var(--co)}
 .offer .otext p{margin-top:.9em;font-weight:300;font-size:var(--t-lead);opacity:.86;line-height:1.35;max-width:34ch}
+/* Film Studio partner list: a short "Partner with us to create:" lead-in and a
+   hairline-marked list of offers, tinted with the pillar accent (--co). */
+.offer .otext p.partner{margin-top:1em;font-weight:500;opacity:.7;font-size:var(--t-body)}
+.offer .otext .offer-list{margin-top:.5em;list-style:none;max-width:34ch}
+.offer .otext .offer-list li{font-weight:400;font-size:var(--t-body);line-height:1.2;opacity:.9;
+  padding:.5em 0;border-top:var(--hair) solid rgba(231,225,212,.18)}
+.offer .otext .offer-list li::before{content:"—";color:var(--co);margin-right:.6em;font-weight:700}
 .offer .otext .date{display:block;margin-top:1em;font-weight:500;letter-spacing:.18em;text-transform:uppercase;font-size:var(--t-label);opacity:.6}
 .offer .otext .more{margin-top:1.3em;display:inline-block;font-weight:500;letter-spacing:.18em;text-transform:uppercase;font-size:var(--t-label);border-bottom:var(--hair) solid var(--co);padding-bottom:.2em;text-decoration:none;color:var(--co);transition:opacity .5s var(--ease)}
 .offer .otext .more:hover{opacity:.6}
@@ -348,17 +357,26 @@ body.no-grain::after{opacity:0}
 /* ============ THE MISFITS — photo wall; hover floats the bigger image ============
    Cells are HEIGHT-driven (vh) so the whole section — head, 2 rows, proof
    line — composes to one screen; the fit pass handles the rest. */
-.mwall{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(8px,1vw,18px);margin-top:clamp(8px,1.5vh,20px)}
-.mcell{position:relative;height:calc(clamp(110px,22vh,240px)*var(--fz));overflow:hidden;background:#1B1818;margin:0}
-.mcell img{width:100%;height:100%;object-fit:cover;filter:grayscale(1) brightness(.82);
+/* CONFIGURABLE / AUTO-FIT roster grid: cells flow and wrap by available width
+   against a min cell size, so ANY number of .mcell blocks lays out cleanly —
+   add or remove artists and the grid reflows with no column math. Portrait 4/5
+   cells suit the B&W performance photography. */
+.mwall{display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(140px,17vw,210px),1fr));
+  gap:clamp(8px,1vw,18px);margin-top:clamp(8px,1.5vh,20px)}
+.mcell{position:relative;aspect-ratio:4/5;overflow:hidden;background:#1B1818;margin:0}
+/* photos arrive already B&W, so we dim slightly at rest and lift brightness +
+   scale on hover (no grayscale→colour reveal — that'd be a no-op on mono art). */
+.mcell img{width:100%;height:100%;object-fit:cover;filter:brightness(.78);
   transition:filter .6s var(--ease),transform .6s var(--ease)}
-.mcell:hover img{filter:none;transform:scale(1.04)}
+.mcell:hover img{filter:brightness(1);transform:scale(1.04)}
 .mcell .mno{position:absolute;top:10px;left:12px;font-weight:900;font-style:italic;font-size:.95rem;color:#fff;opacity:.85;text-shadow:0 1px 6px rgba(0,0,0,.5)}
 .mcell .mname{position:absolute;left:12px;bottom:10px;right:12px;font-weight:900;font-size:clamp(.95rem,1.1vw,1.3rem);letter-spacing:-.01em;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.65)}
+/* the template cell reads as an empty slot, not a real artist */
+.mcell-placeholder{outline:1px dashed rgba(231,225,212,.35);outline-offset:-1px}
+.mcell-placeholder img{opacity:.25}
 .mproof{margin-top:calc(clamp(18px,3vh,40px)*var(--fz));font-weight:300;font-size:calc(var(--t-lead)*var(--fz))}
 .mproof b{font-weight:900;font-style:italic;color:var(--yellow)}
-@media(max-width:860px){.mwall{grid-template-columns:repeat(2,1fr)}}
-@media(hover:none){.mcell img{filter:none}}
+@media(hover:none){.mcell img{filter:brightness(.9)}}
 
 /* ============ VERTICAL MODAL ============ */
 .vmodal{position:fixed;inset:0;z-index:950;display:flex;opacity:0;pointer-events:none;transition:opacity .45s var(--ease)}
@@ -396,12 +414,12 @@ body.no-grain::after{opacity:0}
 .foot .cols{display:grid;grid-template-columns:1.2fr 1fr auto;gap:clamp(24px,4vw,80px);align-items:start;border-top:var(--hair) solid rgba(231,225,212,.28);padding-top:clamp(24px,3vw,44px)}
 .foot .mk{font-weight:900;font-style:italic;font-size:clamp(1.2rem,1.6vw,1.8rem)}
 .foot .mk .mis{color:var(--red)}
-.foot .memo p{font-weight:300;font-size:var(--t-body);opacity:.8;max-width:34ch}
-.foot .memo p b{font-weight:900}
-.foot .memo form{margin-top:1em;display:inline-flex;border:var(--hair) solid rgba(231,225,212,.5)}
-.foot .memo input{background:transparent;border:0;color:var(--cream);font-family:var(--font);font-size:var(--t-body);font-weight:300;padding:.7em .9em;width:min(50vw,260px);outline:none}
-.foot .memo input::placeholder{color:var(--cream);opacity:.4}
-.foot .memo button{background:var(--pink);color:var(--ink);border:0;font-family:var(--font);font-weight:900;font-style:italic;font-size:var(--t-body);padding:0 1.2em;cursor:pointer}
+.foot .about p{margin-top:.8em;font-weight:300;font-size:var(--t-body);opacity:.8;max-width:44ch;line-height:1.5}
+.foot .about p b{font-weight:900}
+/* footer site-nav: same uppercase link treatment as the social column */
+.foot .fnav{display:flex;flex-direction:column;gap:.7em;align-items:flex-start}
+.foot .fnav a{color:inherit;text-decoration:none;font-size:var(--t-label);font-weight:500;letter-spacing:.18em;text-transform:uppercase;opacity:.7;transition:opacity .5s var(--ease)}
+.foot .fnav a:hover{opacity:1}
 .foot .lnx{display:flex;flex-direction:column;gap:.7em;align-items:flex-start}
 .foot .lnx a{color:inherit;text-decoration:none;font-size:var(--t-label);font-weight:500;letter-spacing:.18em;text-transform:uppercase;opacity:.7;transition:opacity .5s var(--ease)}
 .foot .lnx a:hover{opacity:1}
@@ -499,25 +517,84 @@ body.no-grain::after{opacity:0}
   <!-- AUDIENCE — ink field, yellow accents. Editorial index + hover photo. -->
   <section class="card dark audience" id="audience" data-nav="dark" data-navbg="#231F20" data-fit>
     <div class="wrap">
-      <h2 class="head reveal d1" data-m>Who we <span class="mark" style="--hl:var(--yellow)">exist</span> for</h2>
+      <h2 class="head reveal d1" data-m>Who are we <span class="mark" style="--hl:var(--yellow)">building</span> for?</h2>
       <div class="aidx peekzone">
         <div class="arow reveal d1" data-photo="assets/photo-rooftop.webp">
-          <span class="ano">01</span><h3>The Curious</h3><p class="adesc">They ask why, not just what.</p>
+          <span class="ano">01</span><h3>The Misfits</h3><p class="adesc">For every square hole, round peg and Misfit — tired of one-size-fits-all narratives?</p>
           <div class="aphoto"><img data-src="assets/photo-rooftop.webp" alt="" width="1053" height="750" decoding="async"></div>
         </div>
         <div class="arow reveal d2" data-photo="assets/photo-concert.webp">
-          <span class="ano">02</span><h3>The Misfits</h3><p class="adesc">Creators who refuse one box.</p>
+          <span class="ano">02</span><h3>The Curious</h3><p class="adesc">Do you ask why and how, more than what?</p>
           <div class="aphoto"><img data-src="assets/photo-concert.webp" alt="" width="1053" height="750" decoding="async"></div>
         </div>
         <div class="arow reveal d3" data-photo="assets/photo-manifesto.webp">
-          <span class="ano">03</span><h3>The Culture-Makers</h3><p class="adesc">Shaping culture on their own terms.</p>
+          <span class="ano">03</span><h3>The Expressive</h3><p class="adesc">Do you use music, fashion and memes to introduce yourself?</p>
           <div class="aphoto"><img data-src="assets/photo-manifesto.webp" alt="" width="2000" height="1326" decoding="async"></div>
         </div>
         <div class="arow reveal d4" data-photo="assets/photo-hands.webp">
-          <span class="ano">04</span><h3>The Builders</h3><p class="adesc">Brands that join culture, not borrow it.</p>
+          <span class="ano">04</span><h3>The Culturally Fluid</h3><p class="adesc">Do you live with contradictions — and are OK with it?</p>
           <div class="aphoto"><img data-src="assets/photo-hands.webp" alt="" width="1053" height="750" decoding="async"></div>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- THE MISFITS BRIGADE — the client's "Our Artists" roster, moved ABOVE
+       Offerings so the reader meets the artists before the offerings that carry
+       them. Photo wall: grayscale, hover reveals colour + the bigger image.
+       Names are PLACEHOLDER until the client supplies the real roster. -->
+  <section class="card dark misfits tall" id="misfits" data-nav="dark" data-navbg="#231F20">
+    <div class="wrap">
+      <h2 class="head reveal d1" data-m>The Misfits <span class="mark" style="--hl:var(--yellow)">Brigade</span></h2>
+      <p class="klabel reveal d1" data-m>Our Artists</p>
+      <!-- CONFIGURABLE ROSTER: cells are uniform, repeating .mcell blocks — add or
+           remove one and the auto-fit grid reflows (no column math). This is the
+           shape TinaCMS will bind a collection to later. Names are PLACEHOLDER
+           (client roster pending); each cell just needs its photo + name filled.
+           9 real artist photos + 1 template placeholder cell at the end. -->
+      <div class="mwall peekzone reveal d1">
+        <figure class="mcell" data-photo="assets/brigade/1.png" data-name="Artist name — TBD">
+          <img src="assets/brigade/1.png" alt="" loading="lazy" decoding="async">
+          <span class="mno">01</span><span class="mname">Artist 01</span>
+        </figure>
+        <figure class="mcell" data-photo="assets/brigade/2.png" data-name="Artist name — TBD">
+          <img src="assets/brigade/2.png" alt="" loading="lazy" decoding="async">
+          <span class="mno">02</span><span class="mname">Artist 02</span>
+        </figure>
+        <figure class="mcell" data-photo="assets/brigade/3.png" data-name="Artist name — TBD">
+          <img src="assets/brigade/3.png" alt="" loading="lazy" decoding="async">
+          <span class="mno">03</span><span class="mname">Artist 03</span>
+        </figure>
+        <figure class="mcell" data-photo="assets/brigade/4.png" data-name="Artist name — TBD">
+          <img src="assets/brigade/4.png" alt="" loading="lazy" decoding="async">
+          <span class="mno">04</span><span class="mname">Artist 04</span>
+        </figure>
+        <figure class="mcell" data-photo="assets/brigade/5.png" data-name="Artist name — TBD">
+          <img src="assets/brigade/5.png" alt="" loading="lazy" decoding="async">
+          <span class="mno">05</span><span class="mname">Artist 05</span>
+        </figure>
+        <figure class="mcell" data-photo="assets/brigade/6.png" data-name="Artist name — TBD">
+          <img src="assets/brigade/6.png" alt="" loading="lazy" decoding="async">
+          <span class="mno">06</span><span class="mname">Artist 06</span>
+        </figure>
+        <figure class="mcell" data-photo="assets/brigade/7.png" data-name="Artist name — TBD">
+          <img src="assets/brigade/7.png" alt="" loading="lazy" decoding="async">
+          <span class="mno">07</span><span class="mname">Artist 07</span>
+        </figure>
+        <figure class="mcell" data-photo="assets/brigade/8.png" data-name="Artist name — TBD">
+          <img src="assets/brigade/8.png" alt="" loading="lazy" decoding="async">
+          <span class="mno">08</span><span class="mname">Artist 08</span>
+        </figure>
+        <figure class="mcell" data-photo="assets/brigade/9.png" data-name="Artist name — TBD">
+          <img src="assets/brigade/9.png" alt="" loading="lazy" decoding="async">
+          <span class="mno">09</span><span class="mname">Artist 09</span>
+        </figure>
+        <figure class="mcell mcell-placeholder" data-photo="assets/offer/live-1.webp" data-name="Placeholder — duplicate this cell to add an artist">
+          <img src="assets/offer/live-1.webp" alt="" loading="lazy" decoding="async">
+          <span class="mno">10</span><span class="mname">Add artist ↗</span>
+        </figure>
+      </div>
+      <p class="mproof reveal d2"><b>32</b> artists · <b>11</b> sold-out rooms · <b>2</b> cities — and counting.</p>
     </div>
   </section>
 
@@ -534,8 +611,7 @@ body.no-grain::after{opacity:0}
         <div class="otext" data-m>
           <div class="onum">01</div>
           <h3>Culturist Network</h3>
-          <p>Culture-led stories from emerging worlds and unheard voices — a media publication for the ones the algorithm skips.</p>
-          <span class="date">First dispatch: late 2026</span>
+          <p>Writers, anthropologists, designers, thinkers, and community-builders who document evolving cultures, identities, and truths. By bringing lived context to every story, they shape how narratives are told and co-create collective experiences.</p>
           <a class="more" href="#">Read more ↗</a>
         </div>
       </article>
@@ -548,7 +624,7 @@ body.no-grain::after{opacity:0}
         <div class="otext" data-m>
           <div class="onum">02</div>
           <h3>IRL &amp; Live Experiences</h3>
-          <p>Temporary worlds. Real gigs, real rooms — where the communities we cover actually show up. Ruhbaru and Jupiter pe Juice live here.</p>
+          <p>Experiences that feel less like events and more like temporary worlds. Built around subcultures, shared identities, and creative rituals, these IRL and live experiences are where misfit communities come together to express, exchange, and belong.</p>
           <a class="more" href="#">Read more ↗</a>
         </div>
       </article>
@@ -561,17 +637,27 @@ body.no-grain::after{opacity:0}
         <div class="otext" data-m>
           <div class="onum">03</div>
           <h3>Film Studio</h3>
-          <p>Brand-native storytelling without flattening the culture. Films and brand work that carry cultural consequence.</p>
+          <p>Led by <b>Nirvair Rai</b>, this production and narrative arm of the Cultural (Mis)fits ecosystem collaborates with brands, media, fashion, and CSR initiatives to create authentic, culture-native content rooted in real communities.</p>
+          <p class="partner">Partner with us to create:</p>
+          <ul class="offer-list">
+            <li>Branded Content &amp; Films</li>
+            <li>Scripted &amp; Feature Content</li>
+            <li>CSR &amp; Purpose Driven Content</li>
+          </ul>
           <a class="more" href="#">Read more ↗</a>
         </div>
       </article>
     </div>
   </section>
 
-  <!-- WORK — brand red field, cream type. -->
+  <!-- THE MISFITS ACTS — brand red field, cream type. Two IPs today; the layout
+       scales to N. To add a 3rd Act: copy one .witem block below, bump its reveal
+       class (d2 → d3), and set the .txt h3 / p / Follow link + .oshot data-photos.
+       The alternating image side, top borders, and even/odd ordering are all
+       handled by CSS (.witem:nth-child(even), :first-of-type) — no extra work. -->
   <section class="card red work tall" id="work" data-nav="dark" data-navbg="#DB1A21">
     <div class="wrap">
-      <h2 class="head reveal d1" data-m>Worlds we <span class="mark" style="--hl:var(--yellow)">built.</span></h2>
+      <h2 class="head reveal d1" data-m>The Misfits <span class="mark" style="--hl:var(--yellow)">Acts.</span></h2>
       <div class="witem reveal d1">
         <div class="txt" data-m><h3>Ruhbaru</h3><p>The sound of home, scaled into a cinematic live experience. From Sufi to cinematic pop, ghazal to qawwali — an intimate world of longing, devotion, memory, and renewal. <b>Come face to face · India tour 2026.</b></p><a class="fl" href="https://instagram.com/culturalmisfits" target="_blank" rel="noopener">Follow ↗</a></div>
         <div class="oshot" data-photos="assets/photo-ruhbaru.webp,assets/photo-concert.webp,assets/photo-hands.webp" style="--co:var(--cream)">
@@ -589,48 +675,6 @@ body.no-grain::after{opacity:0}
     </div>
   </section>
 
-  <!-- THE MISFITS — proof of roster: photo wall, hover shows the bigger image.
-       Names are PLACEHOLDER until the client supplies the real roster. -->
-  <section class="card dark misfits" id="misfits" data-nav="dark" data-navbg="#231F20" data-fit>
-    <div class="wrap">
-      <h2 class="head reveal d1" data-m>Who are these <span class="mark" style="--hl:var(--yellow)">misfits</span>?</h2>
-      <div class="mwall peekzone reveal d1">
-        <figure class="mcell" data-photo="assets/offer/live-1.webp" data-name="Zoya Firaq — ghazal, unarchived">
-          <img src="assets/offer/live-1.webp" alt="Zoya Firaq" loading="lazy" decoding="async">
-          <span class="mno">01</span><span class="mname">Zoya Firaq</span>
-        </figure>
-        <figure class="mcell" data-photo="assets/offer/live-2.webp" data-name="Baawra Collective — folk futurism">
-          <img src="assets/offer/live-2.webp" alt="Baawra Collective" loading="lazy" decoding="async">
-          <span class="mno">02</span><span class="mname">Baawra Collective</span>
-        </figure>
-        <figure class="mcell" data-photo="assets/offer/net-2.webp" data-name="Meher &amp; the Monsoon — indie longing">
-          <img src="assets/offer/net-2.webp" alt="Meher and the Monsoon" loading="lazy" decoding="async">
-          <span class="mno">03</span><span class="mname">Meher &amp; the Monsoon</span>
-        </figure>
-        <figure class="mcell" data-photo="assets/offer/live-3.webp" data-name="Kabir Deewana — sufi punk">
-          <img src="assets/offer/live-3.webp" alt="Kabir Deewana" loading="lazy" decoding="async">
-          <span class="mno">04</span><span class="mname">Kabir Deewana</span>
-        </figure>
-        <figure class="mcell" data-photo="assets/offer/film-1.webp" data-name="Rooh Parast — qawwali reimagined">
-          <img src="assets/offer/film-1.webp" alt="Rooh Parast" loading="lazy" decoding="async">
-          <span class="mno">05</span><span class="mname">Rooh Parast</span>
-        </figure>
-        <figure class="mcell" data-photo="assets/offer/net-3.webp" data-name="Gully Raag — hip-hop from the margins">
-          <img src="assets/offer/net-3.webp" alt="Gully Raag" loading="lazy" decoding="async">
-          <span class="mno">06</span><span class="mname">Gully Raag</span>
-        </figure>
-        <figure class="mcell" data-photo="assets/offer/film-2.webp" data-name="The Juice Ensemble — musical satire">
-          <img src="assets/offer/film-2.webp" alt="The Juice Ensemble" loading="lazy" decoding="async">
-          <span class="mno">07</span><span class="mname">The Juice Ensemble</span>
-        </figure>
-        <figure class="mcell" data-photo="assets/offer/film-3.webp" data-name="Aksar Nadeem — spoken word">
-          <img src="assets/offer/film-3.webp" alt="Aksar Nadeem" loading="lazy" decoding="async">
-          <span class="mno">08</span><span class="mname">Aksar Nadeem</span>
-        </figure>
-      </div>
-      <p class="mproof reveal d2"><b>32</b> artists · <b>11</b> sold-out rooms · <b>2</b> cities — and counting.</p>
-    </div>
-  </section>
 
   <!-- PARTNER CTA — ink field; pink is the page's ONE spectrum moment. -->
   <section class="card dark cta" id="contact" data-nav="dark" data-navbg="#231F20" data-fit>
@@ -640,20 +684,25 @@ body.no-grain::after{opacity:0}
     </div>
   </section>
 
-  <!-- FOOTER — slim strip; newsletter demoted here. -->
+  <!-- FOOTER — About Us blurb, site nav, and socials in three columns. -->
   <footer class="card foot" data-nav="dark" data-navbg="#1B1818">
     <div class="wrap">
       <div class="cols">
-        <div>
+        <div class="about">
           <div class="mk">Cultural <span class="mis">(Mis)</span>fits</div>
+          <p><b>About Us</b> — Built with the outliers, Cultural (Mis)fits is a next-generation culture platform that exists to deliver extraordinary, authentic commentary on topics that shape today's cultural movements.</p>
         </div>
-        <div class="memo">
-          <p><b>The Misfit Memo</b> — cultural intelligence, weekly. Five minutes, no fluff.</p>
-          <form onsubmit="return false"><input type="email" placeholder="(enter your email)" aria-label="Email"><button>Subscribe</button></form>
-        </div>
+        <nav class="fnav">
+          <a href="#top">Home</a>
+          <a href="#culturist-network">Culturist Network</a>
+          <a href="#irl-live">IRL &amp; Live Experiences</a>
+          <a href="#film-studio">Film Studio</a>
+        </nav>
         <div class="lnx">
           <a href="https://instagram.com/culturalmisfits" target="_blank" rel="noopener">Instagram</a>
-          <a href="mailto:hello@cmf.world">hello@cmf.world</a>
+          <a href="https://facebook.com/culturalmisfits" target="_blank" rel="noopener">Facebook</a>
+          <a href="https://youtube.com/@culturalmisfits" target="_blank" rel="noopener">Youtube</a>
+          <a href="mailto:hello@culturalmisfits.com">hello@culturalmisfits.com</a>
         </div>
       </div>
       <div class="base">
