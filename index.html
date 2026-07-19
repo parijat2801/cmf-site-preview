@@ -89,10 +89,11 @@ body.no-grain::after{opacity:0}
   clip-path:polygon(0 6%,100% 0,100% 94%,0 100%)}
 .reveal.in .mark::before{transform:scaleX(1)}
 .reveal.in .mark{color:var(--ink)}
-/* .mark-w keeps the highlighted TEXT white (over a red highlight) instead of the
-   default dark ink — used where white-on-red reads better than ink-on-red. */
-.reveal.in .mark.mark-w,.mark.mark-w{color:var(--white)}
-@media(prefers-reduced-motion:reduce){.mark::before{transform:scaleX(1)}.mark{color:var(--ink)}.mark.mark-w{color:var(--white)}}
+/* .mark-w keeps the highlighted TEXT light (over a red highlight) instead of the
+   default dark ink. Uses --cream to MATCH the surrounding heading (which is cream
+   on dark cards), so the highlighted word isn't a different, cooler white. */
+.reveal.in .mark.mark-w,.mark.mark-w{color:var(--cream)}
+@media(prefers-reduced-motion:reduce){.mark::before{transform:scaleX(1)}.mark{color:var(--ink)}.mark.mark-w{color:var(--cream)}}
 
 /* ============ NAV — themed per card, auto-hides on scroll down ============ */
 .nav{position:fixed;top:0;left:0;right:0;z-index:900;display:flex;align-items:center;justify-content:space-between;
