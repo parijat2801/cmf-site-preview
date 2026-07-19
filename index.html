@@ -422,6 +422,87 @@ body.no-grain::after{opacity:0}
 .foot .lnx a:hover{opacity:1}
 .foot .base{margin-top:clamp(28px,3vw,48px);display:flex;justify-content:space-between;gap:2em;font-size:var(--t-label);letter-spacing:.08em;opacity:.45}
 @media(max-width:860px){.foot .cols{grid-template-columns:1fr;gap:32px}.foot .base{flex-direction:column;gap:.6em}}
+
+/* ============================================================
+   MANIFESTO COLLAGE (ported from protos/m.html). All classes mf-prefixed to
+   avoid colliding with the deck's .card/.beat/.ph/.mk. These sections are NOT
+   .deck > .card, so they escape the pin/dwell/fit systems and scroll plainly.
+   ============================================================ */
+/* reveal-on-scroll (proto's .rise, renamed .mf-rise; driven by its own trigger) */
+.mf-rise{opacity:0;transform:translateY(34px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
+.mf-rise.in{opacity:1;transform:none}
+
+/* CHANT COLLAGE — red frame, dark inset panel, photos bleed off edges */
+.mf-collage{position:relative;background:var(--red);padding:clamp(30px,6vh,80px) 0 clamp(40px,8vh,110px)}
+.mf-panel{position:relative;background:var(--ink);overflow:visible;
+  margin:0 clamp(30px,8vw,120px);padding:clamp(30px,4vw,56px) clamp(28px,4vw,60px) clamp(50px,8vh,120px)}
+.mf-imglayer{position:absolute;inset:0;z-index:1;pointer-events:none}
+.mf-ph{position:absolute;box-shadow:0 16px 46px rgba(0,0,0,.5);overflow:hidden}
+.mf-ph img{width:100%;height:100%;object-fit:cover;display:block}
+.mf-ph1{right:-9%;top:15%;width:44%;aspect-ratio:3/2}
+.mf-ph2{left:-12%;top:42%;width:30%;aspect-ratio:3/4}
+.mf-ph3{right:-8%;top:68%;width:40%;aspect-ratio:4/5}
+.mf-txtlayer{position:relative;z-index:2}
+/* HEADING for the chant section — the manifesto opens on this. Full headline
+   scale (near the "Where…" beats), cream, red highlight on the promise. */
+.mf-lede{font-weight:900;letter-spacing:-.03em;line-height:.94;color:var(--cream);
+  font-size:clamp(2.2rem,6vw,5.4rem);max-width:16ch;margin-bottom:clamp(60px,11vh,150px)}
+.mf-lede .mf-mk{background:linear-gradient(transparent 60%,var(--red) 0);padding:0 .05em;color:var(--cream)}
+.mf-beat h3{font-weight:900;color:var(--red);letter-spacing:-.03em;line-height:.86;font-size:clamp(2.4rem,7.5vw,6rem)}
+.mf-beat p{margin-top:.7em;font-weight:400;color:var(--cream);font-size:clamp(1.1rem,1.8vw,1.7rem);opacity:.95;line-height:1.3;max-width:30ch}
+.mf-wl1{max-width:60%}
+.mf-wl1 h3{max-width:9ch}
+.mf-wl2{max-width:72%;margin-left:auto;text-align:right;margin-top:clamp(140px,22vh,300px)}
+.mf-wl2 p{display:inline-block;text-align:left;margin-left:auto}
+.mf-wl3{max-width:66%;margin-top:clamp(120px,20vh,260px)}
+.mf-wl3 h3{max-width:11ch}
+
+/* ANSWER — same red frame, dark inset, hands into "uniting…" */
+.mf-answer{background:var(--red);padding:0}
+.mf-answer .mf-inset{background:var(--ink);margin:0 clamp(30px,8vw,120px);padding:clamp(50px,10vh,140px) clamp(28px,4vw,60px) clamp(20px,3vh,40px)}
+.mf-a1{font-weight:900;letter-spacing:-.03em;line-height:1.0;font-size:clamp(1.8rem,4.6vw,4.4rem);max-width:20ch}
+.mf-a1 .mf-mk{background:linear-gradient(transparent 58%,var(--red) 0);padding:0 .05em}
+.mf-a2{margin-top:.7em;font-weight:300;font-size:clamp(1.2rem,2.4vw,2.3rem);opacity:.9;max-width:30ch;line-height:1.2}
+
+/* FOUR-TYPES FILMSTRIP REEL — sticky stage, active card enlarges on scroll.
+   The section is red; the sticky stage's dark interior is inset so the red bands
+   run down the edges continuous with the collage + answer above. A tall runway
+   sibling gives the scrub its scroll distance. */
+.mf-unite{position:relative;background:var(--red)}
+/* the sticky reel stage centres its content so the pinned reel has no big void
+   above or below. A small "uniting…" header stays INSIDE the stage so the reel
+   never reads as a headless floating row while it's pinned. */
+.mf-ustage{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;justify-content:center;overflow:hidden;
+  background:var(--ink);margin:0 clamp(30px,8vw,120px);padding:clamp(24px,4vh,56px) clamp(28px,4vw,60px)}
+/* HEADING for the reel — a real section header, not a faint whisper. Heavy,
+   cream, sized to command the top of the pinned stage above the four cards. */
+.mf-uhead{font-weight:900;letter-spacing:-.03em;font-size:clamp(1.7rem,4vw,3.4rem);color:var(--cream);
+  opacity:1;margin-bottom:clamp(20px,3.5vh,44px);max-width:24ch;line-height:.98}
+.mf-reel{display:flex;gap:clamp(12px,1.5vw,24px);align-items:stretch}
+.mf-reel-runway{height:240vh}   /* ~60vh of scroll per card — snappier than 420vh */
+/* the Brigade card follows the NON-card manifesto; kill its top drop-shadow AND
+   flatten its dark radial-gradient to the plain ink tone. Otherwise the gradient's
+   lighter centre (#2A2526) meets the flat #231F20 manifesto above and shows a
+   tonal seam line right at the boundary. Flat ink = seamless. */
+#misfits{box-shadow:none;background:var(--ink)}
+.mf-card{position:relative;flex:1 1 0;height:min(58vh,560px);background:#1B1818;overflow:hidden;
+  filter:grayscale(.15) brightness(.5);transition:filter .6s var(--ease),flex-grow .6s var(--ease)}
+.mf-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 28%}
+.mf-cap{position:absolute;left:0;right:0;bottom:0;padding:clamp(14px,2vw,26px);z-index:2;
+  background:linear-gradient(0deg,rgba(35,31,32,.9),transparent)}
+.mf-card h4{font-weight:900;letter-spacing:-.03em;line-height:.95;font-size:clamp(1rem,1.6vw,1.9rem)}
+.mf-q{font-weight:300;font-size:clamp(.85rem,1.05vw,1.15rem);opacity:0;max-height:0;overflow:hidden;transition:opacity .5s,max-height .5s}
+.mf-card.active{filter:none;flex-grow:2.6}
+.mf-card.active h4{font-size:clamp(1.6rem,2.6vw,3rem)}
+.mf-card.active .mf-q{opacity:.85;max-height:4em;margin-top:.4em}
+@media(max-width:760px){
+  .mf-panel{margin:0 14px}
+  .mf-wl1,.mf-wl2,.mf-wl3{max-width:100%;text-align:left;margin-left:0}
+  .mf-wl2,.mf-wl3{margin-top:clamp(70px,14vh,140px)}
+  .mf-ph1,.mf-ph2,.mf-ph3{width:72%}.mf-ph2{left:auto;right:-6%}
+  .mf-card{height:44vh}.mf-card h4{font-size:clamp(.85rem,3.5vw,1.2rem)}.mf-card.active{flex-grow:3.4}
+}
+@media(prefers-reduced-motion:reduce){.mf-rise{opacity:1;transform:none;transition:none}}
 </style>
 </head>
 <body>
@@ -487,53 +568,44 @@ body.no-grain::after{opacity:0}
     <div class="scroll" id="hscroll"><span class="lbl">Scroll</span><i class="meter" id="hmeter"></i></div>
   </header>
 
-  <!-- MANIFESTO — designer photo bg. Thesis + 3 beats stepped through the dwell. -->
-  <section class="card blue manifesto" id="manifesto" data-nav="light" data-navbg="#084CA1" data-fit>
-    <img class="sec-bg" src="assets/manifesto-still.jpg" alt="" decoding="async">
-    <div class="wrap">
-      <h2 class="thesis reveal d1" data-m><span class="w3">The algorithm shows you</span><span>the highlights.</span><span class="w3 wht">Culture happens</span><span class="acc wht">in the margins.</span></h2>
-      <div class="beats">
-        <i class="lfill"></i>
-        <div class="beat" data-m><h3>Culture gets flattened.</h3><p>Stories get reduced into trend language, aesthetic shorthand, and easy labels. The lived complexity disappears first.</p></div>
-        <div class="beat" data-m><h3>Systems decide who fits.</h3><p>Mainstream and fringe are not natural places. They are built by power, access, language, taste, money, and memory.</p></div>
-        <div class="beat" data-m><h3>Misfits move culture forward.</h3><p>When systems cannot absorb difference, new voices relocate and form new aesthetics, identities, and communities.</p></div>
+  <!-- ============================================================
+       MANIFESTO — collage unit (replaces old Manifesto + Quote + Audience).
+       Three movements inside ONE continuous red frame:
+         1. CHANT COLLAGE — 3 "Where…" photo-beats, red headlines over photos
+            that bleed off the panel edges.
+         2. ANSWER — resolves and hands into "uniting…".
+         3. FOUR-TYPES REEL — filmstrip; active card enlarges on scroll.
+       These are DELIBERATELY NOT .card sections: cards = '.deck > .card', so
+       plain sections here are excluded from the pin/dwell/fit/nav-theme systems
+       and simply scroll (like the proto). All classes are mf-prefixed to avoid
+       colliding with the deck's .card/.beat/.ph/.mk. ============================ -->
+  <section class="mf-collage">
+    <div class="mf-panel">
+      <div class="mf-imglayer">
+        <figure class="mf-ph mf-ph1 mf-rise"><img src="assets/collage/blur.png" alt="" decoding="async"></figure>
+        <figure class="mf-ph mf-ph2 mf-rise"><img src="assets/collage/arcade.png" alt="" decoding="async"></figure>
+        <figure class="mf-ph mf-ph3 mf-rise"><img src="assets/collage/banana.png" alt="" decoding="async"></figure>
+      </div>
+      <div class="mf-txtlayer">
+        <div class="mf-lede mf-rise">Mainstream or niche — a space to be seen, understood, and valued.</div>
+        <div class="mf-beat mf-wl1 mf-rise"><h3>Where new languages are formed.</h3><p>Slang, sound, and syntax the mainstream hasn't caught up to yet.</p></div>
+        <div class="mf-beat mf-wl2 mf-rise"><h3>Where new aesthetics are tested.</h3><p>Looks and worlds tried on in public, long before they trend.</p></div>
+        <div class="mf-beat mf-wl3 mf-rise"><h3>Where new truths are spoken.</h3><p>The things people actually mean, said out loud without translation.</p></div>
       </div>
     </div>
   </section>
 
-  <!-- QUOTE — cream, ink, red period. The brand-book cover. -->
-  <section class="card cream quote" data-nav="dark" data-navbg="#231F20" data-fit>
-    <video class="sec-video" src="assets/quote-bg.mp4?v=designer" poster="assets/quote-bg.jpg?v=designer" muted loop playsinline autoplay preload="auto"></video>
-    <div class="scrim"></div>
-    <div class="tv"><div class="scan"></div><div class="roll"></div><div class="glass"></div></div>
-    <div class="wrap">
-      <blockquote class="reveal" data-m><span>A <span class="mark" style="--hl:var(--yellow)">sanctuary and catalyst</span>,</span><span>of the culture,</span><span>by the culture,</span><span>for the culture<span class="dot">.</span></span></blockquote>
-    </div>
-  </section>
-
-  <!-- AUDIENCE — ink field, yellow accents. Editorial index + hover photo. -->
-  <section class="card dark audience" id="audience" data-nav="dark" data-navbg="#231F20" data-fit>
-    <div class="wrap">
-      <h2 class="head reveal d1" data-m>Who are we <span class="mark" style="--hl:var(--yellow)">building</span> for?</h2>
-      <div class="aidx peekzone">
-        <div class="arow reveal d1" data-photo="assets/photo-rooftop.webp">
-          <span class="ano">01</span><h3>The Misfits</h3><p class="adesc">For every square hole, round peg and Misfit — tired of one-size-fits-all narratives?</p>
-          <div class="aphoto"><img data-src="assets/photo-rooftop.webp" alt="" width="1053" height="750" decoding="async"></div>
-        </div>
-        <div class="arow reveal d2" data-photo="assets/photo-concert.webp">
-          <span class="ano">02</span><h3>The Curious</h3><p class="adesc">Do you ask why and how, more than what?</p>
-          <div class="aphoto"><img data-src="assets/photo-concert.webp" alt="" width="1053" height="750" decoding="async"></div>
-        </div>
-        <div class="arow reveal d3" data-photo="assets/photo-manifesto.webp">
-          <span class="ano">03</span><h3>The Expressive</h3><p class="adesc">Do you use music, fashion and memes to introduce yourself?</p>
-          <div class="aphoto"><img data-src="assets/photo-manifesto.webp" alt="" width="2000" height="1326" decoding="async"></div>
-        </div>
-        <div class="arow reveal d4" data-photo="assets/photo-hands.webp">
-          <span class="ano">04</span><h3>The Culturally Fluid</h3><p class="adesc">Do you live with contradictions — and are OK with it?</p>
-          <div class="aphoto"><img data-src="assets/photo-hands.webp" alt="" width="1053" height="750" decoding="async"></div>
-        </div>
+  <section class="mf-unite" id="audience">
+    <div class="mf-ustage">
+      <div class="mf-uhead mf-rise">Where creativity, connection, and progress start by uniting…</div>
+      <div class="mf-reel" id="mf-reel">
+        <figure class="mf-card" data-mfcard><img src="assets/brigade/3.png" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Curious</h4><div class="mf-q">Do you ask why and how, more than what?</div></figcaption></figure>
+        <figure class="mf-card" data-mfcard><img src="assets/brigade/2.png" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Expressive</h4><div class="mf-q">Do you introduce yourself through music, fashion, and memes?</div></figcaption></figure>
+        <figure class="mf-card" data-mfcard><img src="assets/brigade/9.png" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Culturally Fluid</h4><div class="mf-q">Do you live with contradictions and still feel whole?</div></figcaption></figure>
+        <figure class="mf-card" data-mfcard><img src="assets/brigade/7.png" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Misfit</h4><div class="mf-q">Are you tired of one-size-fits-all narratives?</div></figcaption></figure>
       </div>
     </div>
+    <div class="mf-reel-runway" aria-hidden="true"></div>
   </section>
 
   <!-- THE MISFITS BRIGADE — the client's "Our Artists" roster, moved ABOVE
@@ -542,7 +614,7 @@ body.no-grain::after{opacity:0}
        Names are PLACEHOLDER until the client supplies the real roster. -->
   <section class="card dark misfits tall" id="misfits" data-nav="dark" data-navbg="#231F20">
     <div class="wrap">
-      <h2 class="head reveal d1" data-m>The Misfits <span class="mark" style="--hl:var(--yellow)">Brigade</span></h2>
+      <h2 class="head reveal d1" data-m>The Misfits <span class="mark" style="--hl:var(--red)">Brigade</span></h2>
       <p class="klabel reveal d1" data-m>Our Artists</p>
       <!-- CONFIGURABLE ROSTER: uniform, repeating .mcell blocks (the shape TinaCMS
            will bind to later). To add an artist, copy one block and set its photo,
@@ -592,7 +664,7 @@ body.no-grain::after{opacity:0}
   <!-- OFFERINGS — ink field; pillar accents from the PRIMARIES: red / yellow / green. -->
   <section class="card dark offerings tall" id="offerings" data-nav="dark" data-navbg="#231F20">
     <div class="wrap">
-      <h2 class="head reveal d1" data-m style="margin-bottom:clamp(30px,4vw,64px)">How does Cultural (Mis)fits bring these <span class="mark" style="--hl:var(--yellow)">narratives</span> to you?</h2>
+      <h2 class="head reveal d1" data-m style="margin-bottom:clamp(30px,4vw,64px)">How does Cultural (Mis)fits bring these <span class="mark" style="--hl:var(--red)">narratives</span> to you?</h2>
 
       <article class="offer reveal" id="culturist-network" style="--co:var(--red)">
         <div class="oshot" data-photos="assets/offer/net-1.webp,assets/offer/net-2.webp,assets/offer/net-3.webp">
@@ -648,7 +720,7 @@ body.no-grain::after{opacity:0}
        handled by CSS (.witem:nth-child(even), :first-of-type) — no extra work. -->
   <section class="card red work tall" id="work" data-nav="dark" data-navbg="#DB1A21">
     <div class="wrap">
-      <h2 class="head reveal d1" data-m>The Misfits <span class="mark" style="--hl:var(--yellow)">Acts.</span></h2>
+      <h2 class="head reveal d1" data-m>The Misfits <span class="mark" style="--hl:var(--red)">Acts.</span></h2>
       <div class="witem reveal d1">
         <div class="txt" data-m><h3>Ruhbaru</h3><p>The sound of home, scaled into a cinematic live experience. From Sufi to cinematic pop, ghazal to qawwali — an intimate world of longing, devotion, memory, and renewal. <b>Come face to face · India tour 2026.</b></p><a class="fl" href="https://instagram.com/culturalmisfits" target="_blank" rel="noopener">Follow ↗</a></div>
         <div class="oshot" data-photos="assets/photo-ruhbaru.webp,assets/photo-concert.webp,assets/photo-hands.webp" style="--co:var(--cream)">
@@ -736,7 +808,7 @@ try{ pretext=await import('./vendor/pretext.esm.js'); }catch(_){ }
    jump, flick) can cross the viewport between IO callbacks and skip it.
    The sweep is the guarantee: anything the scroll position has already
    reached gets revealed, no matter how it got there. */
-const pendingReveals=new Set(document.querySelectorAll('.reveal'));
+const pendingReveals=new Set(document.querySelectorAll('.reveal, .mf-rise'));
 function fireReveal(el){ el.classList.add('in'); pendingReveals.delete(el); io.unobserve(el); }
 const io=new IntersectionObserver((es)=>{
   es.forEach(e=>{ if(e.isIntersecting)fireReveal(e.target); });
@@ -1031,15 +1103,17 @@ if(!reduce){
            top-aligned would clip whatever hangs below the fold. */
         talls[i]=card.offsetHeight>vh()+2;
         let d;
-        if(card.classList.contains('hero')) d=vh()*0.5;   // short hold; scroll releases to Manifesto (beats are timer-driven, not scrubbed)
-        else if(card.classList.contains('manifesto')) d=talls[i]?vh()*0.8:3*0.9*vh();   // one beat ≈ 90vh, prod parity
+        if(card.classList.contains('hero')) d=vh()*0.5;   // short hold; scroll releases to the manifesto collage
         else{
           const lines=measureLines(card);
           d=vh()*(0.45+0.055*lines);
           d=Math.max(vh()*0.55,Math.min(vh()*2.1,d));
         }
         dwells[i]=Math.round(d*k);
-        spacers[i].style.height=dwells[i]+'px';
+        /* the hero pins with pinSpacing:true (it precedes the non-card manifesto),
+           so it reserves its own room — its .spacer must stay 0 to avoid a double
+           gap. All other cards use their spacer for the pin distance. */
+        spacers[i].style.height=(card.classList.contains('hero')?0:dwells[i])+'px';
       });
     }
     computeAll();
@@ -1048,20 +1122,29 @@ if(!reduce){
     /* pins: dwell solo, then one viewport of being covered */
     cards.forEach((card,i)=>{
       if(i===cards.length-1)return;
-      if(card.classList.contains('manifesto'))return;       // gets its own trigger below
       // NOTE: the hero uses this SAME standard pin (no bespoke trigger). Its beat
       // typewriter is driven by a timer + kill-on-scroll only — scroll's job is
-      // just to release the pin to the Manifesto, like every other card.
+      // just to release the pin to the manifesto collage, like every other card.
+      // (The manifesto collage sections are NOT .card, so they aren't in `cards`
+      //  and are never pinned here — they scroll plainly.)
+      /* The hero is the last pinned card before the NON-card manifesto collage.
+         With pinSpacing:false a card relies on the NEXT pinned card to scroll up
+         and cover it; the manifesto isn't a card, so nothing covers the hero and
+         it sat fixed OVER the manifesto. So the hero uses pinSpacing:true to
+         reserve its own room and release cleanly. Its separate .spacer is then
+         redundant (that caused a double-gap), so we zero it below. */
+      const heroPin=card.classList.contains('hero');
       const st=ScrollTrigger.create({
         trigger:card,
         start:()=>talls[i]?'bottom bottom':'top top',
         /* pin until the NEXT card has fully covered: dwell + the distance its
            top must travel. From a bottom-pin that distance is one viewport;
-           from a top-pin it is this card's own height (≈100vh for hold cards,
-           but never assume exactly). */
-        end:()=>'+='+(dwells[i]+(talls[i]?vh():card.offsetHeight)),
-        pin:true,pinSpacing:false,invalidateOnRefresh:true,
+           from a top-pin it is this card's own height. The hero just holds for
+           its dwell, then releases (pinSpacing:true reserves exactly that room). */
+        end:()=>heroPin?'+='+dwells[i]:'+='+(dwells[i]+(talls[i]?vh():card.offsetHeight)),
+        pin:true,pinSpacing:heroPin,invalidateOnRefresh:true,
       });
+      if(heroPin) spacers[i].style.height='0px';   // no double-count: pinSpacing reserves the room
       if(card.id)anchorTargets[card.id]=()=>talls[i]?st.start-(card.offsetHeight-vh()):st.start;
       /* rows inside a card (the three verticals) anchor to their own offset,
          with headroom for the nav bar */
@@ -1235,69 +1318,38 @@ if(!reduce){
       document.getElementById('hscroll')?.classList.add('took');
     }
 
-    /* manifesto: pin + scrub the three beats through the dwell, with snap.
-       If the card is taller than the viewport (phones), pinning top-top would
-       clip it — fall back to a plain tall-card pin with staggered beat reveal. */
-    const mi=cards.findIndex(c=>c.classList.contains('manifesto'));
-    const beats=gsap.utils.toArray('.manifesto .beat');
-    // the beats (and their dim top line) stay visible; only the TEXT steps in.
-    const beatText=beats.map(b=>b.querySelectorAll('h3,p'));
-    if(!talls[mi]){
-      gsap.set(beatText,{autoAlpha:0,y:44});
-      const tl=gsap.timeline({
-        defaults:{ease:'none'},
-        scrollTrigger:{
-          trigger:'.manifesto',
-          start:'top top',
-          // +0.7vh reading pad so the last beat holds long enough to read
-          end:()=>'+='+(dwells[mi]+cards[mi].offsetHeight+vh()*.7),
-          pin:true,pinSpacing:false,scrub:.4,invalidateOnRefresh:true,
-          snap:{
-            /* snap to each beat's hold inside the dwell portion, or the end */
-            snapTo:(v)=>{
-              const frac=dwells[mi]/(dwells[mi]+cards[mi].offsetHeight+vh()*.7);
-              const pts=beats.map((_,i)=>((i+0.75)/beats.length)*frac);
-              pts.push(1);
-              let best=pts[0];for(const p of pts)if(Math.abs(p-v)<Math.abs(best-v))best=p;
-              return Math.abs(best-v)<.12?best:v;
-            },
-            duration:{min:.2,max:.6},delay:.05,ease:'power2.inOut',
-          },
-        },
+    /* MANIFESTO COLLAGE — the four-types filmstrip reel. The .mf-ustage is
+       sticky (CSS) and its sibling .mf-reel-runway (420vh) gives the scrub its
+       scroll distance; this scrub sets which card is .active as you pass through.
+       No pin trigger here — the section is not a .card, so the deck's pin system
+       never touches it and the CSS sticky does the holding. (The old manifesto's
+       beat-scrub/snap/lfill timeline was deleted with those sections.) */
+    const mfReel=document.getElementById('mf-reel');
+    if(mfReel && !reduce){
+      const mfCards=[...mfReel.querySelectorAll('[data-mfcard]')];
+      let mfCur=-1;
+      const mfActive=(idx)=>{ if(idx===mfCur)return; mfCur=idx;
+        mfCards.forEach((c,k)=>c.classList.toggle('active',k===idx)); };
+      const mfST=ScrollTrigger.create({
+        trigger:'.mf-unite', start:'top top', end:'bottom bottom', scrub:.5,
+        invalidateOnRefresh:true,
+        onUpdate:self=>mfActive(Math.min(mfCards.length-1,Math.floor(self.progress*mfCards.length))),
       });
-      beats.forEach((b,i)=>{
-        // each beat's text steps in at its point in the scrub
-        tl.to(beatText[i],{autoAlpha:1,y:0,duration:.45,ease:'power1.out'},i*.9+.2);
+      mfActive(0);
+      /* CLICKABLE: clicking a card scrolls to the position that makes it active,
+         so click and scroll stay in one source of truth (the scrub sets .active).
+         Each card owns the band [i/N, (i+1)/N) of the pin range; aim at its middle. */
+      mfCards.forEach((card,i)=>{
+        card.style.cursor='pointer';
+        card.addEventListener('click',()=>{
+          const frac=(i+0.5)/mfCards.length;
+          const y=mfST.start + (mfST.end-mfST.start)*frac;
+          lenis.scrollTo(y,{duration:0.8});
+        });
       });
-      tl.to({},{duration:1.6});                // dwell: reading time on the last beat before the cover starts
-      anchorTargets['manifesto']=()=>tl.scrollTrigger.start;
-
-      // the continuous line has its OWN scrub tied to the manifesto pin range,
-      // so it draws 0→1 exactly as the section scrolls (decoupled from the beat
-      // step timeline, which guarantees it completes). Ends a touch before the
-      // pin's tail so the full line is visible while the beats hold.
-      const lfill=document.querySelector('.manifesto .beats .lfill');
-      gsap.fromTo(lfill,{scaleX:0},{scaleX:1,ease:'none',
-        scrollTrigger:{trigger:'.manifesto',start:'top top',
-          end:()=>'+='+Math.round((dwells[mi]+cards[mi].offsetHeight)*.82),
-          scrub:.4,invalidateOnRefresh:true}});
-    }else{
-      // tall fallback: text steps in with a stagger; the continuous line draws
-      // across as the block enters. The dim base line is always present (CSS).
-      const lfill=document.querySelector('.manifesto .beats .lfill');
-      gsap.set(beatText.flatMap(nl=>[...nl]),{autoAlpha:0,y:44});
-      gsap.set(lfill,{scaleX:0});
-      gsap.to(lfill,{scaleX:1,duration:1.1,ease:'none',
-        scrollTrigger:{trigger:'.manifesto .beats',start:'top 85%',end:'top 40%',scrub:.4}});
-      beats.forEach((b,i)=>{
-        gsap.to(beatText[i],{autoAlpha:1,y:0,duration:.8,ease:'power2.out',delay:i*.15,
-          scrollTrigger:{trigger:'.manifesto .beats',start:'top 80%'}});
-      });
-      const st=ScrollTrigger.create({
-        trigger:cards[mi],start:'bottom bottom',end:()=>'+='+(dwells[mi]+vh()),
-        pin:true,pinSpacing:false,invalidateOnRefresh:true,
-      });
-      anchorTargets['manifesto']=()=>st.start-(cards[mi].offsetHeight-vh());
+    } else if(mfReel){
+      // reduced-motion: reveal the first card's question, no scroll-driven change
+      mfReel.querySelector('[data-mfcard]')?.classList.add('active');
     }
 
     /* nav theme: flip text color AND bar background when a card's top passes
