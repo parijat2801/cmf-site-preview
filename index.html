@@ -402,9 +402,9 @@ body.no-grain::after{opacity:0}
 .cta .head{max-width:16ch}
 .cta .biglink{display:inline-block;margin-top:calc(clamp(30px,6vh,72px)*var(--fz));font-weight:900;font-style:italic;letter-spacing:-.02em;
   font-size:calc(clamp(1.7rem,min(4.2vw,5.5vh),4.4rem)*var(--fz));line-height:1;color:var(--cream);text-decoration:none;
-  border-bottom:3px solid var(--pink);padding-bottom:.12em;transition:color .5s var(--ease)}
-.cta .biglink:hover{color:var(--pink)}
-.cta .biglink .arr{font-style:normal;color:var(--pink)}
+  border-bottom:3px solid var(--red);padding-bottom:.12em;transition:color .5s var(--ease)}
+.cta .biglink:hover{color:var(--red)}
+.cta .biglink .arr{font-style:normal;color:var(--red)}
 
 /* ============ FOOTER — slim strip; the memo lives here now ============ */
 .foot{min-height:auto;padding-block:clamp(40px,5vw,80px);justify-content:flex-start;background:#1B1818;color:var(--cream)}
@@ -439,9 +439,12 @@ body.no-grain::after{opacity:0}
 .mf-imglayer{position:absolute;inset:0;z-index:1;pointer-events:none}
 .mf-ph{position:absolute;box-shadow:0 16px 46px rgba(0,0,0,.5);overflow:hidden}
 .mf-ph img{width:100%;height:100%;object-fit:cover;display:block}
-.mf-ph1{right:-9%;top:15%;width:44%;aspect-ratio:3/2}
-.mf-ph2{left:-12%;top:42%;width:30%;aspect-ratio:3/4}
-.mf-ph3{right:-8%;top:68%;width:40%;aspect-ratio:4/5}
+/* each photo bleeds off its edge by the SAME ABSOLUTE amount (a fixed vw, not a
+   %-of-own-width) so all three sit equidistant from the screen edge; their size
+   and vertical position stay varied. */
+.mf-ph1{right:-4vw;top:15%;width:44%;aspect-ratio:3/2}
+.mf-ph2{left:-4vw;top:42%;width:30%;aspect-ratio:3/4}
+.mf-ph3{right:-4vw;top:68%;width:40%;aspect-ratio:4/5}
 .mf-txtlayer{position:relative;z-index:2}
 /* HEADING for the chant section — the manifesto opens on this. Full headline
    scale (near the "Where…" beats), cream, red highlight on the promise. */
