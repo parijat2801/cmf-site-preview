@@ -371,9 +371,6 @@ body.no-grain::after{opacity:0}
 .mcell:hover img{filter:brightness(1);transform:scale(1.04)}
 .mcell .mno{position:absolute;top:10px;left:12px;font-weight:900;font-style:italic;font-size:.95rem;color:#fff;opacity:.85;text-shadow:0 1px 6px rgba(0,0,0,.5)}
 .mcell .mname{position:absolute;left:12px;bottom:10px;right:12px;font-weight:900;font-size:clamp(.95rem,1.1vw,1.3rem);letter-spacing:-.01em;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.65)}
-/* the template cell reads as an empty slot, not a real artist */
-.mcell-placeholder{outline:1px dashed rgba(231,225,212,.35);outline-offset:-1px}
-.mcell-placeholder img{opacity:.25}
 .mproof{margin-top:calc(clamp(18px,3vh,40px)*var(--fz));font-weight:300;font-size:calc(var(--t-lead)*var(--fz))}
 .mproof b{font-weight:900;font-style:italic;color:var(--yellow)}
 @media(hover:none){.mcell img{filter:brightness(.9)}}
@@ -547,61 +544,55 @@ body.no-grain::after{opacity:0}
     <div class="wrap">
       <h2 class="head reveal d1" data-m>The Misfits <span class="mark" style="--hl:var(--yellow)">Brigade</span></h2>
       <p class="klabel reveal d1" data-m>Our Artists</p>
-      <!-- CONFIGURABLE ROSTER: cells are uniform, repeating .mcell blocks — add or
-           remove one and the auto-fit grid reflows (no column math). This is the
-           shape TinaCMS will bind a collection to later. Names are PLACEHOLDER
-           (client roster pending); each cell just needs its photo + name filled.
-           9 real artist photos + 1 template placeholder cell at the end. -->
+      <!-- CONFIGURABLE ROSTER: uniform, repeating .mcell blocks (the shape TinaCMS
+           will bind to later). To add an artist, copy one block and set its photo,
+           name (.mname + alt + data-name), and number (.mno). The grid auto-fits
+           and cells are ordered BY THE NUMBER, so source order doesn't matter. -->
       <div class="mwall peekzone reveal d1">
-        <figure class="mcell" data-photo="assets/brigade/1.png" data-name="Artist name — TBD">
-          <img src="assets/brigade/1.png" alt="" loading="lazy" decoding="async">
-          <span class="mno">01</span><span class="mname">Artist 01</span>
+        <figure class="mcell" data-photo="assets/brigade/1.png" data-name="Aakash Odedra">
+          <img src="assets/brigade/1.png" alt="Aakash Odedra" loading="lazy" decoding="async">
+          <span class="mno">01</span><span class="mname">Aakash Odedra</span>
         </figure>
-        <figure class="mcell" data-photo="assets/brigade/2.png" data-name="Artist name — TBD">
-          <img src="assets/brigade/2.png" alt="" loading="lazy" decoding="async">
-          <span class="mno">02</span><span class="mname">Artist 02</span>
+        <figure class="mcell" data-photo="assets/brigade/2.png" data-name="Eshna Kutty">
+          <img src="assets/brigade/2.png" alt="Eshna Kutty" loading="lazy" decoding="async">
+          <span class="mno">02</span><span class="mname">Eshna Kutty</span>
         </figure>
-        <figure class="mcell" data-photo="assets/brigade/3.png" data-name="Artist name — TBD">
-          <img src="assets/brigade/3.png" alt="" loading="lazy" decoding="async">
-          <span class="mno">03</span><span class="mname">Artist 03</span>
+        <figure class="mcell" data-photo="assets/brigade/3.png" data-name="Nicki Wells">
+          <img src="assets/brigade/3.png" alt="Nicki Wells" loading="lazy" decoding="async">
+          <span class="mno">03</span><span class="mname">Nicki Wells</span>
         </figure>
-        <figure class="mcell" data-photo="assets/brigade/4.png" data-name="Artist name — TBD">
-          <img src="assets/brigade/4.png" alt="" loading="lazy" decoding="async">
-          <span class="mno">04</span><span class="mname">Artist 04</span>
+        <figure class="mcell" data-photo="assets/brigade/4.png" data-name="Nirvair Singh Rai">
+          <img src="assets/brigade/4.png" alt="Nirvair Singh Rai" loading="lazy" decoding="async">
+          <span class="mno">04</span><span class="mname">Nirvair Singh Rai</span>
         </figure>
-        <figure class="mcell" data-photo="assets/brigade/5.png" data-name="Artist name — TBD">
-          <img src="assets/brigade/5.png" alt="" loading="lazy" decoding="async">
-          <span class="mno">05</span><span class="mname">Artist 05</span>
+        <figure class="mcell" data-photo="assets/brigade/5.png" data-name="Ravi-Ra">
+          <img src="assets/brigade/5.png" alt="Ravi-Ra" loading="lazy" decoding="async">
+          <span class="mno">05</span><span class="mname">Ravi-Ra</span>
         </figure>
-        <figure class="mcell" data-photo="assets/brigade/6.png" data-name="Artist name — TBD">
-          <img src="assets/brigade/6.png" alt="" loading="lazy" decoding="async">
-          <span class="mno">06</span><span class="mname">Artist 06</span>
+        <figure class="mcell" data-photo="assets/brigade/6.png" data-name="Rushil Ranjan">
+          <img src="assets/brigade/6.png" alt="Rushil Ranjan" loading="lazy" decoding="async">
+          <span class="mno">06</span><span class="mname">Rushil Ranjan</span>
         </figure>
-        <figure class="mcell" data-photo="assets/brigade/7.png" data-name="Artist name — TBD">
-          <img src="assets/brigade/7.png" alt="" loading="lazy" decoding="async">
-          <span class="mno">07</span><span class="mname">Artist 07</span>
+        <figure class="mcell" data-photo="assets/brigade/7.png" data-name="Gopal Datt">
+          <img src="assets/brigade/7.png" alt="Gopal Datt" loading="lazy" decoding="async">
+          <span class="mno">07</span><span class="mname">Gopal Datt</span>
         </figure>
-        <figure class="mcell" data-photo="assets/brigade/8.png" data-name="Artist name — TBD">
-          <img src="assets/brigade/8.png" alt="" loading="lazy" decoding="async">
-          <span class="mno">08</span><span class="mname">Artist 08</span>
+        <figure class="mcell" data-photo="assets/brigade/8.png" data-name="Parikshit Balochi">
+          <img src="assets/brigade/8.png" alt="Parikshit Balochi" loading="lazy" decoding="async">
+          <span class="mno">08</span><span class="mname">Parikshit Balochi</span>
         </figure>
-        <figure class="mcell" data-photo="assets/brigade/9.png" data-name="Artist name — TBD">
-          <img src="assets/brigade/9.png" alt="" loading="lazy" decoding="async">
-          <span class="mno">09</span><span class="mname">Artist 09</span>
-        </figure>
-        <figure class="mcell mcell-placeholder" data-photo="assets/offer/live-1.webp" data-name="Placeholder — duplicate this cell to add an artist">
-          <img src="assets/offer/live-1.webp" alt="" loading="lazy" decoding="async">
-          <span class="mno">10</span><span class="mname">Add artist ↗</span>
+        <figure class="mcell" data-photo="assets/brigade/9.png" data-name="Abi Sampa">
+          <img src="assets/brigade/9.png" alt="Abi Sampa" loading="lazy" decoding="async">
+          <span class="mno">09</span><span class="mname">Abi Sampa</span>
         </figure>
       </div>
-      <p class="mproof reveal d2"><b>32</b> artists · <b>11</b> sold-out rooms · <b>2</b> cities — and counting.</p>
     </div>
   </section>
 
   <!-- OFFERINGS — ink field; pillar accents from the PRIMARIES: red / yellow / green. -->
   <section class="card dark offerings tall" id="offerings" data-nav="dark" data-navbg="#231F20">
     <div class="wrap">
-      <h2 class="head reveal d1" data-m style="margin-bottom:clamp(30px,4vw,64px)">Get to the heart of the <span class="mark" style="--hl:var(--yellow)">new culture.</span></h2>
+      <h2 class="head reveal d1" data-m style="margin-bottom:clamp(30px,4vw,64px)">How does Cultural (Mis)fits bring these <span class="mark" style="--hl:var(--yellow)">narratives</span> to you?</h2>
 
       <article class="offer reveal" id="culturist-network" style="--co:var(--red)">
         <div class="oshot" data-photos="assets/offer/net-1.webp,assets/offer/net-2.webp,assets/offer/net-3.webp">
@@ -680,7 +671,7 @@ body.no-grain::after{opacity:0}
   <section class="card dark cta" id="contact" data-nav="dark" data-navbg="#231F20" data-fit>
     <div class="wrap">
       <h2 class="head reveal d1" data-m>Building something with <span class="it">cultural consequence?</span></h2>
-      <a class="biglink reveal d2" href="mailto:hello@cmf.world">Start a conversation <span class="arr">↗</span></a>
+      <a class="biglink reveal d2" href="mailto:hello@culturalmisfits.com">Start a conversation <span class="arr">↗</span></a>
     </div>
   </section>
 
@@ -825,6 +816,19 @@ const oio=new IntersectionObserver((es)=>{
   es.forEach(e=>{ if(e.isIntersecting){ buildShot(e.target.querySelector('.oshot')); oio.unobserve(e.target);} });
 },{rootMargin:'300px 0px'});
 document.querySelectorAll('.offer,.witem').forEach(o=>oio.observe(o));
+
+/* ---------- Brigade roster order: the NUMBER shown on each cell (.mno) is the
+   single source of truth for its position. Sort the .mcell nodes by that number
+   and re-append in order, so changing a cell's number (by hand or via TinaCMS
+   later) moves it in the grid — no need to reorder the source markup. The
+   auto-fit grid then flows them left-to-right in numeric order. ---------- */
+(function orderRoster(){
+  const wall=document.querySelector('.mwall'); if(!wall)return;
+  const num=el=>{ const t=el.querySelector('.mno')?.textContent||''; const n=parseInt(t,10); return isNaN(n)?1e9:n; };
+  [...wall.querySelectorAll('.mcell')]
+    .sort((a,b)=>num(a)-num(b))
+    .forEach(cell=>wall.appendChild(cell));   // stable re-append in numeric order
+})();
 
 /* ---------- hover peek: the bigger image trails the cursor over any
    .peekzone (audience index rows + the misfits wall); touch = accordion ---------- */
