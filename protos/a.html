@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Manifesto→Audience · Option A</title>
+<style>
+@font-face{font-family:'NHG';src:url('../fonts/NeueHaasDisplayLight.ttf') format('truetype');font-weight:300;font-style:normal;font-display:swap}
+@font-face{font-family:'NHG';src:url('../fonts/NeueHaasDisplayRoman.ttf') format('truetype');font-weight:400;font-display:swap}
+@font-face{font-family:'NHG';src:url('../fonts/NeueHaasDisplayMediu.ttf') format('truetype');font-weight:500;font-display:swap}
+@font-face{font-family:'NHG';src:url('../fonts/NeueHaasDisplayBlack.ttf') format('truetype');font-weight:900;font-display:swap}
+@font-face{font-family:'NHG';src:url('../fonts/NeueHaasDisplayThinItalic.ttf') format('truetype');font-weight:200;font-style:italic;font-display:swap}
+:root{--ink:#231F20;--cream:#E7E1D4;--white:#fff;--red:#DB1A21;--yellow:#FFDD00;
+  --gutter:clamp(24px,6vw,120px);--font:'NHG','Helvetica Neue',Arial,sans-serif;--ease:cubic-bezier(.16,1,.3,1)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--ink);color:var(--cream);line-height:1.05;overflow-x:hidden}
+.note{position:fixed;top:14px;left:14px;z-index:99;font-size:12px;letter-spacing:.15em;text-transform:uppercase;opacity:.5}
+.pre{height:60vh;display:flex;align-items:flex-end;padding:0 var(--gutter) 4vh}
+.pre p{font-size:clamp(1rem,1.4vw,1.5rem);font-weight:300;opacity:.5;max-width:30ch}
+/* the merged unit: one pinned field, movements step through on scroll */
+.unit{position:relative}
+.stage{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;justify-content:center;
+  padding:0 var(--gutter);overflow:hidden}
+.mv{position:absolute;left:var(--gutter);right:var(--gutter);opacity:0;transition:opacity .5s var(--ease),transform .6s var(--ease)}
+.mv.on{opacity:1}
+/* movement 1: the chant — huge */
+.chant span{display:block;font-weight:900;letter-spacing:-.03em;line-height:.98;
+  font-size:clamp(2rem,5.4vw,5.4rem);opacity:.25;transform:translateY(.1em);transition:opacity .5s,color .5s}
+.chant span.lit{opacity:1}
+.chant span .w{color:var(--red)}
+/* movement 2: the answer — medium */
+.answer p{font-weight:900;letter-spacing:-.02em;line-height:1.06;font-size:clamp(1.6rem,3.6vw,3.4rem);max-width:20ch}
+.answer p .mk{background:linear-gradient(transparent 60%,rgba(255,221,0,.9) 0);padding:0 .05em}
+.answer .lead2{margin-top:.6em;font-weight:300;font-size:clamp(1.2rem,2.4vw,2.2rem);opacity:.85;max-width:26ch}
+/* movement 3: the uniting — resolves to named people */
+.unite .u{font-weight:200;font-style:italic;font-size:clamp(1.4rem,3vw,2.8rem);opacity:.6;margin-bottom:.3em}
+.aidx{display:flex;flex-direction:column}
+.arow{display:grid;grid-template-columns:1fr auto;align-items:baseline;gap:1.5em;
+  padding:.55em 0;border-top:1.5px solid rgba(231,225,212,.2);opacity:0;transform:translateY(20px);transition:opacity .5s,transform .5s}
+.arow.on{opacity:1;transform:none}
+.arow h3{font-weight:900;letter-spacing:-.03em;line-height:.95;font-size:clamp(1.8rem,4.4vw,4.2rem)}
+.arow p{font-weight:300;font-size:clamp(.9rem,1.15vw,1.25rem);opacity:.7;text-align:right;max-width:26ch;justify-self:end}
+.post{height:80vh;display:flex;align-items:center;padding:0 var(--gutter)}
+.post p{opacity:.4;font-size:clamp(1rem,1.4vw,1.5rem)}
+.scrollcue{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.4}
+@media(max-width:760px){.arow{grid-template-columns:1fr}.arow p{text-align:left;justify-self:start;margin-top:.3em}}
+</style></head>
+<body>
+<div class="note">Option A · vertical descent, type shrinks as it resolves</div>
+<div class="scrollcue">scroll ↓</div>
+
+<div class="pre"><p>[ hero ends: “We are Cultural (Mis)fits.” ]</p></div>
+
+<section class="unit" id="unit">
+  <div class="stage">
+    <!-- MV1 chant -->
+    <div class="mv chant on" data-mv="0">
+      <span data-c>Where new <span class="w">languages</span> are formed.</span>
+      <span data-c>Where new <span class="w">aesthetics</span> are tested.</span>
+      <span data-c>Where new <span class="w">truths</span> are spoken.</span>
+    </div>
+    <!-- MV2 answer -->
+    <div class="mv answer" data-mv="1">
+      <p>Mainstream or niche — a space to be <span class="mk">seen, understood, and valued.</span></p>
+      <p class="lead2">Where misfits unite to drive the engine of creativity, connection, and progress —</p>
+    </div>
+    <!-- MV3 uniting → names -->
+    <div class="mv unite" data-mv="2">
+      <div class="u">uniting</div>
+      <div class="aidx">
+        <div class="arow" data-a><h3>The Curious</h3><p>Do you ask why and how, more than what?</p></div>
+        <div class="arow" data-a><h3>The Expressive</h3><p>Music, fashion and memes to introduce yourself?</p></div>
+        <div class="arow" data-a><h3>The Culturally Fluid</h3><p>Live with contradictions — and OK with it?</p></div>
+        <div class="arow" data-a><h3>The Misfit</h3><p>Tired of one-size-fits-all narratives?</p></div>
+      </div>
+    </div>
+  </div>
+  <!-- scroll runway: 4 screens of scroll drive the 3 movements + the name reveal -->
+  <div style="height:400vh"></div>
+</section>
+
+<div class="post"><p>[ next: The Misfits Brigade — the artists ]</p></div>
+
+<script src="../vendor/gsap.min.js"></script>
+<script src="../vendor/ScrollTrigger.min.js"></script>
+<script src="../vendor/lenis.min.js"></script>
+<script>
+const lenis=new Lenis({lerp:.11}); lenis.on('scroll',ScrollTrigger.update);
+gsap.ticker.add(t=>lenis.raf(t*1000)); gsap.ticker.lagSmoothing(0);
+gsap.registerPlugin(ScrollTrigger);
+
+const mvs=[...document.querySelectorAll('.mv')];
+const chant=[...document.querySelectorAll('[data-c]')];
+const rows=[...document.querySelectorAll('[data-a]')];
+
+// show exactly one movement at a time
+function showMv(i){ mvs.forEach((m,k)=>m.classList.toggle('on',k===i)); }
+
+ScrollTrigger.create({
+  trigger:'#unit', start:'top top', end:'bottom bottom', scrub:.4,
+  onUpdate:self=>{
+    const p=self.progress;                       // 0..1 over the 400vh runway
+    // phase 1 (0–.35): chant lines light one by one
+    if(p<.35){ showMv(0);
+      const t=p/.35; chant.forEach((s,k)=>s.classList.toggle('lit',t> k/chant.length));
+    }
+    // phase 2 (.35–.6): the answer
+    else if(p<.6){ showMv(1); }
+    // phase 3 (.6–1): uniting + names stagger in
+    else{ showMv(2);
+      const t=(p-.6)/.4; rows.forEach((r,k)=>r.classList.toggle('on',t> (k+.3)/rows.length));
+    }
+  }
+});
+</script>
+</body></html>

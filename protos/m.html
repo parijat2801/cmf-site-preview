@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Manifesto — real copy in the collage</title>
+<style>
+@font-face{font-family:'NHG';src:url('../fonts/NeueHaasDisplayLight.ttf') format('truetype');font-weight:300;font-display:swap}
+@font-face{font-family:'NHG';src:url('../fonts/NeueHaasDisplayRoman.ttf') format('truetype');font-weight:400;font-display:swap}
+@font-face{font-family:'NHG';src:url('../fonts/NeueHaasDisplayMediu.ttf') format('truetype');font-weight:500;font-display:swap}
+@font-face{font-family:'NHG';src:url('../fonts/NeueHaasDisplayBlack.ttf') format('truetype');font-weight:900;font-display:swap}
+@font-face{font-family:'NHG';src:url('../fonts/NeueHaasDisplayThinItalic.ttf') format('truetype');font-weight:200;font-style:italic;font-display:swap}
+:root{--ink:#231F20;--cream:#E7E1D4;--white:#fff;--red:#DB1A21;--yellow:#FFDD00;
+  --gutter:clamp(20px,4vw,64px);--font:'NHG','Helvetica Neue',Arial,sans-serif;--ease:cubic-bezier(.16,1,.3,1)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--red);color:var(--cream);line-height:1.02;overflow-x:hidden}
+.note{position:fixed;top:10px;left:10px;z-index:99;font-size:11px;letter-spacing:.14em;text-transform:uppercase;opacity:.6;color:#fff}
+.scrollcue{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.4;color:#fff}
+.pre{height:50vh;display:flex;align-items:flex-end;padding:0 var(--gutter) 4vh;background:var(--ink)}
+.pre p{font-size:clamp(1rem,1.4vw,1.5rem);font-weight:300;opacity:.4;max-width:30ch}
+.rise{opacity:0;transform:translateY(34px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
+.rise.on{opacity:1;transform:none}
+
+/* ---------- COLLAGE: the 3 "Where" chant lines as photo-beats ----------
+   The RED field is the frame: .collage is red, the .panel is an inset dark block
+   with side margins, so the red shows as thick bands on the left and right (and
+   top/bottom) framing the whole collage — the signature of the reference. */
+.collage{position:relative;background:var(--red);padding:clamp(30px,6vh,80px) 0 clamp(40px,8vh,110px)}
+.panel{position:relative;background:var(--ink);overflow:visible;
+  margin:0 clamp(30px,8vw,120px);padding:clamp(30px,4vw,56px) clamp(28px,4vw,60px) clamp(50px,8vh,120px)}
+.eyebrow{font-weight:500;letter-spacing:.16em;text-transform:uppercase;font-size:clamp(.6rem,.75vw,.8rem);
+  color:#fff;text-decoration:underline;text-underline-offset:3px;line-height:1.7;margin-bottom:1.4em;max-width:30ch}
+/* image layer (below) */
+.imglayer{position:absolute;inset:0;z-index:1;pointer-events:none}
+.ph{position:absolute;box-shadow:0 16px 46px rgba(0,0,0,.5);overflow:hidden}
+.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.ph1{right:-9%;top:15%;width:44%;aspect-ratio:3/2}
+.ph2{left:-12%;top:42%;width:30%;aspect-ratio:3/4}
+.ph3{right:-8%;top:68%;width:40%;aspect-ratio:4/5}
+/* text layer (on top) — the 3 "Where" lines, each with a short gloss (body slot).
+   The gloss fills the beat the way the reference's paragraphs did — that pairing
+   is what makes the collage read tight rather than sparse. */
+.txtlayer{position:relative;z-index:2}
+.beat h3{font-weight:900;color:var(--red);letter-spacing:-.03em;line-height:.86;font-size:clamp(2.4rem,7.5vw,6rem)}
+.beat p{margin-top:.9em;font-weight:400;color:var(--cream);font-size:clamp(.9rem,1.12vw,1.2rem);opacity:.94;line-height:1.38;max-width:32ch}
+.wl1{max-width:60%}
+.wl1 h3{max-width:9ch}
+.wl2{max-width:72%;margin-left:auto;text-align:right;margin-top:clamp(140px,22vh,300px)}
+.wl2 p{display:inline-block;text-align:left;margin-left:auto}
+.wl3{max-width:66%;margin-top:clamp(120px,20vh,260px)}
+.wl3 h3{max-width:11ch}
+
+/* ---------- ANSWER: full-width resolve, no photo ----------
+   Sits inside the same red frame as the collage above: the section is red, an
+   inset dark block holds the copy, so the red bands run continuously down the
+   sides from the collage through the answer into the four-types below. */
+.answer{background:var(--red);padding:0}
+.answer .inset{background:var(--ink);margin:0 clamp(30px,8vw,120px);padding:clamp(50px,10vh,140px) clamp(28px,4vw,60px) clamp(40px,8vh,110px)}
+.answer .a1{font-weight:900;letter-spacing:-.03em;line-height:1.0;font-size:clamp(1.8rem,4.6vw,4.4rem);max-width:20ch}
+.answer .a1 .mk{background:linear-gradient(transparent 58%,var(--red) 0);padding:0 .05em}
+.answer .a2{margin-top:.7em;font-weight:300;font-size:clamp(1.2rem,2.4vw,2.3rem);opacity:.9;max-width:30ch;line-height:1.2}
+
+/* ---------- THE FOUR TYPES — filmstrip reel (from proto C3) ----------
+   A horizontal reel of the four; the active card enlarges with its face +
+   question as you scroll through the pin. Previews the Brigade grid that follows. */
+/* the four-types section continues the red frame: the section is red, and the
+   sticky stage's dark interior is inset with side margins so the same red bands
+   run down the edges — collage + answer + reel read as one framed red unit. */
+.unite{position:relative;background:var(--red)}
+.ustage{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;justify-content:center;overflow:hidden;
+  background:var(--ink);margin:0 clamp(30px,8vw,120px);padding:0 clamp(28px,4vw,60px)}
+.uhead{font-weight:200;font-style:italic;font-size:clamp(1.3rem,2.6vw,2.4rem);opacity:.6;margin-bottom:clamp(16px,3vh,36px)}
+.reel{display:flex;gap:clamp(12px,1.5vw,24px);align-items:stretch}
+.card{position:relative;flex:1 1 0;height:min(58vh,560px);background:#1B1818;overflow:hidden;
+  filter:grayscale(.15) brightness(.5);transition:filter .6s var(--ease),flex-grow .6s var(--ease)}
+.card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 28%}
+.card .cap{position:absolute;left:0;right:0;bottom:0;padding:clamp(14px,2vw,26px);z-index:2;
+  background:linear-gradient(0deg,rgba(35,31,32,.9),transparent)}
+.card h4{font-weight:900;letter-spacing:-.03em;line-height:.95;font-size:clamp(1rem,1.6vw,1.9rem)}
+.card .q{font-weight:300;font-size:clamp(.85rem,1.05vw,1.15rem);opacity:0;max-height:0;overflow:hidden;transition:opacity .5s,max-height .5s}
+.card.active{filter:none;flex-grow:2.6}
+.card.active h4{font-size:clamp(1.6rem,2.6vw,3rem)}
+.card.active .q{opacity:.85;max-height:4em;margin-top:.4em}
+@media(max-width:760px){.card{height:44vh}.card h4{font-size:clamp(.85rem,3.5vw,1.2rem)}.card.active{flex-grow:3.4}}
+.post{height:60vh;display:flex;align-items:center;padding:0 var(--gutter);background:var(--ink)}
+.post p{opacity:.4;font-size:clamp(1rem,1.4vw,1.5rem)}
+@media(max-width:760px){
+  .panel{margin:0 14px}
+  .wl1,.wl2,.wl3{max-width:100%;text-align:left;margin-left:0}
+  .wl2,.wl3{margin-top:clamp(70px,14vh,140px)}
+  .ph1,.ph2,.ph3{width:72%}.ph2{left:auto;right:-6%}
+}
+</style></head>
+<body>
+<div class="note">MANIFESTO · our copy in the collage — chant beats → answer → four types</div>
+<div class="scrollcue">scroll ↓</div>
+<div class="pre"><p>[ hero ends: “We are Cultural (Mis)fits.” ]</p></div>
+
+<!-- CHANT as the 3 photo-beats -->
+<section class="collage">
+  <div class="panel">
+    <div class="imglayer">
+      <figure class="ph ph1 rise"><img src="../assets/collage/blur.png" alt=""></figure>
+      <figure class="ph ph2 rise"><img src="../assets/collage/arcade.png" alt=""></figure>
+      <figure class="ph ph3 rise"><img src="../assets/collage/banana.png" alt=""></figure>
+    </div>
+    <div class="txtlayer">
+      <div class="beat wl1 rise"><h3>Where new languages are formed.</h3><p>Slang, sound, and syntax the mainstream hasn't caught up to yet.</p></div>
+      <div class="beat wl2 rise"><h3>Where new aesthetics are tested.</h3><p>Looks and worlds tried on in public, long before they trend.</p></div>
+      <div class="beat wl3 rise"><h3>Where new truths are spoken.</h3><p>The things people actually mean, said out loud without translation.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ANSWER resolve — bent (Idea 3) so it hands into "uniting…" -->
+<section class="answer">
+  <div class="inset">
+    <div class="a1 rise">Mainstream or niche — a space to be <span class="mk">seen, understood, and valued.</span></div>
+    <div class="a2 rise">Where creativity, connection, and progress start by uniting…</div>
+  </div>
+</section>
+
+<!-- FOUR TYPES — filmstrip reel (C3) -->
+<section class="unite" id="unite">
+  <div class="ustage">
+    <div class="reel" id="reel">
+      <figure class="card" data-card><img src="../assets/brigade/3.png" alt=""><figcaption class="cap"><h4>The Curious</h4><div class="q">Do you ask why and how, more than what?</div></figcaption></figure>
+      <figure class="card" data-card><img src="../assets/brigade/2.png" alt=""><figcaption class="cap"><h4>The Expressive</h4><div class="q">Do you introduce yourself through music, fashion, and memes?</div></figcaption></figure>
+      <figure class="card" data-card><img src="../assets/brigade/9.png" alt=""><figcaption class="cap"><h4>The Culturally Fluid</h4><div class="q">Do you live with contradictions and still feel whole?</div></figcaption></figure>
+      <figure class="card" data-card><img src="../assets/brigade/7.png" alt=""><figcaption class="cap"><h4>The Misfit</h4><div class="q">Are you tired of one-size-fits-all narratives?</div></figcaption></figure>
+    </div>
+  </div>
+  <div style="height:420vh"></div>
+</section>
+
+<div class="post"><p>[ next: The Misfits Brigade — the artists ]</p></div>
+
+<script src="../vendor/gsap.min.js"></script>
+<script src="../vendor/ScrollTrigger.min.js"></script>
+<script src="../vendor/lenis.min.js"></script>
+<script>
+const lenis=new Lenis({lerp:.11}); lenis.on('scroll',ScrollTrigger.update);
+gsap.ticker.add(t=>lenis.raf(t*1000)); gsap.ticker.lagSmoothing(0);
+gsap.registerPlugin(ScrollTrigger);
+document.querySelectorAll('.rise').forEach(el=>ScrollTrigger.create({trigger:el,start:'top 88%',onEnter:()=>el.classList.add('on')}));
+
+/* filmstrip reel: active card enlarges as you scroll through the pin */
+const cards=[...document.querySelectorAll('[data-card]')];let curCard=-1;
+function active(i){ if(i===curCard)return; curCard=i; cards.forEach((c,k)=>c.classList.toggle('active',k===i)); }
+ScrollTrigger.create({trigger:'#unite',start:'top top',end:'bottom bottom',scrub:.5,
+  onUpdate:self=>active(Math.min(3,Math.floor(self.progress*4)))});
+active(0);
+</script>
+</body></html>

@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Manifesto→Audience · Option C</title>
+<style>
+@font-face{font-family:'NHG';src:url('../fonts/NeueHaasDisplayLight.ttf') format('truetype');font-weight:300;font-display:swap}
+@font-face{font-family:'NHG';src:url('../fonts/NeueHaasDisplayBlack.ttf') format('truetype');font-weight:900;font-display:swap}
+@font-face{font-family:'NHG';src:url('../fonts/NeueHaasDisplayThinItalic.ttf') format('truetype');font-weight:200;font-style:italic;font-display:swap}
+:root{--ink:#231F20;--cream:#E7E1D4;--white:#fff;--red:#DB1A21;--yellow:#FFDD00;
+  --gutter:clamp(24px,6vw,120px);--font:'NHG','Helvetica Neue',Arial,sans-serif;--ease:cubic-bezier(.16,1,.3,1)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--ink);color:var(--cream);line-height:1.05;overflow-x:hidden}
+.note{position:fixed;top:14px;left:14px;z-index:99;font-size:12px;letter-spacing:.15em;text-transform:uppercase;opacity:.5}
+.pre{height:60vh;display:flex;align-items:flex-end;padding:0 var(--gutter) 4vh}
+.pre p{font-size:clamp(1rem,1.4vw,1.5rem);font-weight:300;opacity:.5;max-width:30ch}
+.scrollcue{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);font-size:11px;letter-spacing:.2em;text-transform:uppercase;opacity:.4}
+/* movement 1+2: the manifesto, a plain scroll block (not pinned) */
+.man{padding:20vh var(--gutter)}
+.man .l{font-weight:900;letter-spacing:-.03em;line-height:1.02;font-size:clamp(1.6rem,4.2vw,4rem);
+  opacity:0;transform:translateY(30px);transition:opacity .8s var(--ease),transform .8s var(--ease)}
+.man .l.on{opacity:1;transform:none}
+.man .w{color:var(--red)}
+.man .small{font-weight:300;font-size:clamp(1.15rem,2.4vw,2.2rem);margin-top:.5em;max-width:28ch}
+.man .mk{background:linear-gradient(transparent 60%,rgba(255,221,0,.9) 0);padding:0 .05em}
+/* movement 3: uniting — each name arrives WITH its face (pins, steps) */
+.unite{position:relative}
+.ustage{position:sticky;top:0;height:100vh;display:grid;grid-template-columns:1fr 1fr;align-items:center;
+  gap:clamp(24px,4vw,80px);padding:0 var(--gutter);overflow:hidden}
+.uphotos{position:relative;aspect-ratio:4/5;width:min(100%,52vh);justify-self:end;background:#1B1818;overflow:hidden}
+.uphotos img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.82);
+  opacity:0;transform:scale(1.05);transition:opacity .7s var(--ease),transform .9s var(--ease)}
+.uphotos img.on{opacity:1;transform:none}
+.utext .u{font-weight:200;font-style:italic;font-size:clamp(1.3rem,2.6vw,2.4rem);opacity:.55;margin-bottom:.4em}
+.uname{position:relative;height:1.15em}
+.uname h3{position:absolute;left:0;top:0;font-weight:900;letter-spacing:-.03em;line-height:1;
+  font-size:clamp(2rem,6vw,6rem);opacity:0;transform:translateY(.2em);transition:opacity .5s var(--ease),transform .5s var(--ease)}
+.uname h3.on{opacity:1;transform:none}
+.uq{margin-top:1em;font-weight:300;font-size:clamp(1rem,1.5vw,1.5rem);opacity:0;max-width:26ch;transition:opacity .5s var(--ease)}
+.uq.on{opacity:.8}
+.post{height:80vh;display:flex;align-items:center;padding:0 var(--gutter)}
+.post p{opacity:.4;font-size:clamp(1rem,1.4vw,1.5rem)}
+@media(max-width:760px){.ustage{grid-template-columns:1fr;gap:24px}.uphotos{width:min(70%,40vh);justify-self:start}}
+</style></head>
+<body>
+<div class="note">Option C · manifesto scrolls, then each name arrives with its face (pre-warms the Brigade)</div>
+<div class="scrollcue">scroll ↓</div>
+
+<div class="pre"><p>[ hero ends: “We are Cultural (Mis)fits.” ]</p></div>
+
+<section class="man" id="man">
+  <div class="l" data-l>Where new <span class="w">languages</span> are formed.</div>
+  <div class="l" data-l>Where new <span class="w">aesthetics</span> are tested.</div>
+  <div class="l" data-l>Where new <span class="w">truths</span> are spoken.</div>
+  <div class="l small" data-l>Mainstream or niche — a space to be <span class="mk">seen, understood, and valued.</span></div>
+  <div class="l small" data-l>Where misfits unite to drive the engine of creativity, connection, and progress —</div>
+</section>
+
+<section class="unite" id="unite">
+  <div class="ustage">
+    <div class="utext">
+      <div class="u">uniting</div>
+      <div class="uname">
+        <h3 data-name>The Curious</h3>
+        <h3 data-name>The Expressive</h3>
+        <h3 data-name>The Culturally Fluid</h3>
+        <h3 data-name>The Misfit</h3>
+      </div>
+      <div class="uq" data-q>Do you ask why and how, more than what?</div>
+    </div>
+    <div class="uphotos">
+      <img data-p src="../assets/brigade/3.png" alt="">
+      <img data-p src="../assets/brigade/2.png" alt="">
+      <img data-p src="../assets/brigade/9.png" alt="">
+      <img data-p src="../assets/brigade/7.png" alt="">
+    </div>
+  </div>
+  <div style="height:360vh"></div>
+</section>
+
+<div class="post"><p>[ next: The Misfits Brigade — the artists ]</p></div>
+
+<script src="../vendor/gsap.min.js"></script>
+<script src="../vendor/ScrollTrigger.min.js"></script>
+<script src="../vendor/lenis.min.js"></script>
+<script>
+const lenis=new Lenis({lerp:.11}); lenis.on('scroll',ScrollTrigger.update);
+gsap.ticker.add(t=>lenis.raf(t*1000)); gsap.ticker.lagSmoothing(0);
+gsap.registerPlugin(ScrollTrigger);
+
+// manifesto lines: simple reveal on enter
+document.querySelectorAll('[data-l]').forEach(el=>{
+  ScrollTrigger.create({trigger:el,start:'top 82%',onEnter:()=>el.classList.add('on')});
+});
+
+// uniting: 4 names, each with its face + question, stepped through the pin
+const names=[...document.querySelectorAll('[data-name]')];
+const photos=[...document.querySelectorAll('[data-p]')];
+const q=document.querySelector('[data-q]');
+const QS=['Do you ask why and how, more than what?',
+          'Music, fashion and memes to introduce yourself?',
+          'Live with contradictions — and OK with it?',
+          'Tired of one-size-fits-all narratives?'];
+function step(i){
+  names.forEach((n,k)=>n.classList.toggle('on',k===i));
+  photos.forEach((p,k)=>p.classList.toggle('on',k===i));
+  q.textContent=QS[i]; q.classList.add('on');
+}
+ScrollTrigger.create({
+  trigger:'#unite', start:'top top', end:'bottom bottom', scrub:.5,
+  onUpdate:self=>{ const i=Math.min(3,Math.floor(self.progress*4)); step(i); }
+});
+step(0);
+</script>
+</body></html>
