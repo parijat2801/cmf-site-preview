@@ -89,7 +89,10 @@ body.no-grain::after{opacity:0}
   clip-path:polygon(0 6%,100% 0,100% 94%,0 100%)}
 .reveal.in .mark::before{transform:scaleX(1)}
 .reveal.in .mark{color:var(--ink)}
-@media(prefers-reduced-motion:reduce){.mark::before{transform:scaleX(1)}.mark{color:var(--ink)}}
+/* .mark-w keeps the highlighted TEXT white (over a red highlight) instead of the
+   default dark ink — used where white-on-red reads better than ink-on-red. */
+.reveal.in .mark.mark-w,.mark.mark-w{color:var(--white)}
+@media(prefers-reduced-motion:reduce){.mark::before{transform:scaleX(1)}.mark{color:var(--ink)}.mark.mark-w{color:var(--white)}}
 
 /* ============ NAV — themed per card, auto-hides on scroll down ============ */
 .nav{position:fixed;top:0;left:0;right:0;z-index:900;display:flex;align-items:center;justify-content:space-between;
@@ -617,7 +620,7 @@ body.no-grain::after{opacity:0}
        Names are PLACEHOLDER until the client supplies the real roster. -->
   <section class="card dark misfits tall" id="misfits" data-nav="dark" data-navbg="#231F20">
     <div class="wrap">
-      <h2 class="head reveal d1" data-m>The Misfits <span class="mark" style="--hl:var(--red)">Brigade</span></h2>
+      <h2 class="head reveal d1" data-m>The Misfits <span class="mark mark-w" style="--hl:var(--red)">Brigade</span></h2>
       <p class="klabel reveal d1" data-m>Our Artists</p>
       <!-- CONFIGURABLE ROSTER: uniform, repeating .mcell blocks (the shape TinaCMS
            will bind to later). To add an artist, copy one block and set its photo,
@@ -667,7 +670,7 @@ body.no-grain::after{opacity:0}
   <!-- OFFERINGS — ink field; pillar accents from the PRIMARIES: red / yellow / green. -->
   <section class="card dark offerings tall" id="offerings" data-nav="dark" data-navbg="#231F20">
     <div class="wrap">
-      <h2 class="head reveal d1" data-m style="margin-bottom:clamp(30px,4vw,64px)">How does Cultural (Mis)fits bring these <span class="mark" style="--hl:var(--red)">narratives</span> to you?</h2>
+      <h2 class="head reveal d1" data-m style="margin-bottom:clamp(30px,4vw,64px)">How does Cultural (Mis)fits bring these <span class="mark mark-w" style="--hl:var(--red)">narratives</span> to you?</h2>
 
       <article class="offer reveal" id="culturist-network" style="--co:var(--red)">
         <div class="oshot" data-photos="assets/offer/net-1.webp,assets/offer/net-2.webp,assets/offer/net-3.webp">
