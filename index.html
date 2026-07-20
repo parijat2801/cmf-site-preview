@@ -73,7 +73,7 @@ body.no-grain::after{opacity:0}
 /* editorial reveals — fade + rise + stagger on enter */
 .reveal{opacity:0;transform:translateY(34px);transition:opacity var(--dur) var(--ease),transform var(--dur) var(--ease)}
 .reveal.in{opacity:1;transform:none}
-.reveal.d1{transition-delay:.1s}.reveal.d2{transition-delay:.2s}.reveal.d3{transition-delay:.3s}.reveal.d4{transition-delay:.4s}
+.reveal.d1{transition-delay:.1s}.reveal.d2{transition-delay:.2s}.reveal.d3{transition-delay:.3s}.reveal.d4{transition-delay:.4s}.reveal.d5{transition-delay:.5s}
 @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
 
 /* ============================================================
@@ -552,16 +552,25 @@ body.no-grain::after{opacity:0}
   padding-bottom:.1em;transition:opacity .5s var(--ease)}
 .fb-write a:hover{opacity:.6}
 
-/* ============ CALLING EVERYBODY — ink field; hairline-ruled address list ============ */
-.ce-list{margin-top:calc(clamp(28px,5vh,60px)*var(--fz))}
-.ce-row{border-top:var(--hair) solid rgba(231,225,212,.28);padding-block:calc(clamp(16px,2.8vh,36px)*var(--fz))}
-.ce-row:last-child{border-bottom:var(--hair) solid rgba(231,225,212,.28)}
-.ce-row p{font-weight:900;letter-spacing:-.02em;line-height:1.06;max-width:26ch;
+/* ============ WE WORK WITH — red field, black poster-weight list (matches
+   the Work/Acts section's red treatment; text is near-black for max
+   contrast, not cream, per the reference). ============ */
+.ww-head{font-weight:900;letter-spacing:-.03em;line-height:.94;color:var(--ink);
+  font-size:calc(var(--t-head)*var(--fz));max-width:18ch}
+.ww-list{margin-top:calc(clamp(28px,5vh,60px)*var(--fz))}
+.ww-row{display:flex;gap:clamp(14px,2.2vw,32px);align-items:baseline;
+  border-top:var(--hair) solid rgba(35,31,32,.35);padding-block:calc(clamp(18px,3vh,40px)*var(--fz))}
+.ww-row:last-child{border-bottom:var(--hair) solid rgba(35,31,32,.35)}
+.ww-no{flex:0 0 auto;font-weight:500;letter-spacing:.05em;color:var(--ink);opacity:.55;
+  font-size:var(--t-label);font-variant-numeric:tabular-nums}
+.ww-row p{color:var(--ink);font-weight:400;opacity:.7;line-height:1.2;max-width:34ch;
   font-size:calc(clamp(1.3rem,min(3vw,4vh),2.6rem)*var(--fz))}
-.ce-write{margin-top:calc(clamp(24px,4vh,48px)*var(--fz));font-weight:500;font-size:var(--t-body)}
-.ce-write a{color:var(--red);text-decoration:none;border-bottom:var(--hair) solid currentColor;
-  padding-bottom:.1em;transition:opacity .5s var(--ease)}
-.ce-write a:hover{opacity:.6}
+.ww-row p b{font-weight:900;font-style:normal;opacity:1}
+.ww-row p i{font-weight:900;font-style:italic;opacity:1}
+@media(max-width:760px){
+  .ww-row{gap:10px}
+  .ww-no{flex-basis:2.4em}
+}
 </style>
 </head>
 <body>
@@ -833,18 +842,17 @@ body.no-grain::after{opacity:0}
 
   <!-- CALLING EVERYBODY — ink field; hairline-ruled address list, same
        register as the audience reel above. -->
-  <section class="card dark calling tall" id="calling" data-nav="dark" data-navbg="#231F20">
+  <section class="card red calling tall" id="calling" data-nav="dark" data-navbg="#DB1A21">
     <div class="wrap">
-      <h2 class="head reveal d1" data-m>We're building a <span class="mark" style="--hl:var(--red)">Cultural Operating System</span> that moves forward with culture, with the help of those who don't conform.</h2>
+      <h2 class="ww-head reveal d1" data-m>We work with</h2>
 
-      <div class="ce-list">
-        <div class="ce-row reveal d1" data-m><p>Are you an Artist or Creator who wants to join the Misfit Brigade?</p></div>
-        <div class="ce-row reveal d2" data-m><p>Are you a Brand who wants to build Cultural Fluency?</p></div>
-        <div class="ce-row reveal d2" data-m><p>Are you a Media Partner or Agency who believes that Misfits are a big deal?</p></div>
-        <div class="ce-row reveal d3" data-m><p>Are you a Community that is tired of stories that keep flattening you?</p></div>
-        <div class="ce-row reveal d3" data-m><p>Are you Anyone who feels the way we feel about Misfits?</p></div>
+      <div class="ww-list">
+        <div class="ww-row reveal d1" data-m><span class="ww-no">01.</span><p><b>Brands</b> who want to <i>participate in culture,</i> not interrupt it.</p></div>
+        <div class="ww-row reveal d2" data-m><span class="ww-no">02.</span><p><b>Creators &amp; Artists</b> who have something <i>real to say.</i></p></div>
+        <div class="ww-row reveal d3" data-m><span class="ww-no">03.</span><p><b>Media partners</b> who want to <i>reach audiences</i> that resist being reached.</p></div>
+        <div class="ww-row reveal d4" data-m><span class="ww-no">04.</span><p><b>Communities</b> who are <i>tired of stories that flatten them.</i></p></div>
+        <div class="ww-row reveal d5" data-m><span class="ww-no">05.</span><p><b>Partners</b> who understand that <i>culture is an economic force.</i></p></div>
       </div>
-      <p class="ce-write reveal d4" data-m>Write to us at <a href="mailto:hello@culturalmisfits.com">hello@culturalmisfits.com</a></p>
     </div>
   </section>
 
