@@ -136,20 +136,15 @@ body.no-grain::after{opacity:0}
 .hero::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
   background:linear-gradient(95deg,rgba(0,0,0,.9) 0%,rgba(0,0,0,.68) 34%,rgba(0,0,0,.25) 62%,rgba(0,0,0,.5) 100%)}
 .hero .content{position:relative;z-index:10;display:block;flex:1;
-  align-items:center;text-align:center;padding-top:clamp(70px,8vh,120px)}
+  align-items:flex-start;text-align:left;padding-top:clamp(70px,8vh,120px)}
 /* the three beats stack in ONE slot so they crossfade in place — no layout
    shift as they swap. The slot reserves height (the tallest beat) via a grid:
    all beats occupy cell 1/1, only .on is opaque. */
-/* all 3 lines are ALWAYS visible, stacked vertically. The ACTIVE line (.on) is
-   big + bright; the other two stay small + dimmed. Scroll moves which line is
-   .on, so the "big" focus travels down the stack (line1→line2→line3). */
-.hero .hstage{position:relative;display:flex;flex-direction:column;justify-content:center;
-  min-height:62vh;gap:clamp(10px,1.4vw,22px);text-align:center}
-.hero .hbeat{width:100%;max-width:none;text-align:center;
-  transform:scale(.44);transform-origin:center;      /* inactive = smaller, NOT dimmed */
-  transition:transform .55s var(--ease);
-  will-change:transform}
-.hero .hbeat.on{transform:scale(1)}
+.hero .hstage{position:relative;display:grid;min-height:52vh;align-content:center}
+.hero .hbeat{grid-area:1/1;align-self:center;max-width:none;
+  opacity:0;transform:translateY(10px);transition:opacity .35s var(--ease),transform .35s var(--ease);
+  will-change:opacity}
+.hero .hbeat.on{opacity:1;transform:none}
 /* PHOSPHOR PERSISTENCE: when a beat is replaced it doesn't cut or slide — it
    stays PUT (transform:none overrides the base 10px drop), glyphs stay lit, and
    its opacity + brightness are driven frame-by-frame BY JS (render()), not a CSS
@@ -238,8 +233,6 @@ body.no-grain::after{opacity:0}
 @keyframes pull{0%,100%{transform:scaleX(.35);transform-origin:left;opacity:.4}50%{transform:scaleX(1);opacity:1}}
 /* CRT overlays — hero only. "Late-night broadcast", not video-game glitch. */
 .tv{position:absolute;inset:0;pointer-events:none;z-index:11}
-/* CRT toggle: .hero.crt-off (set from JS via CRT_ON) hides the whole overlay + flash */
-.hero.crt-off .tv,.hero.crt-off .flash{display:none}
 .tv .scan{position:absolute;inset:0;opacity:.3;mix-blend-mode:multiply;background:repeating-linear-gradient(to bottom,rgba(0,0,0,0) 0 2px,rgba(0,0,0,.22) 2px 3px)}
 .tv .roll{position:absolute;left:0;right:0;top:0;height:26vh;opacity:.5;background:linear-gradient(to bottom,rgba(255,255,255,0),rgba(255,255,255,.05) 50%,rgba(255,255,255,0));animation:rollmove 7s linear infinite;will-change:transform}
 @keyframes rollmove{0%{transform:translateY(-30vh)}100%{transform:translateY(130vh)}}
@@ -1439,7 +1432,7 @@ if(!reduce){
            top-aligned would clip whatever hangs below the fold. */
         talls[i]=card.offsetHeight>vh()+2;
         let d;
-        if(card.classList.contains('hero')) d=vh()*1.6;   // scroll room for the 3-line sequence (~0.53 screen/line); tune by feel
+        if(card.classList.contains('hero')) d=vh()*0.5;   // short hold; scroll releases to the manifesto collage
         else if(card.classList.contains('for-brands')) d=vh()*1.8;  // hold long enough for the chart choreography (~3s) so a fast scroll can't skip it
         else{
           const lines=measureLines(card);
@@ -1455,11 +1448,6 @@ if(!reduce){
     }
     computeAll();
     ScrollTrigger.addEventListener('refreshInit',computeAll);
-
-    /* hero line-sequence hook: the hero pin's onUpdate calls this with its 0..1
-       progress. Assigned real logic by the hero engine below; no-op until then
-       (and on non-hero setups / reduced motion). Kept in the pin's coord space. */
-    let heroProgress=()=>{};
 
     /* pins: dwell solo, then one viewport of being covered */
     cards.forEach((card,i)=>{
@@ -1485,7 +1473,6 @@ if(!reduce){
            its dwell, then releases (pinSpacing:true reserves exactly that room). */
         end:()=>heroPin?'+='+dwells[i]:'+='+(dwells[i]+(talls[i]?vh():card.offsetHeight)),
         pin:true,pinSpacing:heroPin,invalidateOnRefresh:true,
-        onUpdate:heroPin?(self=>heroProgress(self.progress)):undefined,  // hero: scroll → line index
       });
       if(heroPin) spacers[i].style.height='0px';   // no double-count: pinSpacing reserves the room
       if(card.id)anchorTargets[card.id]=()=>talls[i]?st.start-(card.offsetHeight-vh()):st.start;
@@ -1499,44 +1486,165 @@ if(!reduce){
       });
     });
 
-    /* HERO — scroll-driven line sequence. Three lines (.hbeat) occupy one slot;
-       exactly ONE is active (big + centered) at a time. Scrolling through the
-       hero's pinned range promotes the next line: current shrinks + fades out,
-       next grows + fades in. A GSAP scrub maps pin-progress → line index.
-       (Replaced the old CRT typewriter/idle-timer beat engine.)
-       NOTE: keep .hbeat/.hstage/.ph/.mis + the .on toggle — vendor/hero-balloon.js
-       reads those to build its (currently invisible) reflection textures. */
-    /* CRT overlay toggle — flip to false to hide scanlines/vignette/roll+flash. */
-    const CRT_ON = true;
-    document.querySelector('.hero')?.classList.toggle('crt-off', !CRT_ON);
-
+    /* hero: three beats crossfade in one slot. TWO drivers, but only ONE is
+       ever live. State is a single index via show(n) — idempotent, so double
+       calls can't flicker.
+         1) idle auto-advance: a setTimeout chain steps 0→1→2 then STOPS, so a
+            reader who never scrolls still reaches the brand signature.
+         2) scroll: a pinned scrub maps scroll position → beat with snap.
+       The FIRST real scroll kills the timer forever (killed=true); from then
+       the scrub owns state. The scrub's onUpdate is gated on `killed`, so
+       before the handoff the timer is the sole writer — the two never fight. */
     const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
     const hi=cards.findIndex(c=>c.classList.contains('hero'));
     const hbeats=gsap.utils.toArray('.hero .hbeat');
-    const N=hbeats.length;
 
-    // show exactly one line active; idempotent (no-op if unchanged).
-    let shownLine=-1;
-    function showLine(i){
-      i=Math.max(0,Math.min(N-1,i));
-      if(i===shownLine)return;
-      shownLine=i;
-      hbeats.forEach((b,j)=>b.classList.toggle('on',j===i));
-    }
+    /* wrap each beat's text in .hink, splitting every character into a .g span so
+       the reveal flows glyph-by-glyph through real inline layout (correct
+       line-by-line wrapping). We walk text nodes so the nested .mis span in beat
+       3 is preserved — its glyphs keep the red color. A caret rides the edge. */
+    const glyphs=new Map();                              // beat → [.g spans in order]
+    hbeats.forEach(b=>{
+      const ink=document.createElement('span'); ink.className='hink';
+      const gs=[];
+      const wrap=node=>{
+        [...node.childNodes].forEach(n=>{
+          if(n.nodeType===3){                            // text node → one .g per char
+            const frag=document.createDocumentFragment();
+            for(const ch of n.textContent){
+              if(ch===' '){                              // real breakable space, no span
+                frag.appendChild(document.createTextNode(' ')); continue;
+              }
+              const g=document.createElement('span'); g.className='g';
+              g.textContent=ch;
+              frag.appendChild(g); gs.push(g);
+            }
+            node.replaceChild(frag,n);
+          } else if(n.nodeType===1){ wrap(n); }          // element (.mis) → recurse, keep it
+        });
+      };
+      while(b.firstChild) ink.appendChild(b.firstChild);
+      wrap(ink);
+      if(gs.length) gs[gs.length-1].classList.add('last');   // caret home when done
+      glyphs.set(b,gs);
+      b.append(ink);
+    });
 
-    if(hi>-1 && hbeats.length && !reduce){
-      showLine(0);
-      document.getElementById('hscroll')?.classList.remove('took');   // keep scroll cue visible
-      // The hero's PIN trigger (created in the deck loop) drives the line index via
-      // heroProgress() — folding onUpdate into the pin keeps the scrub in the pin's
-      // own coordinate space (a separate trigger desynced after pinSpacing shifted
-      // coords). heroProgress is the hook the pin calls; here we give it real logic.
-      heroProgress=(p)=>showLine(Math.floor(p*N*0.999));
+    if(hi>-1 && !talls[hi] && hbeats.length && !reduce){
+      /* ---- SINGLE SOURCE OF TRUTH beat engine ----
+         Two earlier attempts leaked state (async animationend cleanup + class
+         juggling) and let beats stack. This model makes overlap STRUCTURALLY
+         impossible: one render() runs every frame; it first hard-clears EVERY
+         beat, then paints exactly ONE active beat (+ an optional decaying ghost).
+         There is no deferred cleanup to miss. State is just a few numbers:
+           active  – index of the beat that should be visible (-1 = none yet)
+           typeAt  – timestamp the active beat began typing (for the reveal)
+           ghost   – {i, at} of the beat currently phosphor-decaying, or null
+           killed  – handoff done; render locks to the signature forever         */
+      const meterEl=document.getElementById('hmeter');
+      const scrollCue=document.getElementById('hscroll');
+      const N=hbeats.length, SIG=N-1;
+      const TYPE_MS=n=>Math.min(3400,950+n*34);           // slower, more deliberate typing
+      const DECAY_MS=650, DWELL=3400;                     // longer hold on each beat before advancing
+      const dur=hbeats.map(b=>TYPE_MS((b.textContent||'').length));
+
+      let active=-1, typeAt=0, ghost=null, killed=false, timer=null, raf=0, meterAt=0;
+
+      // paint one beat: light the first `p` fraction of its glyphs, set opacity.
+      const paint=(b,i,p,op,decay)=>{
+        const gs=glyphs.get(b), lit=Math.round(p*gs.length);
+        // toggle('lit', j<lit) is a no-op for already-lit glyphs, so the per-glyph
+        // hot-phosphor "strike" animation fires exactly ONCE per glyph, on the frame
+        // it's first struck — never re-fires while it stays lit.
+        gs.forEach((g,j)=>g.classList.toggle('lit',j<lit));
+        b.classList.toggle('on',op>0);
+        b.classList.toggle('done',p>=1&&!decay);
+        b.classList.toggle('typing',p<1&&op>0&&!decay);
+        b.classList.toggle('decay',!!decay);
+        b.style.opacity=op<1?op.toFixed(3):'';            // JS-driven fade (no CSS anim to leak)
+      };
+      const clear=b=>{ paint(b,0,0,0,false); b.style.opacity=''; };
+
+      // the ONE render. Idempotent: clears all, then paints active (+ghost).
+      function render(now){
+        for(let i=0;i<N;i++){
+          const b=hbeats[i];
+          if(i===active){
+            const p=killed?1:Math.min(1,(now-typeAt)/dur[i]);
+            paint(b,i,p,1,false);
+          }else if(ghost&&ghost.i===i&&!killed){
+            const e=(now-ghost.at)/DECAY_MS;
+            if(e>=1){ ghost=null; clear(b); }
+            else{ const bloom=e<.14; paint(b,i,1,1-e,true);
+              b.style.filter=bloom?'brightness(1.9)':''; }
+          }else{
+            clear(b); b.style.filter='';
+          }
+        }
+      }
+      function loop(now){ render(now);
+        // keep looping while typing OR a ghost is decaying (not after kill's lock)
+        const b=hbeats[active];
+        const stillTyping=active>=0 && !killed && (now-typeAt)<dur[active];
+        if(stillTyping || ghost) raf=requestAnimationFrame(loop);
+      }
+      const kick=()=>{ cancelAnimationFrame(raf); raf=requestAnimationFrame(loop); };
+
+      // advance to beat n: the current active becomes the decaying ghost.
+      function go(n){
+        if(n===active)return;
+        if(active>=0) ghost={i:active, at:performance.now()};
+        active=n; typeAt=performance.now();
+        kick();
+      }
+
+      // idle auto-advance: type a beat, fill the meter over the dwell, advance.
+      function runMeter(onFull){ meterAt=performance.now(); scrollCue?.classList.remove('hint');
+        (function m(now){ if(killed)return;
+          const p=Math.min(1,(now-meterAt)/DWELL); meterEl?.style.setProperty('--mp',p.toFixed(3));
+          if(p<1) requestAnimationFrame(m); else onFull&&onFull();
+        })(performance.now());
+      }
+      const tick=()=>{ if(killed)return;
+        if(active<SIG){ go(active+1); runMeter(()=>{ if(!killed) timer=setTimeout(tick,50); }); }
+        else scrollCue?.classList.add('hint');
+      };
+
+      // beat 0 waits for the CRT power-on to finish (.content "open" anim → .settled)
+      const heroEl=document.querySelector('.hero');
+      const startBeats=()=>{ if(killed||active>-1)return;
+        go(0); timer=setTimeout(tick,DWELL); };
+      if(heroEl?.classList.contains('settled')){ startBeats(); }
+      else{
+        document.querySelector('.hero .content')?.addEventListener('animationend',startBeats,{once:true});
+        setTimeout(startBeats,1600);
+      }
+
+      // handoff: first real user scroll locks the signature FOREVER. render()'s
+      // killed branch forces active=SIG, opacity 1, no ghost — scroll-up re-pin
+      // can't resurrect anything because render always clears all-but-active.
+      const kill=()=>{ if(killed)return; killed=true;
+        if(timer){clearTimeout(timer);timer=null;}
+        ghost=null; active=SIG; scrollCue?.classList.add('took');
+        cancelAnimationFrame(raf); render(performance.now());   // one authoritative paint
+      };
+      ['wheel','touchmove','keydown'].forEach(ev=>
+        addEventListener(ev,e=>{ if(ev==='keydown'&&!['ArrowDown','PageDown',' ','Spacebar'].includes(e.key))return; kill(); },{passive:true,once:false}));
       anchorTargets['top']=()=>0;
-    }else if(hi>-1 && hbeats.length){
-      // reduced-motion: show every line, stacked (no scroll animation).
+    }else if(hi>-1 && hbeats.length && !reduce){
+      /* fallback (phones where the card is tall, or no scrub): no pin, no
+         timer. Un-grid the stage so the beats flow vertically (no overlap),
+         step them in with a stagger, and leave ALL visible so nothing is
+         stranded and nothing clips. Reduced-motion is CSS-only (all visible). */
       document.querySelector('.hero .hstage')?.classList.add('flowed');
-      hbeats.forEach(b=>b.classList.add('on'));
+      document.getElementById('hscroll')?.classList.add('took');   // no idle meter in flow mode
+      hbeats.forEach((b,i)=>{
+        b.classList.add('notype');                                 // ink shown full, no caret
+        gsap.to(b,{autoAlpha:1,y:0,duration:.7,ease:'power2.out',delay:.2+i*.5,
+          onStart:()=>b.classList.add('on')});
+      });
+    }else if(hi>-1 && hbeats.length){   // reduced-motion: every beat visible, full ink, no cue
+      hbeats.forEach(b=>b.classList.add('on','notype'));
       document.getElementById('hscroll')?.classList.add('took');
     }
 
