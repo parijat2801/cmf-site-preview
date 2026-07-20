@@ -634,9 +634,10 @@ body.no-grain::after{opacity:0}
 .fb-chart.in .fb-note{opacity:1;transform:rotate(-3deg)}
 .fb-note p{font-family:'Caveat',cursive;font-weight:600;line-height:1.02;letter-spacing:.01em;
   font-size:calc(clamp(1.25rem,2vw,1.75rem)*var(--fz));max-width:20ch;margin:0}
-/* arrow hangs off the note's bottom-left, sweeping down-left to "Cultural Leaders" */
-.fb-note-arrow{position:absolute;top:88%;left:-30%;
-  width:clamp(64px,7vw,104px);height:auto;color:var(--red);overflow:visible}
+/* arrow hangs off the note's bottom, sweeping down to "Cultural Leaders" just
+   below-left of the sentence */
+.fb-note-arrow{position:absolute;top:74%;left:-8%;
+  width:clamp(60px,6.5vw,96px);height:auto;color:var(--red);overflow:visible}
 .fb-note-arrow path{stroke-dasharray:220;stroke-dashoffset:220;
   transition:stroke-dashoffset .7s var(--ease) 3.7s}
 .fb-chart.in .fb-note-arrow path{stroke-dashoffset:0}
