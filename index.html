@@ -121,7 +121,8 @@ body.no-grain::after{opacity:0}
 /* ============ HERO (CRT) — video field, white type, red accent ============ */
 .hero{position:relative;isolation:isolate}
 /* background video — fills the card, sits under every other hero layer */
-.hero .hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;z-index:0;pointer-events:none}
+.hero .hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;z-index:0;pointer-events:none;
+  filter:grayscale(1) contrast(1.05)}   /* keep the balloon video B&W; the CRT .tv overlay sits on top */
 /* legibility scrim — darker on the left where the copy sits, lighter on the right */
 .hero::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
   background:linear-gradient(95deg,rgba(0,0,0,.9) 0%,rgba(0,0,0,.68) 34%,rgba(0,0,0,.25) 62%,rgba(0,0,0,.5) 100%)}
