@@ -53,6 +53,19 @@ html{-webkit-font-smoothing:antialiased}
 body{font-family:var(--font);background:var(--ink);color:var(--cream);line-height:1.1;overflow-x:hidden}
 img{display:block;max-width:100%}
 .wrap{padding-inline:var(--gutter);width:100%}
+/* ONE shared keyboard focus ring — :focus-visible only, so mouse/touch clicks
+   never show it. Brand-red outline with offset reads on dark/red/cream alike.
+   Covers nav links, .more/.fl "read more" links, .biglink CTA, footer links,
+   and the modal's prev/next/close controls. */
+.nav a:focus-visible,.more:focus-visible,.fl:focus-visible,.biglink:focus-visible,
+.foot .fnav a:focus-visible,.foot .lnx a:focus-visible,
+.varrows button:focus-visible,.vclose:focus-visible,
+[data-mfcard]:focus-visible{
+  outline:2px solid var(--red);outline-offset:3px;border-radius:2px}
+/* visually-hidden helper: keeps content in the accessibility tree without
+   showing it on screen (used for the modal's accessible name heading) */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0,0,0,0);white-space:nowrap;border:0}
 /* Film grain: pre-baked 128px noise tile. Normal blend + its own layer —
    no per-frame SVG turbulence compositing. */
 body::after{content:"";position:fixed;inset:0;z-index:8000;pointer-events:none;opacity:.05;
@@ -718,9 +731,9 @@ body.no-grain::after{opacity:0}
     <div class="mf-ustage">
       <div class="mf-uhead mf-rise">For every square hole, round peg and Misfit: tired of one-size-fits-all narratives?</div>
       <div class="mf-reel" id="mf-reel">
-        <figure class="mf-card" data-mfcard><img src="assets/traits/curious.jpg" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Curious</h4><div class="mf-q">Do you ask why and how, more than what?</div></figcaption></figure>
-        <figure class="mf-card" data-mfcard><img src="assets/traits/expressive.jpg" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Expressive</h4><div class="mf-q">Do you use music, fashion and memes to introduce yourself?</div></figcaption></figure>
-        <figure class="mf-card" data-mfcard><img src="assets/traits/culturally-fluid.jpg" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Culturally Fluid</h4><div class="mf-q">Do you live with contradictions — and are OK with it?</div></figcaption></figure>
+        <figure class="mf-card" data-mfcard tabindex="0" role="button"><img src="assets/traits/curious.jpg" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Curious</h4><div class="mf-q">Do you ask why and how, more than what?</div></figcaption></figure>
+        <figure class="mf-card" data-mfcard tabindex="0" role="button"><img src="assets/traits/expressive.jpg" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Expressive</h4><div class="mf-q">Do you use music, fashion and memes to introduce yourself?</div></figcaption></figure>
+        <figure class="mf-card" data-mfcard tabindex="0" role="button"><img src="assets/traits/culturally-fluid.jpg" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Culturally Fluid</h4><div class="mf-q">Do you live with contradictions — and are OK with it?</div></figcaption></figure>
       </div>
     </div>
     <div class="mf-reel-runway" aria-hidden="true"></div>
@@ -961,7 +974,8 @@ body.no-grain::after{opacity:0}
      detail copy + a misfits-style photo grid, populated per vertical. -->
 <div class="vmodal" id="vmodal" hidden>
   <div class="vscrim" data-close></div>
-  <article class="vpanel" role="dialog" aria-modal="true">
+  <article class="vpanel" role="dialog" aria-modal="true" aria-labelledby="vtitle" tabindex="-1">
+    <h2 class="sr-only" id="vtitle"></h2>
     <figure class="vfig"><img id="vimg" src="" alt="" decoding="async"></figure>
     <div class="vtextcol">
       <div class="vbody" id="vbody"></div>
@@ -1235,9 +1249,12 @@ const VERTICALS={
 };
 const vmodal=document.getElementById('vmodal');
 const vImg=document.getElementById('vimg'), vBody=document.getElementById('vbody');
+const vTitle=document.getElementById('vtitle');
+const vPanel=document.querySelector('.vpanel');
 const vPrev=document.getElementById('vprev'), vNext=document.getElementById('vnext');
 let lenisRef=null;   // set by the scroll engine; modal pauses it while open
 let vSlides=[], vAt=0;
+let vTrigger=null;   // element that opened the modal — focus returns here on close
 
 // render one slide: image on the left, its paragraphs on the right.
 function renderSlide(i){
@@ -1251,18 +1268,51 @@ function renderSlide(i){
   vNext.disabled=i>=vSlides.length-1;
   vmodal.classList.toggle('single',vSlides.length<=1);
 }
-function openVertical(id){
+// background inert: keeps Tab/AT from reaching the page behind the open modal.
+// Marks the fixed nav bar and the .deck content wrapper (siblings of #vmodal),
+// never the modal itself.
+function setBgInert(on){
+  document.querySelectorAll('#nav,#top').forEach(el=>{
+    if(!el)return;
+    if(on){ el.setAttribute('inert',''); el.setAttribute('aria-hidden','true'); }
+    else { el.removeAttribute('inert'); el.removeAttribute('aria-hidden'); }
+  });
+}
+function vFocusables(){
+  if(!vPanel)return [];
+  return [...vPanel.querySelectorAll('a[href],button:not(:disabled),[tabindex]:not([tabindex="-1"])')]
+    .filter(el=>el.offsetParent!==null);
+}
+function vTrapKeydown(e){
+  if(e.key!=='Tab')return;
+  const items=vFocusables(); if(!items.length)return;
+  const first=items[0], last=items[items.length-1];
+  if(e.shiftKey && document.activeElement===first){ e.preventDefault(); last.focus(); }
+  else if(!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); }
+}
+function openVertical(id,trigger){
   const v=VERTICALS[id]; if(!v)return;
+  vTrigger=trigger||document.activeElement;
   vmodal.style.setProperty('--vc',v.accent);
   vSlides=v.slides||[]; renderSlide(0);
+  if(vTitle) vTitle.textContent=document.getElementById(id)?.querySelector('h3')?.textContent||'';
   vmodal.hidden=false;
-  setTimeout(()=>vmodal.classList.add('open'),20);
+  setBgInert(true);
+  setTimeout(()=>{
+    vmodal.classList.add('open');
+    (vPanel?.querySelector('a[href],button:not(:disabled)')||vPanel)?.focus?.();
+  },20);
+  vPanel?.addEventListener('keydown',vTrapKeydown);
   lenisRef?.stop(); document.documentElement.style.overflow='hidden';
 }
 function closeVertical(){
   vmodal.classList.remove('open');
+  vPanel?.removeEventListener('keydown',vTrapKeydown);
+  setBgInert(false);
   lenisRef?.start(); document.documentElement.style.overflow='';
   setTimeout(()=>{vmodal.hidden=true;},450);
+  vTrigger?.focus?.();
+  vTrigger=null;
 }
 const vGo=d=>renderSlide(Math.max(0,Math.min(vSlides.length-1,vAt+d)));
 vPrev.addEventListener('click',()=>vGo(-1));
@@ -1270,7 +1320,7 @@ vNext.addEventListener('click',()=>vGo(1));
 document.querySelectorAll('.offer .more').forEach(a=>{
   if(a.hasAttribute('data-scroll'))return;         // this one scrolls to a section (handled by the anchor handler), not the modal
   const id=a.closest('.offer').id;
-  a.addEventListener('click',e=>{e.preventDefault();openVertical(id);});
+  a.addEventListener('click',e=>{e.preventDefault();openVertical(id,a);});
 });
 vmodal.addEventListener('click',e=>{ if(e.target.closest('[data-close]'))closeVertical(); });
 addEventListener('keydown',e=>{ if(vmodal.hidden)return;
@@ -1623,15 +1673,22 @@ if(!reduce){
         onUpdate:self=>mfActive(Math.min(mfCards.length-1,Math.floor(self.progress*mfCards.length))),
       });
       mfActive(0);
-      /* CLICKABLE: clicking a card scrolls to the position that makes it active,
-         so click and scroll stay in one source of truth (the scrub sets .active).
-         Each card owns the band [i/N, (i+1)/N) of the pin range; aim at its middle. */
+      /* CLICKABLE (+ keyboard-operable, since these are tabindex="0" figures):
+         activating a card scrolls to the position that makes it active,
+         so click/Enter/Space and scroll stay in one source of truth (the
+         scrub sets .active). Each card owns the band [i/N, (i+1)/N) of the
+         pin range; aim at its middle. */
+      const mfActivate=i=>{
+        const frac=(i+0.5)/mfCards.length;
+        const y=mfST.start + (mfST.end-mfST.start)*frac;
+        lenis.scrollTo(y,{duration:0.8});
+      };
       mfCards.forEach((card,i)=>{
         card.style.cursor='pointer';
-        card.addEventListener('click',()=>{
-          const frac=(i+0.5)/mfCards.length;
-          const y=mfST.start + (mfST.end-mfST.start)*frac;
-          lenis.scrollTo(y,{duration:0.8});
+        card.addEventListener('click',()=>mfActivate(i));
+        card.addEventListener('keydown',e=>{
+          if(e.key!=='Enter' && e.key!==' ' && e.key!=='Spacebar')return;
+          e.preventDefault(); mfActivate(i);
         });
       });
     } else if(mfReel){
