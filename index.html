@@ -307,11 +307,11 @@ body.no-grain::after{opacity:0}
 }
 
 /* ============ OFFERINGS — three pillars, hover auto-cycles the photos ============ */
-.offer{display:grid;grid-template-columns:1.05fr 1fr;gap:clamp(28px,4vw,88px);align-items:center;
+.offer{display:grid;grid-template-columns:1.35fr 1fr;gap:clamp(28px,4vw,88px);align-items:center;
   padding-block:clamp(24px,4vh,56px);border-top:var(--hair) solid rgba(231,225,212,.16)}
 /* the photo is capped against the WINDOW: 4/5 aspect × 46vh wide ≈ 57vh tall,
    so a full row (photo + text + padding) always fits one screen */
-.oshot{position:relative;aspect-ratio:4/5;width:min(100%,46vh);justify-self:start;overflow:hidden;user-select:none;background:#1B1818;--edge:var(--co)}
+.oshot{position:relative;aspect-ratio:1/1;width:min(100%,62vh);justify-self:start;overflow:hidden;user-select:none;background:#1B1818;--edge:var(--co)}
 .oshot::before{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;box-shadow:inset 0 0 0 0 var(--edge);transition:box-shadow .5s var(--ease)}
 .oshot:hover::before{box-shadow:inset 0 0 0 2px var(--edge)}
 .oshot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .6s var(--ease),transform var(--dur) var(--ease)}
@@ -330,6 +330,8 @@ body.no-grain::after{opacity:0}
 .offer .otext .onum{font-weight:900;font-style:italic;font-size:clamp(1.4rem,2vw,2.4rem);color:var(--co);line-height:1}
 .offer .otext h3{margin-top:.2em;font-weight:900;font-size:clamp(2rem,4.4vw,4.6rem);letter-spacing:-.03em;line-height:.92;color:var(--co)}
 .offer .otext p{margin-top:.9em;font-weight:300;font-size:var(--t-lead);opacity:.86;line-height:1.35;max-width:34ch}
+/* the lead's name at full Black weight (like the headers) — same size, more thickness */
+.offer .otext p .lead-name{font-weight:900}
 /* Film Studio partner list: a short "Partner with us to create:" lead-in and a
    hairline-marked list of offers, tinted with the pillar accent (--co). */
 .offer .otext p.partner{margin-top:1em;font-weight:500;opacity:.7;font-size:var(--t-body)}
@@ -674,7 +676,7 @@ body.no-grain::after{opacity:0}
   <!-- OFFERINGS — ink field; pillar accents from the PRIMARIES: red / yellow / green. -->
   <section class="card dark offerings tall" id="offerings" data-nav="dark" data-navbg="#231F20">
     <div class="wrap">
-      <h2 class="head reveal d1" data-m style="margin-bottom:clamp(30px,4vw,64px)">How does Cultural (Mis)fits bring these <span class="mark mark-w" style="--hl:var(--red)">narratives</span> to you?</h2>
+      <h2 class="head reveal d1" data-m style="margin-bottom:clamp(30px,4vw,64px)">How we bring these <span class="mark mark-w" style="--hl:var(--red)">narratives</span> to you.</h2>
 
       <article class="offer reveal" id="culturist-network" style="--co:var(--red)">
         <div class="oshot" data-photos="assets/offer/net-1.webp,assets/offer/net-2.webp,assets/offer/net-3.webp">
@@ -710,7 +712,7 @@ body.no-grain::after{opacity:0}
         <div class="otext" data-m>
           <div class="onum">03</div>
           <h3>Film Studio</h3>
-          <p>Led by <b>Nirvair Rai</b>, this production and narrative arm of the Cultural (Mis)fits ecosystem collaborates with brands, media, fashion, and CSR initiatives to create authentic, culture-native content rooted in real communities.</p>
+          <p>Led by <b class="lead-name">Nirvair Rai</b>, this production and narrative arm of the Cultural (Mis)fits ecosystem collaborates with brands, media, fashion, and CSR initiatives to create authentic, culture-native content rooted in real communities.</p>
           <p class="partner">Partner with us to create:</p>
           <ul class="offer-list">
             <li>Branded Content &amp; Films</li>
