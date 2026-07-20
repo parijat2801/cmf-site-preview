@@ -512,9 +512,15 @@ body.no-grain::after{opacity:0}
 @media(prefers-reduced-motion:reduce){.mf-rise{opacity:1;transform:none;transition:none}}
 
 /* ============ FOR BRANDS — ink field; positioning chart, red accent ============ */
-.fb-chart{margin-top:calc(clamp(36px,6vh,84px)*var(--fz));
-  display:grid;grid-template-columns:clamp(28px,3vw,52px) 1fr;grid-template-rows:1fr clamp(28px,3vw,52px);
-  gap:clamp(10px,1.4vw,20px);max-width:960px}
+/* 2-column layout: graph left, copy right. Stacks on mobile. */
+.fb-cols{margin-top:calc(clamp(36px,6vh,84px)*var(--fz));display:grid;
+  grid-template-columns:1.1fr 1fr;gap:clamp(32px,5vw,88px);align-items:center}
+.fb-chart{display:grid;grid-template-columns:clamp(28px,3vw,52px) 1fr;grid-template-rows:1fr clamp(28px,3vw,52px);
+  gap:clamp(10px,1.4vw,20px)}
+/* right column: the position lead + the offer bullets */
+.fb-copy .fb-lead{font-weight:900;letter-spacing:-.02em;line-height:1.05;
+  font-size:calc(clamp(1.5rem,min(3vw,4vh),2.8rem)*var(--fz));max-width:22ch}
+.fb-copy .fb-list{margin-top:clamp(20px,3vh,36px)}
 .fb-yaxis{grid-row:1;grid-column:1;display:flex;align-items:center;justify-content:center}
 .fb-yaxis span{writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap;
   font-weight:500;letter-spacing:.2em;text-transform:uppercase;font-size:var(--t-label);opacity:.6}
@@ -536,10 +542,11 @@ body.no-grain::after{opacity:0}
 .fb-xaxis{grid-row:2;grid-column:2;padding-top:.6em;
   font-weight:500;letter-spacing:.2em;text-transform:uppercase;font-size:var(--t-label);opacity:.6}
 @media(max-width:760px){
+  .fb-cols{grid-template-columns:1fr;gap:clamp(28px,6vh,48px)}
   .fb-chart{grid-template-columns:22px 1fr;max-width:none}
   .fb-target{position:static;margin-top:clamp(18px,4vh,32px);text-align:left;max-width:28ch}
   .fb-target .fb-glyph{margin-left:0}
-  .fb-quad{max-width:none}
+  .fb-copy .fb-lead{max-width:none}
 }
 .fb-sub{margin-top:calc(clamp(28px,5vh,60px)*var(--fz));font-weight:300;
   font-size:calc(var(--t-lead)*var(--fz));line-height:1.2;max-width:28ch}
@@ -814,23 +821,27 @@ body.no-grain::after{opacity:0}
       <p class="klabel reveal d1" data-m>For Brands</p>
       <h2 class="head reveal d1" data-m>Cultural Relevance <span class="mark mark-w" style="--hl:var(--red)">Made Real</span></h2>
 
-      <figure class="fb-chart reveal d2" data-m>
-        <div class="fb-yaxis"><span>Meaningful Scale</span></div>
-        <div class="fb-plot">
-          <p class="fb-quad">Position your brand in social discourse and ensure it resonates culturally with people today.</p>
-          <div class="fb-target">
-            <span class="fb-glyph" aria-hidden="true"></span>
-            <p>If your brand isn't here, is it even culturally relevant?</p>
+      <div class="fb-cols">
+        <figure class="fb-chart reveal d2" data-m>
+          <div class="fb-yaxis"><span>Meaningful Scale</span></div>
+          <div class="fb-plot">
+            <div class="fb-target">
+              <span class="fb-glyph" aria-hidden="true"></span>
+              <p>If your brand isn't here, is it even culturally relevant?</p>
+            </div>
           </div>
-        </div>
-        <div class="fb-xaxis">Cultural Impact</div>
-      </figure>
+          <div class="fb-xaxis">Cultural Impact</div>
+        </figure>
 
-      <p class="fb-sub reveal d3" data-m>Build clout for Brands through:</p>
-      <ul class="fb-list reveal d3" data-m>
-        <li>Culture-nuanced brand narratives</li>
-        <li>Culture and Media native formats in mass media, social media and live experiences</li>
-      </ul>
+        <div class="fb-copy reveal d2" data-m>
+          <p class="fb-lead">Position your brand in social discourse and ensure it resonates culturally with people today.</p>
+          <ul class="fb-list">
+            <li>Culture-nuanced brand narratives</li>
+            <li>Culture and Media native formats in mass media, social media and live experiences</li>
+          </ul>
+        </div>
+      </div>
+
       <p class="fb-write reveal d3" data-m>Write to us at <a href="mailto:hello@culturalmisfits.com">hello@culturalmisfits.com</a></p>
     </div>
   </section>
