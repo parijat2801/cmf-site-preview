@@ -951,12 +951,14 @@ body.no-grain::after{opacity:0}
             </div>
             <svg class="fb-note-arrow" viewBox="0 0 100 100" preserveAspectRatio="none"
                  fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-              <!-- shaft: from just under the note (57,11) curving down to the label (68,25) -->
-              <path class="fb-note-line" d="M57 11 C 63 15, 65 19, 68 25"
+              <!-- Coordinates are plot-% (viewBox 0-100, preserveAspectRatio=none).
+                   Shaft ends at (66,28) = just on the "Cultural Leaders" label; the
+                   arrowhead VERTEX is the middle point (66,28), and its legs are
+                   pre-skewed to render symmetric under the 5.55/3.16 x:y scale. -->
+              <path class="fb-note-line" d="M57 15 C 59.5 17, 62.5 22, 66 28"
                     stroke="currentColor" vector-effect="non-scaling-stroke"
                     stroke-width="4" stroke-linecap="round"/>
-              <!-- head at the shaft end (68,25), opening up-and-right toward the label -->
-              <path class="fb-note-head" d="M60.5 24 L68.5 25.5 L66 17.5"
+              <path class="fb-note-head" d="M65.6 24.3 L66 28 L64 26.8"
                     stroke="currentColor" vector-effect="non-scaling-stroke"
                     stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
