@@ -1009,6 +1009,10 @@ document.querySelector('.hero .content')
   if(!hero)return;
   const content=hero.querySelector('.content');
   const vid=hero.querySelector('.hero-video');
+  /* slow the balloon video so it's still playing while the hero text animation
+     (power-on → typewriter beats → signature) runs in front. */
+  if(vid){ vid.playbackRate=0.5;
+    vid.addEventListener('loadedmetadata',()=>{vid.playbackRate=0.5;}); }
   const clipped=()=>content && getComputedStyle(content).clipPath!=='none';
   const settle=()=>{
     if(content) content.style.clipPath='none';
