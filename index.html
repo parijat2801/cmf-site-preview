@@ -317,11 +317,12 @@ body.no-grain::after{opacity:0}
 }
 
 /* ============ OFFERINGS — three pillars, hover auto-cycles the photos ============ */
-.offer{display:grid;grid-template-columns:1.35fr 1fr;gap:clamp(28px,4vw,88px);align-items:center;
+/* matches the Acts (.witem) layout: equal columns + a TIGHT gap so the text and
+   image sit close, and the image is large (fills its column). No mid-row void. */
+.offer{display:grid;grid-template-columns:1fr 1fr;gap:clamp(24px,3vw,64px);align-items:center;
   padding-block:clamp(24px,4vh,56px);border-top:var(--hair) solid rgba(231,225,212,.16)}
-/* the photo is capped against the WINDOW: 4/5 aspect × 46vh wide ≈ 57vh tall,
-   so a full row (photo + text + padding) always fits one screen */
-.oshot{position:relative;aspect-ratio:1/1;width:min(100%,62vh);justify-self:start;overflow:hidden;user-select:none;background:#1B1818;--edge:var(--co)}
+/* larger image, like Acts (up to 72vh), filling its column */
+.oshot{position:relative;aspect-ratio:1/1;width:min(100%,72vh);justify-self:start;overflow:hidden;user-select:none;background:#1B1818;--edge:var(--co)}
 .oshot::before{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;box-shadow:inset 0 0 0 0 var(--edge);transition:box-shadow .5s var(--ease)}
 .oshot:hover::before{box-shadow:inset 0 0 0 2px var(--edge)}
 .oshot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .6s var(--ease),transform var(--dur) var(--ease)}
