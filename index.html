@@ -410,27 +410,46 @@ body.no-grain::after{opacity:0}
 .mproof b{font-weight:900;font-style:italic;color:var(--yellow)}
 @media(hover:none){.mcell img{filter:brightness(.9)}}
 
-/* ============ VERTICAL MODAL ============ */
+/* ============ VERTICAL MODAL — image left, paragraphs right, ‹ › ✕ bottom ============ */
 .vmodal{position:fixed;inset:0;z-index:950;display:flex;opacity:0;pointer-events:none;transition:opacity .45s var(--ease)}
 .vmodal.open{opacity:1;pointer-events:auto}
-.vscrim{position:absolute;inset:0;background:rgba(16,14,15,.78)}
-.vpanel{position:relative;margin:auto;width:min(1100px,94vw);max-height:88vh;overflow:auto;overscroll-behavior:contain;
-  background:var(--ink);border:var(--hair) solid rgba(231,225,212,.18);color:var(--cream);
-  padding:clamp(24px,4vh,56px) clamp(22px,3vw,56px);
+.vscrim{position:absolute;inset:0;background:rgba(16,14,15,.72)}
+/* CONTAINED panel (floats with margin, not full-bleed) on the site's exact dark
+   card surface — same radial ink gradient as .card.dark. Two columns: square
+   image | text; a bottom nav row spans both. */
+.vpanel{position:relative;margin:auto;width:min(1180px,90vw);max-height:88vh;color:var(--cream);
+  background:radial-gradient(120% 120% at 50% 35%,#2A2526,#231F20 78%);
+  border:var(--hair) solid rgba(231,225,212,.14);
+  padding:clamp(22px,3vw,52px);
+  display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);
+  gap:clamp(30px,3.4vw,72px);align-items:stretch;
   transform:translateY(26px);transition:transform .5s var(--ease)}
 .vmodal.open .vpanel{transform:none}
-.vclose{position:absolute;top:clamp(16px,2vh,28px);right:clamp(16px,2vw,28px);z-index:2;
-  background:none;border:var(--hair) solid rgba(231,225,212,.4);color:var(--cream);font-family:var(--font);
-  font-size:var(--t-label);font-weight:500;letter-spacing:.18em;text-transform:uppercase;padding:.5em 1em;cursor:pointer;
-  transition:background .4s var(--ease),color .4s var(--ease)}
-.vclose:hover{background:var(--cream);color:var(--ink)}
-.vtitle{margin-top:clamp(24px,4vh,44px);font-weight:900;letter-spacing:-.03em;line-height:.94;font-size:clamp(2rem,4.5vw,4.2rem);color:var(--vc,var(--cream));max-width:16ch}
-.vkick{margin-top:.9em;font-size:var(--t-label);font-weight:500;letter-spacing:.2em;text-transform:uppercase;opacity:.6}
-.vbody{margin-top:.9em;font-weight:300;font-size:var(--t-lead);line-height:1.3;max-width:42ch}
-.vbody b{font-weight:900;font-style:italic}
-.vgrid{grid-template-columns:repeat(3,1fr);margin-top:clamp(18px,3vh,36px)}
-.vgrid .mcell{height:clamp(120px,24vh,260px)}
-@media(max-width:860px){.vgrid{grid-template-columns:repeat(2,1fr)}}
+.vfig{grid-column:1;margin:0;aspect-ratio:1/1;width:100%;overflow:hidden;background:#1B1818}
+.vfig img{width:100%;height:100%;object-fit:cover;display:block}
+/* text column matches the image height; body scrolls, nav row pins to the bottom
+   (= bottom of the image). arrows on the left, close on the right. */
+.vtextcol{grid-column:2;display:flex;flex-direction:column;min-height:0}
+.vbody{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding-right:.4em;
+  font-weight:500;font-size:clamp(1.05rem,1.5vw,1.6rem);line-height:1.28;letter-spacing:-.01em;max-width:34ch}
+.vbody p{margin:0}
+.vbody p + p{margin-top:1.1em}
+.vbody b{font-weight:900}
+/* nav row: sits at the bottom of the text column, level with the image bottom */
+.vnav{display:flex;align-items:center;justify-content:space-between;margin-top:clamp(18px,2.4vh,34px)}
+.varrows{display:flex;gap:clamp(14px,1.6vw,26px)}
+.varrows button,.vclose{background:none;border:0;color:var(--cream);cursor:pointer;padding:6px;line-height:0;
+  opacity:.9;transition:opacity .3s var(--ease),transform .3s var(--ease)}
+.varrows button:hover,.vclose:hover{opacity:1}
+.varrows .vprev:hover{transform:translateX(-3px)}
+.varrows .vnext:hover{transform:translateX(3px)}
+.varrows button:disabled{opacity:.26;cursor:default;transform:none}
+.vmodal.single .varrows{visibility:hidden}      /* single-slide: keep close aligned */
+@media(max-width:860px){
+  .vpanel{grid-template-columns:1fr;gap:22px;align-items:start}
+  .vfig{grid-column:1}
+  .vtextcol{grid-column:1;min-height:0}
+}
 
 /* ============ PARTNER CTA — the page finally asks its audience to act ============ */
 .cta{text-align:left}
@@ -835,9 +854,11 @@ body.no-grain::after{opacity:0}
       </article>
 
       <article class="offer reveal" id="film-studio" style="--co:var(--green)">
-        <div class="oshot" data-photos="assets/offer/film-1.webp,assets/offer/film-2.webp,assets/offer/film-3.webp">
-          <span class="idx">1/3</span>
-          <span class="ticks"><i class="cur"></i><i></i><i></i></span>
+        <!-- images come from VERTICALS['film-studio'].slides (same as the modal);
+             buildShot() rebuilds the ticks/idx to match the real count. -->
+        <div class="oshot">
+          <span class="idx">1/4</span>
+          <span class="ticks"><i class="cur"></i><i></i><i></i><i></i></span>
         </div>
         <div class="otext" data-m>
           <h3>Film Studio</h3>
@@ -981,11 +1002,25 @@ body.no-grain::after{opacity:0}
 <div class="vmodal" id="vmodal" hidden>
   <div class="vscrim" data-close></div>
   <article class="vpanel" role="dialog" aria-modal="true">
-    <button class="vclose" data-close aria-label="Close">Close ✕</button>
-    <h3 class="vtitle" id="vtitle"></h3>
-    <p class="vkick" id="vkick"></p>
-    <p class="vbody" id="vbody"></p>
-    <div class="mwall vgrid peekzone" id="vgrid"></div>
+    <figure class="vfig"><img id="vimg" src="" alt="" decoding="async"></figure>
+    <div class="vtextcol">
+      <div class="vbody" id="vbody"></div>
+      <!-- nav row pinned to the bottom of the text column (level with the image bottom):
+           arrows on the left, close on the right -->
+      <div class="vnav">
+        <div class="varrows" aria-label="Slides">
+          <button class="vprev" id="vprev" aria-label="Previous">
+            <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5l-7 7 7 7"/></svg>
+          </button>
+          <button class="vnext" id="vnext" aria-label="Next">
+            <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+        <button class="vclose" data-close aria-label="Close">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+    </div>
   </article>
 </div>
 
@@ -1086,8 +1121,21 @@ document.querySelector('.hero .content')
 
 /* ---------- offerings: hover auto-cycles; touch taps advance ---------- */
 function buildShot(shot){
-  const srcs=(shot.dataset.photos||'').split(',').filter(Boolean);
+  // Single source of truth: if this .oshot belongs to a modal-linked .offer,
+  // use the SAME images the modal shows (VERTICALS[id].slides) so the section's
+  // cycle and the pop-up never drift apart. Otherwise fall back to data-photos.
+  const vid=shot.closest('.offer')?.id;
+  const linked=vid&&VERTICALS[vid]&&VERTICALS[vid].slides;
+  const srcs=linked
+    ? VERTICALS[vid].slides.map(s=>s.image)
+    : (shot.dataset.photos||'').split(',').filter(Boolean);
   if(!srcs.length||shot.dataset.built)return; shot.dataset.built='1';
+  // Rebuild the tick row to match the actual image count (may differ from the
+  // hardcoded markup once the linked list changes length).
+  const ticksEl=shot.querySelector('.ticks');
+  if(ticksEl&&ticksEl.children.length!==srcs.length){
+    ticksEl.innerHTML=srcs.map((_,i)=>i===0?'<i class="cur"></i>':'<i></i>').join('');
+  }
   const ticks=[...shot.querySelectorAll('.ticks i')];
   const idx=shot.querySelector('.idx');
   const imgs=srcs.map((s,i)=>{const im=new Image();im.src=s;im.alt='';im.decoding='async';
@@ -1186,27 +1234,60 @@ if(hoverable){
 }
 
 /* ---------- vertical modal: "Read more" opens the vertical's world ---------- */
+/* Each vertical is an ARRAY OF SLIDES. One slide = { image, paragraphs:[...] }.
+   The ‹ › arrows step through slides (image + its paragraphs advance together).
+   TO EXTEND: add another {image, paragraphs:[...]} object to a vertical's array;
+   add more paragraph strings to any slide's `paragraphs`. That's the whole API. */
 const VERTICALS={
-  'culturist-network':{num:'01',name:'Culturist Network',kick:'Stories from the margins',accent:'var(--red)',
-    body:'A media publication for the ones the algorithm skips — culture-led stories from emerging worlds and unheard voices. Long-form profiles, scene reports, and photo essays that treat the margins as the main stage. First dispatch: late 2026.',
-    photos:['assets/offer/net-1.webp','assets/offer/net-2.webp','assets/offer/net-3.webp','assets/photo-manifesto.webp','assets/photo-rooftop.webp','assets/photo-hands.webp']},
-  'irl-live':{num:'02',name:'IRL & Live Experiences',kick:'Gigs · rooms · tours',accent:'var(--yellow)',
-    body:'Temporary worlds you can stand inside. Ruhbaru — the sound of home as a cinematic live experience — and Jupiter Pe Juice, a 90-minute musical satire. Real rooms, real communities, built to tour India in 2026.',
-    photos:['assets/offer/live-1.webp','assets/offer/live-2.webp','assets/offer/live-3.webp','assets/photo-concert.webp','assets/photo-ruhbaru.webp','assets/photo-jupiter.webp']},
-  'film-studio':{num:'03',name:'Film Studio',kick:'Brand-native storytelling',accent:'var(--green)',
-    body:'Films and brand work that carry cultural consequence. We help brands participate in culture without flattening it — documentary instincts, cinematic craft, and access to scenes no agency deck can fake.',
-    photos:['assets/offer/film-1.webp','assets/offer/film-2.webp','assets/offer/film-3.webp','assets/photo-rooftop.webp','assets/photo-manifesto.webp','assets/photo-hands.webp']},
+  'culturist-network':{accent:'var(--red)',slides:[
+    {image:'assets/offer/net-1.webp',paragraphs:[
+      'A media publication for the ones the algorithm skips — culture-led stories from emerging worlds and unheard voices.',
+      'Long-form profiles, scene reports, and photo essays that treat the margins as the main stage. First dispatch: late 2026.']},
+    {image:'assets/photo-manifesto.webp',paragraphs:[
+      'We document evolving cultures, identities, and truths — bringing lived context to every story.',
+      'Writers, anthropologists, designers, thinkers, and community-builders shape how narratives are told and co-created.']},
+  ]},
+  'irl-live':{accent:'var(--yellow)',slides:[
+    {image:'assets/offer/live-1.webp',paragraphs:[
+      'Temporary worlds you can stand inside. Experiences that feel less like events and more like places.',
+      'Built around subcultures, shared identities, and creative rituals — where misfit communities come together to express, exchange, and belong.']},
+    {image:'assets/photo-ruhbaru.webp',paragraphs:[
+      'Ruhbaru — the sound of home, scaled into a cinematic live experience. India tour 2026.',
+      'Jupiter Pe Juice — a 90-minute musical satire where everyday absurdities become songs, punchlines, and cultural commentary.']},
+  ]},
+  'film-studio':{accent:'var(--green)',slides:[
+    {image:'assets/offer/nirvair-1.webp',paragraphs:[
+      'Films and brand work that carry cultural consequence. Led by Nirvair Rai.']},
+    {image:'assets/offer/nirvair-2.webp',paragraphs:[
+      'His body of work spans documentary projects such as Landless Kings, which followed the lives of Rohingya refugees along the Myanmar–Bangladesh border, and Memory of Land, a reflection on 100 years of the Jallianwala Bagh massacre and the afterlives of colonial trauma, exhibited internationally.']},
+    {image:'assets/offer/nirvair-3.webp',paragraphs:[
+      'Alongside this, Nirvair has built an extensive commercial and fashion portfolio, collaborating with brands and designers including Nike, Netflix, Sabyasachi, Tarun Tahiliani, Satya Paul, Vivo, Lenskart, Elle, and Vogue.']},
+    {image:'assets/offer/nirvair-4.webp',paragraphs:[
+      'We help brands participate in culture without flattening it — documentary instincts, cinematic craft, and access to scenes no agency deck can fake.']},
+  ]},
 };
 const vmodal=document.getElementById('vmodal');
+const vImg=document.getElementById('vimg'), vBody=document.getElementById('vbody');
+const vPrev=document.getElementById('vprev'), vNext=document.getElementById('vnext');
 let lenisRef=null;   // set by the scroll engine; modal pauses it while open
+let vSlides=[], vAt=0;
+
+// render one slide: image on the left, its paragraphs on the right.
+function renderSlide(i){
+  const s=vSlides[i]; if(!s)return;
+  vAt=i;
+  vImg.src=s.image; vImg.alt='';
+  vBody.innerHTML=(s.paragraphs||[]).map(p=>`<p>${p}</p>`).join('');
+  vBody.scrollTop=0;
+  // arrows disabled at the ends (single-slide verticals hide the arrows via CSS)
+  vPrev.disabled=i<=0;
+  vNext.disabled=i>=vSlides.length-1;
+  vmodal.classList.toggle('single',vSlides.length<=1);
+}
 function openVertical(id){
   const v=VERTICALS[id]; if(!v)return;
   vmodal.style.setProperty('--vc',v.accent);
-  document.getElementById('vkick').textContent=v.kick;
-  document.getElementById('vtitle').textContent=v.name;
-  document.getElementById('vbody').textContent=v.body;
-  document.getElementById('vgrid').innerHTML=v.photos.map((p,i)=>
-    `<figure class="mcell" data-photo="${p}"><img src="${p}" alt="" decoding="async"><span class="mno">0${i+1}</span></figure>`).join('');
+  vSlides=v.slides||[]; renderSlide(0);
   vmodal.hidden=false;
   setTimeout(()=>vmodal.classList.add('open'),20);
   lenisRef?.stop(); document.documentElement.style.overflow='hidden';
@@ -1216,13 +1297,20 @@ function closeVertical(){
   lenisRef?.start(); document.documentElement.style.overflow='';
   setTimeout(()=>{vmodal.hidden=true;},450);
 }
+const vGo=d=>renderSlide(Math.max(0,Math.min(vSlides.length-1,vAt+d)));
+vPrev.addEventListener('click',()=>vGo(-1));
+vNext.addEventListener('click',()=>vGo(1));
 document.querySelectorAll('.offer .more').forEach(a=>{
   if(a.hasAttribute('data-scroll'))return;         // this one scrolls to a section (handled by the anchor handler), not the modal
   const id=a.closest('.offer').id;
   a.addEventListener('click',e=>{e.preventDefault();openVertical(id);});
 });
-vmodal.addEventListener('click',e=>{ if(e.target.dataset.close!==undefined)closeVertical(); });
-addEventListener('keydown',e=>{ if(e.key==='Escape'&&!vmodal.hidden)closeVertical(); });
+vmodal.addEventListener('click',e=>{ if(e.target.closest('[data-close]'))closeVertical(); });
+addEventListener('keydown',e=>{ if(vmodal.hidden)return;
+  if(e.key==='Escape')closeVertical();
+  else if(e.key==='ArrowLeft')vGo(-1);
+  else if(e.key==='ArrowRight')vGo(1);
+});
 
 /* ============================================================
    SCROLL ENGINE — Lenis (feel) + GSAP ScrollTrigger (pinned scenes).
