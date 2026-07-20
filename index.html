@@ -531,6 +531,13 @@ body.no-grain::after{opacity:0}
 .fb-plot::before,.fb-plot::after{content:"";position:absolute;background:rgba(231,225,212,.14)}
 .fb-plot::before{left:0;right:0;top:50%;height:var(--hair)}
 .fb-plot::after{top:0;bottom:0;left:50%;width:var(--hair)}
+/* axis arrowheads: Y points UP at the top of the left axis; X points RIGHT at
+   the end of the bottom axis. Solid triangles in the axis-line colour. */
+.fb-arrow{position:absolute;width:0;height:0;z-index:1}
+.fb-arrow-y{top:-6px;left:calc(-1*var(--hair));transform:translateX(-50%);
+  border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:9px solid rgba(231,225,212,.55)}
+.fb-arrow-x{bottom:calc(-1*var(--hair));right:-6px;transform:translateY(50%);
+  border-top:6px solid transparent;border-bottom:6px solid transparent;border-left:9px solid rgba(231,225,212,.55)}
 .fb-quad{max-width:22ch;font-weight:900;letter-spacing:-.02em;line-height:1.04;
   font-size:calc(clamp(1.3rem,min(2.6vw,3.6vh),2.2rem)*var(--fz))}
 .fb-target{position:absolute;top:clamp(14px,2.4vw,28px);right:clamp(14px,2.4vw,28px);
@@ -825,6 +832,8 @@ body.no-grain::after{opacity:0}
         <figure class="fb-chart reveal d2" data-m>
           <div class="fb-yaxis"><span>Meaningful Scale</span></div>
           <div class="fb-plot">
+            <span class="fb-arrow fb-arrow-y" aria-hidden="true"></span>
+            <span class="fb-arrow fb-arrow-x" aria-hidden="true"></span>
             <div class="fb-target">
               <img class="fb-glyph" src="assets/brand/balloon-red.png" alt="" decoding="async">
               <p>If your brand isn't here, is it even culturally relevant?</p>
