@@ -634,14 +634,6 @@ body.no-grain::after{opacity:0}
 .fb-chart.in .fb-note{opacity:1;transform:rotate(-3deg)}
 .fb-note p{font-family:'Caveat',cursive;font-weight:600;line-height:1.02;letter-spacing:.01em;
   font-size:calc(clamp(1.25rem,2vw,1.75rem)*var(--fz));max-width:20ch;margin:0}
-/* arrow spans the whole plot in 0-100 %-coordinates (preserveAspectRatio=none),
-   so its endpoints are the same %-space as the labels — points at .fb-q-tr by
-   construction. non-scaling-stroke keeps the line width even under the stretch. */
-.fb-note-arrow{position:absolute;inset:0;width:100%;height:100%;z-index:3;
-  color:var(--red);pointer-events:none;overflow:visible}
-.fb-note-arrow path{stroke-dasharray:60;stroke-dashoffset:60;
-  transition:stroke-dashoffset .7s var(--ease) 3.7s}
-.fb-chart.in .fb-note-arrow path{stroke-dashoffset:0}
 .fb-xaxis{grid-row:2;grid-column:2;padding-top:.6em;text-align:center;
   color:var(--cream);font-weight:700;letter-spacing:-.01em;line-height:1.08;
   font-size:calc(clamp(.82rem,1.5vw,1.15rem)*var(--fz));opacity:.9}
@@ -941,27 +933,10 @@ body.no-grain::after{opacity:0}
             <span class="fb-qlabel fb-q-tr">Cultural Leaders</span>
             <span class="fb-qlabel fb-q-bl">Invisible</span>
             <span class="fb-qlabel fb-q-br">Mainstream</span>
-            <!-- FINAL BEAT: a hand-drawn note + arrow points at "Cultural Leaders",
-                 appearing only after the axes/labels have all drawn in. The arrow
-                 is a plot-spanning SVG drawn in the SAME 0-100 %-coordinates the
-                 quadrant labels use, so its head lands on the label by construction
-                 (label .fb-q-tr center = 75,28). No pixel nudging. -->
+            <!-- the handwritten note floats above the top-right quadrant -->
             <div class="fb-note" aria-hidden="true">
               <p>If your brand isn't here, is it even culturally relevant?</p>
             </div>
-            <svg class="fb-note-arrow" viewBox="0 0 100 100" preserveAspectRatio="none"
-                 fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-              <!-- Coordinates are plot-% (viewBox 0-100, preserveAspectRatio=none).
-                   Shaft ends at (66,28) = just on the "Cultural Leaders" label; the
-                   arrowhead VERTEX is the middle point (66,28), and its legs are
-                   pre-skewed to render symmetric under the 5.55/3.16 x:y scale. -->
-              <path class="fb-note-line" d="M57 15 C 59.5 17, 62.5 22, 66 28"
-                    stroke="currentColor" vector-effect="non-scaling-stroke"
-                    stroke-width="4" stroke-linecap="round"/>
-              <path class="fb-note-head" d="M65.6 24.3 L66 28 L64 26.8"
-                    stroke="currentColor" vector-effect="non-scaling-stroke"
-                    stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
           </div>
           <div class="fb-xaxis">Cultural Impact</div>
         </figure>
