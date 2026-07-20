@@ -515,6 +515,9 @@ body.no-grain::after{opacity:0}
 /* 2-column layout: graph left, copy right. Stacks on mobile. */
 .fb-cols{margin-top:calc(clamp(36px,6vh,84px)*var(--fz));display:grid;
   grid-template-columns:1.1fr 1fr;gap:clamp(32px,5vw,88px);align-items:center}
+/* the right-column copy reveals LAST — after the axes draw and the target lands.
+   Push its reveal transition-delay past the ~1.05s target beat. */
+.fb-copy.reveal{transition-delay:1.25s !important}
 .fb-chart{display:grid;grid-template-columns:clamp(28px,3vw,52px) 1fr;grid-template-rows:1fr clamp(28px,3vw,52px);
   gap:clamp(10px,1.4vw,20px)}
 /* right column: the position lead + the offer bullets */
@@ -524,24 +527,41 @@ body.no-grain::after{opacity:0}
 .fb-yaxis{grid-row:1;grid-column:1;display:flex;align-items:center;justify-content:center}
 .fb-yaxis span{writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap;
   font-weight:500;letter-spacing:.2em;text-transform:uppercase;font-size:var(--t-label);opacity:.6}
-.fb-plot{grid-row:1;grid-column:2;position:relative;border-left:var(--hair) solid rgba(231,225,212,.32);
-  border-bottom:var(--hair) solid rgba(231,225,212,.32);min-height:clamp(240px,34vh,420px);
+.fb-plot{grid-row:1;grid-column:2;position:relative;min-height:clamp(240px,34vh,420px);
   padding:clamp(20px,3vw,40px)}
 /* faint quadrant midlines so it reads as a 2x2, not just a corner bracket */
-.fb-plot::before,.fb-plot::after{content:"";position:absolute;background:rgba(231,225,212,.14)}
+.fb-plot::before,.fb-plot::after{content:"";position:absolute;background:rgba(231,225,212,.14);
+  opacity:0;transition:opacity .5s var(--ease) .9s}
 .fb-plot::before{left:0;right:0;top:50%;height:var(--hair)}
 .fb-plot::after{top:0;bottom:0;left:50%;width:var(--hair)}
-/* axis arrowheads: Y points UP at the top of the left axis; X points RIGHT at
-   the end of the bottom axis. Solid triangles in the axis-line colour. */
-.fb-arrow{position:absolute;width:0;height:0;z-index:1}
-.fb-arrow-y{top:-6px;left:calc(-1*var(--hair));transform:translateX(-50%);
+/* ---- CHOREOGRAPHY: axes DRAW in (Y up, then X right), then the balloon target
+   lands, then the midlines + copy. All driven by one trigger — the site adds
+   .in to .fb-chart when it scrolls into view — and sequenced by transition
+   delays. Pure CSS, no JS. ---- */
+/* the two axis LINES (scalable divs, replacing the old borders) */
+.fb-axis{position:absolute;background:rgba(231,225,212,.32);z-index:0}
+.fb-axis-y{left:0;bottom:0;width:var(--hair);height:100%;transform:scaleY(0);transform-origin:bottom;
+  transition:transform .5s var(--ease)}                    /* draws UP, first */
+.fb-axis-x{left:0;bottom:0;height:var(--hair);width:100%;transform:scaleX(0);transform-origin:left;
+  transition:transform .5s var(--ease) .45s}               /* draws RIGHT, after Y */
+/* axis arrowheads: pop in as each axis finishes drawing */
+.fb-arrow{position:absolute;width:0;height:0;z-index:1;opacity:0;transition:opacity .25s var(--ease)}
+.fb-arrow-y{top:-6px;left:calc(-1*var(--hair));transform:translateX(-50%);transition-delay:.5s;
   border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:9px solid rgba(231,225,212,.55)}
-.fb-arrow-x{bottom:calc(-1*var(--hair));right:-6px;transform:translateY(50%);
+.fb-arrow-x{bottom:calc(-1*var(--hair));right:-6px;transform:translateY(50%);transition-delay:.95s;
   border-top:6px solid transparent;border-bottom:6px solid transparent;border-left:9px solid rgba(231,225,212,.55)}
+/* fire the draw when the chart is in view */
+.fb-chart.in .fb-axis-y{transform:scaleY(1)}
+.fb-chart.in .fb-axis-x{transform:scaleX(1)}
+.fb-chart.in .fb-arrow{opacity:1}
+.fb-chart.in .fb-plot::before,.fb-chart.in .fb-plot::after{opacity:1}
 .fb-quad{max-width:22ch;font-weight:900;letter-spacing:-.02em;line-height:1.04;
   font-size:calc(clamp(1.3rem,min(2.6vw,3.6vh),2.2rem)*var(--fz))}
+/* the target (balloon + callout) lands AFTER the axes draw — the "be here" beat */
 .fb-target{position:absolute;top:clamp(14px,2.4vw,28px);right:clamp(14px,2.4vw,28px);
-  max-width:16ch;text-align:right}
+  max-width:16ch;text-align:right;opacity:0;transform:translateY(-8px) scale(.9);
+  transform-origin:top right;transition:opacity .45s var(--ease) 1s,transform .5s var(--ease) 1s}
+.fb-chart.in .fb-target{opacity:1;transform:none}
 .fb-target .fb-glyph{display:block;margin-left:auto;width:auto;height:clamp(52px,7vw,96px);margin-bottom:.6em;
   object-fit:contain}
 .fb-target p{font-weight:900;font-style:italic;letter-spacing:-.01em;line-height:1.15;color:var(--red);
@@ -832,6 +852,8 @@ body.no-grain::after{opacity:0}
         <figure class="fb-chart reveal d2" data-m>
           <div class="fb-yaxis"><span>Meaningful Scale</span></div>
           <div class="fb-plot">
+            <span class="fb-axis fb-axis-y" aria-hidden="true"></span>
+            <span class="fb-axis fb-axis-x" aria-hidden="true"></span>
             <span class="fb-arrow fb-arrow-y" aria-hidden="true"></span>
             <span class="fb-arrow fb-arrow-x" aria-hidden="true"></span>
             <div class="fb-target">
