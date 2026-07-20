@@ -535,8 +535,8 @@ body.no-grain::after{opacity:0}
   font-size:calc(clamp(1.3rem,min(2.6vw,3.6vh),2.2rem)*var(--fz))}
 .fb-target{position:absolute;top:clamp(14px,2.4vw,28px);right:clamp(14px,2.4vw,28px);
   max-width:16ch;text-align:right}
-.fb-target .fb-glyph{display:block;margin-left:auto;width:clamp(20px,2.2vw,30px);height:clamp(20px,2.2vw,30px);
-  border:var(--hair) solid var(--red);border-radius:50%;margin-bottom:.5em}
+.fb-target .fb-glyph{display:block;margin-left:auto;width:auto;height:clamp(52px,7vw,96px);margin-bottom:.6em;
+  object-fit:contain}
 .fb-target p{font-weight:900;font-style:italic;letter-spacing:-.01em;line-height:1.15;color:var(--red);
   font-size:calc(var(--t-body)*var(--fz))}
 .fb-xaxis{grid-row:2;grid-column:2;padding-top:.6em;
@@ -826,7 +826,7 @@ body.no-grain::after{opacity:0}
           <div class="fb-yaxis"><span>Meaningful Scale</span></div>
           <div class="fb-plot">
             <div class="fb-target">
-              <span class="fb-glyph" aria-hidden="true"></span>
+              <img class="fb-glyph" src="assets/brand/balloon-red.png" alt="" decoding="async">
               <p>If your brand isn't here, is it even culturally relevant?</p>
             </div>
           </div>
