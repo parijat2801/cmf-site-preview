@@ -980,12 +980,27 @@ try{ pretext=await import('./vendor/pretext.esm.js'); }catch(_){ }
    jump, flick) can cross the viewport between IO callbacks and skip it.
    The sweep is the guarantee: anything the scroll position has already
    reached gets revealed, no matter how it got there. */
-const pendingReveals=new Set(document.querySelectorAll('.reveal, .mf-rise'));
+/* .fb-chart is handled by its OWN replay observer below (it re-runs its
+   choreography every time it enters view), so keep it out of the once-only set. */
+const pendingReveals=new Set([...document.querySelectorAll('.reveal, .mf-rise')].filter(el=>!el.classList.contains('fb-chart')));
 function fireReveal(el){ el.classList.add('in'); pendingReveals.delete(el); io.unobserve(el); }
 const io=new IntersectionObserver((es)=>{
   es.forEach(e=>{ if(e.isIntersecting)fireReveal(e.target); });
 },{threshold:.15});
 pendingReveals.forEach(el=>io.observe(el));
+
+/* Brands chart: REPLAY on enter — toggle .in when it enters/leaves view so the
+   axis-draw → target → copy choreography re-runs each time you scroll to it
+   (instead of playing once and being missed on a fast scroll). */
+const fbChart=document.querySelector('.fb-chart');
+if(fbChart){
+  new IntersectionObserver((es)=>{
+    es.forEach(e=>{
+      if(e.isIntersecting) fbChart.classList.add('in');
+      else fbChart.classList.remove('in');   // reset so re-entry replays
+    });
+  },{threshold:.35}).observe(fbChart);
+}
 let sweepAt=0;
 addEventListener('scroll',()=>{
   const now=performance.now();
@@ -1280,6 +1295,7 @@ if(!reduce){
         talls[i]=card.offsetHeight>vh()+2;
         let d;
         if(card.classList.contains('hero')) d=vh()*0.5;   // short hold; scroll releases to the manifesto collage
+        else if(card.classList.contains('for-brands')) d=vh()*1.8;  // hold long enough for the chart choreography (~3s) so a fast scroll can't skip it
         else{
           const lines=measureLines(card);
           d=vh()*(0.45+0.055*lines);
