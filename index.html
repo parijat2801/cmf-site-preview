@@ -373,8 +373,13 @@ body.no-grain::after{opacity:0}
    against a min cell size, so ANY number of .mcell blocks lays out cleanly —
    add or remove artists and the grid reflows with no column math. Portrait 4/5
    cells suit the B&W performance photography. */
-.mwall{display:grid;grid-template-columns:repeat(auto-fill,minmax(clamp(140px,17vw,210px),1fr));
+/* fixed 5 columns on desktop (roster reads as a tidy 5-up wall); steps down on
+   narrower screens. Adding/removing artists still reflows within the column count. */
+.mwall{display:grid;grid-template-columns:repeat(5,1fr);
   gap:clamp(8px,1vw,18px);margin-top:clamp(8px,1.5vh,20px)}
+@media(max-width:1100px){.mwall{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:820px){.mwall{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:560px){.mwall{grid-template-columns:repeat(2,1fr)}}
 .mcell{position:relative;aspect-ratio:4/5;overflow:hidden;background:#1B1818;margin:0}
 /* photos arrive already B&W, so we dim slightly at rest and lift brightness +
    scale on hover (no grayscale→colour reveal — that'd be a no-op on mono art). */
