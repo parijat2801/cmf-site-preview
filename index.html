@@ -590,10 +590,11 @@ body.no-grain::after{opacity:0}
 .fb-list li{font-weight:400;font-size:var(--t-body);line-height:1.3;opacity:.9;
   padding:.6em 0;border-top:var(--hair) solid rgba(231,225,212,.18)}
 .fb-list li::before{content:"—";color:var(--red);margin-right:.6em;font-weight:700}
-.fb-write{margin-top:calc(clamp(20px,3.5vh,40px)*var(--fz));font-weight:500;font-size:var(--t-body)}
-.fb-write a{color:var(--red);text-decoration:none;border-bottom:var(--hair) solid currentColor;
-  padding-bottom:.1em;transition:opacity .5s var(--ease)}
-.fb-write a:hover{opacity:.6}
+/* same scale as .fb-lead; the email carries a .mark highlight (no underline) */
+.fb-write{margin-top:calc(clamp(28px,4.5vh,56px)*var(--fz));font-weight:900;letter-spacing:-.02em;
+  line-height:1.05;font-size:calc(clamp(1.5rem,min(3vw,4vh),2.8rem)*var(--fz));max-width:22ch}
+.fb-write a{color:inherit;text-decoration:none;transition:opacity .5s var(--ease)}
+.fb-write a:hover{opacity:.75}
 
 /* ============ WE WORK WITH — brand red field, cream type (matches THE
    MISFITS ACTS exactly: .head/.mark heading, light-weight cream body copy,
@@ -882,7 +883,7 @@ body.no-grain::after{opacity:0}
         </div>
       </div>
 
-      <p class="fb-write reveal d3" data-m>Write to us at <a href="mailto:hello@culturalmisfits.com">hello@culturalmisfits.com</a></p>
+      <p class="fb-write reveal d3" data-m>Write to us at <a href="mailto:hello@culturalmisfits.com"><span class="mark mark-w" style="--hl:var(--red)">hello@culturalmisfits.com</span></a></p>
     </div>
   </section>
 
