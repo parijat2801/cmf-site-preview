@@ -358,6 +358,7 @@ body.no-grain::after{opacity:0}
 .mproof{margin-top:calc(clamp(18px,3vh,40px)*var(--fz));font-weight:300;font-size:calc(var(--t-lead)*var(--fz))}
 .mproof b{font-weight:900;font-style:italic;color:var(--yellow)}
 @media(hover:none){.mcell img{filter:brightness(.9)}}
+@media(prefers-reduced-motion:reduce){.mcell:hover img{transform:none}}
 
 /* ============ VERTICAL MODAL — image left, paragraphs right, ‹ › ✕ bottom ============ */
 .vmodal{position:fixed;inset:0;z-index:950;display:flex;opacity:0;pointer-events:none;transition:opacity .45s var(--ease)}
@@ -1109,8 +1110,10 @@ function buildShot(shot){
     shot.classList.remove('flip');void shot.offsetWidth;shot.classList.add('flip');
   }
   const next=()=>show(cur+1);
+  const reduceMotion=matchMedia('(prefers-reduced-motion:reduce)').matches;
   shot.addEventListener('pointerenter',e=>{
     if(e.pointerType==='touch')return;
+    if(reduceMotion)return;   // keep the first image static; no hover auto-cycle
     next(); shot.classList.add('cycling');
     timer=setInterval(next,900);
   });
@@ -1145,6 +1148,7 @@ const peek=document.getElementById('apeek');
 const peekImg=peek.querySelector('img');
 const peekCap=peek.querySelector('figcaption');
 const hoverable=matchMedia('(hover:hover)').matches;
+const peekReduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
 if(hoverable){
   let px=0,py=0,tx=0,ty=0,rafOn=false,shownY=0;
   function loop(){
@@ -1156,7 +1160,11 @@ if(hoverable){
     peekImg.src=item.dataset.photo;
     peekCap.textContent=item.dataset.name||'';
     shownY=scrollY;
-    if(!rafOn){px=x+28;py=y-210;rafOn=true;requestAnimationFrame(loop);}
+    if(peekReduce){
+      // no cursor-trailing rAF loop: snap straight to position, stay put
+      px=x+28;py=y-210;
+      peek.style.transform=`translate(${px}px,${py}px)`;
+    }else if(!rafOn){px=x+28;py=y-210;rafOn=true;requestAnimationFrame(loop);}
     peek.classList.add('on');
   }
   function hidePeek(){ peek.classList.remove('on'); rafOn=false; }
