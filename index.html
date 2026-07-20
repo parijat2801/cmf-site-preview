@@ -557,7 +557,8 @@ body.no-grain::after{opacity:0}
    currentColor hairlines, .onum-style italic numerals). ============ */
 .ww-list{margin-top:calc(clamp(28px,5vh,60px)*var(--fz))}
 .ww-row{display:flex;gap:clamp(14px,2.2vw,32px);align-items:baseline;
-  border-top:var(--hair) solid currentColor;padding-block:clamp(26px,3vw,52px)}
+  /* rule matches the number color exactly: cream at .6 (numbers are --cream, opacity:.6) */
+  border-top:var(--hair) solid rgba(231,225,212,.6);padding-block:clamp(26px,3vw,52px)}
 .ww-row:first-of-type{border-top:0}
 .ww-no{flex:0 0 auto;font-weight:900;font-style:italic;font-size:clamp(1.4rem,2vw,2.4rem);
   color:var(--cream);opacity:.6;line-height:1}
