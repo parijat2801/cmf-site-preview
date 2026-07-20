@@ -20,17 +20,17 @@
 :root{
   /* brand palette — exact values from brand.css (the brand book) */
   --ink:#231F20;--cream:#E7E1D4;--white:#FFFFFF;
-  --red:#DB1A21;--yellow:#FFDD00;--green:#009E49;--blue:#084CA1;--pink:#E5018C;
+  --red:#DB1A21;--yellow:#FFDD00;--green:#009E49;--blue:#084CA1;
   /* type + spacing scale with BOTH axes: min(vw, vh) keeps a short, wide
      window (laptops) from getting poster-sized type that overflows it */
   --gutter:clamp(24px,6vw,120px);--sec-y:clamp(56px,9vh,160px);
   --t-label:clamp(.7rem,.8vw,.92rem);--t-body:clamp(1rem,1.15vw,1.35rem);
-  --t-lead:clamp(1.3rem,min(2.2vw,3vh),2.4rem);--t-head:clamp(2.4rem,min(7.5vw,10vh),8.5rem);--t-mega:clamp(3rem,min(9.5vw,14vh),12rem);
+  --t-lead:clamp(1.3rem,min(2.2vw,3vh),2.4rem);--t-head:clamp(2.4rem,min(7.5vw,10vh),8.5rem);
   --hair:1.5px;--font:'NHG','Helvetica Neue',Helvetica,Arial,sans-serif;
   /* ONE motion language — heavy, decelerating, no bounce. */
   --ease:cubic-bezier(.16,1,.3,1);
   --ease-io:cubic-bezier(.7,0,.2,1);
-  --dur:1s;--dur-slow:1.25s;
+  --dur:1s;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-font-smoothing:antialiased}
@@ -62,8 +62,6 @@ body.no-grain::after{opacity:0}
   box-shadow:0 -12px 32px rgba(0,0,0,.3)}
 .card.tall{justify-content:flex-start}
 .card.dark{background:radial-gradient(120% 120% at 50% 35%,#2A2526,#231F20 78%);color:var(--cream)}
-.card.blue{background:var(--blue);color:var(--cream)}
-.card.cream{background:var(--cream);color:var(--ink)}
 .card.red{background:var(--red);color:var(--cream)}
 .spacer{height:0;pointer-events:none}
 .foot{box-shadow:none}
@@ -249,55 +247,7 @@ body.no-grain::after{opacity:0}
 .hero.settled .flash{display:none;animation:none}
 @media(prefers-reduced-motion:reduce){.hero .flash,.tv .roll{display:none}.hero .content{clip-path:none;animation:none}}
 
-/* ============ MANIFESTO — designer photo bg, natural colour, INK type ============ */
-/* Photo covers the section at its natural brightness (no scrim, like the
-   designer). Text is ink/black so it reads on the bright image. The .blue
-   class stays only as a load fallback behind the photo. */
-.manifesto{isolation:isolate;color:var(--ink)}
-.manifesto .sec-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:right center;z-index:0;pointer-events:none}
-.manifesto .wrap{position:relative;z-index:2}
-.manifesto .thesis{font-weight:900;letter-spacing:-.03em;line-height:.98;font-size:calc(clamp(1.7rem,min(4.4vw,6vh),4.6rem)*var(--fz));max-width:20ch;color:var(--ink)}
-.thesis > span{display:block}
-.thesis .w3{font-weight:300}
-.thesis .acc{font-style:italic}
-/* second sentence ("Culture happens in the margins") reads white over the
-   photo, matching the designer; first sentence stays ink */
-.thesis .wht{color:var(--white)}
-/* one continuous top line across all three beats. It's always present (dim);
-   a single .lfill bar is scaled left→right by the scrub timeline, so the line
-   "draws" smoothly as you scroll — width is driven by scroll, not a timer. */
-.beats{position:relative;margin-top:calc(clamp(32px,6vh,80px)*var(--fz));
-  display:grid;grid-template-columns:repeat(3,1fr);
-  border-top:var(--hair) solid rgba(35,31,32,.28)}
-.beats .lfill{position:absolute;top:calc(-1*var(--hair));left:0;height:var(--hair);width:100%;
-  background:var(--ink);transform:scaleX(0);transform-origin:left}
-.beat{padding:calc(clamp(16px,2.4vh,32px)*var(--fz)) clamp(20px,2vw,40px) 0 0}
-.beat h3{margin-top:.35em;font-weight:900;font-size:calc(var(--t-lead)*var(--fz));letter-spacing:-.02em;line-height:1;color:var(--ink)}
-.beat p{margin-top:.6em;font-weight:400;font-size:var(--t-body);line-height:1.4;max-width:42ch;color:var(--ink)}
-@media(max-width:860px){.beats{grid-template-columns:1fr;gap:8px}}
-
-/* ============ QUOTE — B&W video field, dark scrim, white type ============ */
-.quote{isolation:isolate;color:var(--white)}
-.quote .sec-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;z-index:0;pointer-events:none;
-  filter:grayscale(1) contrast(1.05)}
-.quote .scrim{position:absolute;inset:0;z-index:1;pointer-events:none;background:rgba(0,0,0,.62)}
-.quote .wrap{position:relative;z-index:10}
-.quote blockquote{font-weight:900;letter-spacing:-.03em;line-height:1.02;font-size:calc(clamp(1.9rem,min(5.2vw,7vh),5.6rem)*var(--fz));max-width:20ch;color:var(--white)}
-.quote blockquote > span{display:block}
-.quote .dot{display:inline;color:var(--red)}
-.quote cite{display:block;margin-top:1.2em;font-style:normal;font-weight:500;letter-spacing:.16em;text-transform:uppercase;font-size:var(--t-label);opacity:.7;color:var(--white)}
-.quote .mis{font-style:italic}
-
 /* ============ AUDIENCE — editorial index + hover photo reveal ============ */
-.aidx{margin-top:clamp(10px,2vw,30px)}
-.arow{display:grid;grid-template-columns:clamp(48px,7vw,110px) 1fr auto;align-items:baseline;gap:clamp(14px,2vw,40px);
-  border-top:var(--hair) solid rgba(231,225,212,.28);padding-block:calc(clamp(14px,2.6vh,34px)*var(--fz));
-  opacity:.55;transition:opacity .5s var(--ease);cursor:default}
-.arow:last-child{border-bottom:var(--hair) solid rgba(231,225,212,.28)}
-.arow:hover,.arow.open{opacity:1}
-.arow .ano{font-weight:900;font-style:italic;font-size:clamp(1.1rem,1.6vw,2rem);color:var(--yellow)}
-.arow h3{font-weight:900;letter-spacing:-.03em;line-height:.94;font-size:calc(clamp(2rem,min(5.2vw,7vh),6rem)*var(--fz))}
-.arow .adesc{font-weight:300;font-size:var(--t-body);opacity:.85;text-align:right;max-width:30ch;justify-self:end}
 /* floating photo that trails the cursor over the index (pointer devices) */
 .apeek{position:fixed;left:0;top:0;z-index:1200;width:min(340px,26vw);aspect-ratio:340/420;overflow:hidden;
   pointer-events:none;clip-path:inset(100% 0 0 0);transition:clip-path .55s var(--ease-io);will-change:transform}
@@ -305,18 +255,8 @@ body.no-grain::after{opacity:0}
 .apeek img{width:100%;height:100%;object-fit:cover}
 .apeek figcaption{position:absolute;left:12px;bottom:10px;right:12px;font-weight:900;font-style:italic;font-size:1rem;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.7)}
 .apeek figcaption:empty{display:none}
-/* touch fallback: rows become an accordion */
-.aphoto{display:none}
 @media(hover:none){
   .apeek{display:none}
-  .arow{cursor:pointer}
-  .aphoto{display:block;grid-column:1/-1;max-height:0;overflow:hidden;transition:max-height .6s var(--ease-io)}
-  .arow.open .aphoto{max-height:70vw}
-  .aphoto img{width:100%;height:auto;padding-top:14px}
-}
-@media(max-width:860px){
-  .arow{grid-template-columns:clamp(36px,10vw,60px) 1fr}
-  .arow .adesc{grid-column:2;text-align:left;justify-self:start;margin-top:.4em}
 }
 
 /* ============ OFFERINGS — three pillars, hover auto-cycles the photos ============ */
@@ -345,7 +285,6 @@ body.no-grain::after{opacity:0}
 .oshot.cycling .ticks i.cur::after{animation:tickfill .9s linear forwards}
 @keyframes tickfill{0%{transform:scaleX(0)}100%{transform:scaleX(1)}}
 .oshot .idx{position:absolute;right:14px;bottom:12px;z-index:4;font-weight:900;font-style:italic;font-size:1.05rem;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.6)}
-.offer .otext .onum{font-weight:900;font-style:italic;font-size:clamp(1.4rem,2vw,2.4rem);color:var(--co);line-height:1}
 .offer .otext h3{margin-top:.2em;font-weight:900;font-size:clamp(2rem,4.4vw,4.6rem);letter-spacing:-.03em;line-height:.92;color:var(--co)}
 .offer .otext p{margin-top:.9em;font-weight:300;font-size:var(--t-lead);opacity:.86;line-height:1.35;max-width:34ch}
 /* the lead's name at full Black weight (like the headers) — same size, more thickness */
@@ -491,7 +430,6 @@ body.no-grain::after{opacity:0}
    scale (near the "Where…" beats), cream. */
 .mf-lede{font-weight:900;letter-spacing:-.03em;line-height:.94;color:var(--cream);
   font-size:clamp(2rem,min(6vw,7vh),5.4rem);max-width:16ch;margin-bottom:clamp(50px,9vh,120px)}
-.mf-lede .mf-mk{background:linear-gradient(transparent 60%,var(--red) 0);padding:0 .05em;color:var(--cream)}
 
 /* Each beat is a 2-column ROW (text | photo), so text and photo are in the same
    flow and always stay aligned at every window size — no absolute drift, no
@@ -615,11 +553,8 @@ body.no-grain::after{opacity:0}
 .fb-q-tr{left:75%;top:28%}
 .fb-q-bl{left:25%;top:72%}
 .fb-q-br{left:75%;top:72%}
-/* FINAL BEAT — handwritten note + arrow pointing at "Cultural Leaders".
-   Sits above/right of the plot; appears LAST, after the whole draw sequence. */
 /* FINAL BEAT — handwritten note sits in the TOP-RIGHT quadrant, above the
-   "Cultural Leaders" label; a short scribbled arrow drops from the note down to
-   the label. Appears LAST, after the whole draw sequence. */
+   "Cultural Leaders" label. Appears LAST, after the whole draw sequence. */
 .fb-note{position:absolute;right:-2%;top:-16%;z-index:3;color:var(--red);
   width:max-content;text-align:center;pointer-events:none;transform-origin:top right;
   opacity:0;transform:translateY(8px) rotate(-3deg);
@@ -637,8 +572,6 @@ body.no-grain::after{opacity:0}
   /* give the note room above a shorter mobile plot */
   .fb-note{top:-24%;font-size:1em}
 }
-.fb-sub{margin-top:calc(clamp(28px,5vh,60px)*var(--fz));font-weight:300;
-  font-size:calc(var(--t-lead)*var(--fz));line-height:1.2;max-width:28ch}
 .fb-list{margin-top:.6em;list-style:none;max-width:44ch}
 .fb-list li{font-weight:400;font-size:var(--t-body);line-height:1.3;opacity:.9;
   padding:.6em 0;border-top:var(--hair) solid rgba(231,225,212,.18)}
@@ -721,9 +654,9 @@ body.no-grain::after{opacity:0}
         <!-- intentional line breaks: each .ph is one sense-unit that stays whole
              (never wraps mid-phrase); .bp is the break between them. On phones the
              fit-scale shrinks type so phrases still hold one line each. -->
-        <h1 class="hbeat mega on" id="mega" data-hb><span class="ph">The connected and culturally fluid generation</span><br class="bp"><span class="ph">lives, feels and creates differently.</span></h1>
-        <p class="hbeat mega" data-hb><span class="ph">They deserve better.</span></p>
-        <p class="hbeat mega sig" data-hb><span class="ph">A Catalyst for Culture.</span><br class="bp"><span class="ph">A Sanctuary for the Misfits.</span><br class="bp"><span class="ph">We are Cultural <span class="mis">(Mis)</span>fits.</span></p>
+        <h1 class="hbeat mega on" id="mega"><span class="ph">The connected and culturally fluid generation</span><br class="bp"><span class="ph">lives, feels and creates differently.</span></h1>
+        <p class="hbeat mega"><span class="ph">They deserve better.</span></p>
+        <p class="hbeat mega sig"><span class="ph">A Catalyst for Culture.</span><br class="bp"><span class="ph">A Sanctuary for the Misfits.</span><br class="bp"><span class="ph">We are Cultural <span class="mis">(Mis)</span>fits.</span></p>
       </div>
     </div>
     <!-- idle-advance meter: fills over the dwell before the next beat auto-types.
@@ -1191,7 +1124,7 @@ document.querySelectorAll('.offer,.witem').forEach(o=>oio.observe(o));
 })();
 
 /* ---------- hover peek: the bigger image trails the cursor over any
-   .peekzone (audience index rows + the misfits wall); touch = accordion ---------- */
+   .peekzone (the misfits wall) ---------- */
 const peek=document.getElementById('apeek');
 const peekImg=peek.querySelector('img');
 const peekCap=peek.querySelector('figcaption');
