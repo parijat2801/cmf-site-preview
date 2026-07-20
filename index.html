@@ -323,6 +323,10 @@ body.no-grain::after{opacity:0}
    image sit close, and the image is large (fills its column). No mid-row void. */
 .offer{display:grid;grid-template-columns:1fr 1fr;gap:clamp(24px,3vw,64px);align-items:center;
   padding-block:clamp(24px,4vh,56px);border-top:var(--hair) solid rgba(231,225,212,.16)}
+/* alternating layout, like the Acts (.witem): on even offers the image + text
+   swap columns so the section zig-zags. Markup order is .oshot then .otext. */
+.offer:nth-of-type(even) .oshot{order:2}
+.offer:nth-of-type(even) .otext{order:1}
 /* larger image, like Acts (up to 72vh), filling its column */
 .oshot{position:relative;aspect-ratio:1/1;width:min(100%,72vh);justify-self:start;overflow:hidden;user-select:none;background:#1B1818;--edge:var(--co)}
 .oshot::before{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;box-shadow:inset 0 0 0 0 var(--edge);transition:box-shadow .5s var(--ease)}
@@ -733,9 +737,9 @@ body.no-grain::after{opacity:0}
     <div class="mf-ustage">
       <div class="mf-uhead mf-rise">For every square hole, round peg and Misfit: tired of one-size-fits-all narratives?</div>
       <div class="mf-reel" id="mf-reel">
-        <figure class="mf-card" data-mfcard><img src="assets/brigade/3.png" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Curious</h4><div class="mf-q">Do you ask why and how, more than what?</div></figcaption></figure>
-        <figure class="mf-card" data-mfcard><img src="assets/brigade/2.png" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Expressive</h4><div class="mf-q">Do you use music, fashion and memes to introduce yourself?</div></figcaption></figure>
-        <figure class="mf-card" data-mfcard><img src="assets/brigade/9.png" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Culturally Fluid</h4><div class="mf-q">Do you live with contradictions — and are OK with it?</div></figcaption></figure>
+        <figure class="mf-card" data-mfcard><img src="assets/traits/curious.jpg" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Curious</h4><div class="mf-q">Do you ask why and how, more than what?</div></figcaption></figure>
+        <figure class="mf-card" data-mfcard><img src="assets/traits/expressive.jpg" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Expressive</h4><div class="mf-q">Do you use music, fashion and memes to introduce yourself?</div></figcaption></figure>
+        <figure class="mf-card" data-mfcard><img src="assets/traits/culturally-fluid.jpg" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Culturally Fluid</h4><div class="mf-q">Do you live with contradictions — and are OK with it?</div></figcaption></figure>
       </div>
     </div>
     <div class="mf-reel-runway" aria-hidden="true"></div>
@@ -805,7 +809,6 @@ body.no-grain::after{opacity:0}
           <span class="ticks"><i class="cur"></i><i></i><i></i></span>
         </div>
         <div class="otext" data-m>
-          <div class="onum">01</div>
           <h3>Culturist Network</h3>
           <p>Writers, anthropologists, designers, thinkers, and community-builders who document evolving cultures, identities, and truths. By bringing lived context to every story, they shape how narratives are told and co-create collective experiences.</p>
           <a class="more" href="#">Read more ↗</a>
@@ -818,10 +821,9 @@ body.no-grain::after{opacity:0}
           <span class="ticks"><i class="cur"></i><i></i><i></i></span>
         </div>
         <div class="otext" data-m>
-          <div class="onum">02</div>
           <h3>IRL &amp; Live Experiences</h3>
           <p>Experiences that feel less like events and more like temporary worlds. Built around subcultures, shared identities, and creative rituals, these IRL and live experiences are where misfit communities come together to express, exchange, and belong.</p>
-          <a class="more" href="#">Read more ↗</a>
+          <a class="more" href="#work" data-scroll>Explore ↗</a>
         </div>
       </article>
 
@@ -831,7 +833,6 @@ body.no-grain::after{opacity:0}
           <span class="ticks"><i class="cur"></i><i></i><i></i></span>
         </div>
         <div class="otext" data-m>
-          <div class="onum">03</div>
           <h3>Film Studio</h3>
           <p>Led by <b class="lead-name">Nirvair Rai</b>, this production and narrative arm of the Cultural (Mis)fits ecosystem collaborates with brands, media, fashion, and CSR initiatives to create authentic, culture-native content rooted in real communities.</p>
           <p class="partner">Partner with us to create:</p>
@@ -1209,6 +1210,7 @@ function closeVertical(){
   setTimeout(()=>{vmodal.hidden=true;},450);
 }
 document.querySelectorAll('.offer .more').forEach(a=>{
+  if(a.hasAttribute('data-scroll'))return;         // this one scrolls to a section (handled by the anchor handler), not the modal
   const id=a.closest('.offer').id;
   a.addEventListener('click',e=>{e.preventDefault();openVertical(id);});
 });

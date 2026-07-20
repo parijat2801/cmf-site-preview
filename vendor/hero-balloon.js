@@ -57,6 +57,26 @@ export function initHeroBalloon(canvas) {
   const pivot = new THREE.Group();
   scene.add(pivot);
 
+  // ---- BACKGROUND IMAGE PLANE: a real visible plane behind the glass glyph. The
+  //      glass material's `transmission` samples the scene rendered BEHIND it, so
+  //      THIS plane is what the glass refracts/bends. Swap BG_IMAGE for any asset.
+  const BG_IMAGE = 'assets/crew.jpg';               // crew shot (red/black streetwear)
+  const bgTex = new THREE.TextureLoader().load(BG_IMAGE);
+  bgTex.colorSpace = THREE.SRGBColorSpace;
+  const bgPlane = new THREE.Mesh(
+    new THREE.PlaneGeometry(1, 1),
+    new THREE.MeshBasicMaterial({ map: bgTex, toneMapped: false })
+  );
+  bgPlane.position.set(0, 0, -3);                 // behind the glyph, faces the camera
+  scene.add(bgPlane);
+  // size the bg plane to cover the view at its depth (updated in fit())
+  function fitBg() {
+    const dist = camera.position.z - bgPlane.position.z;
+    const vH = 2 * Math.tan((camera.fov * Math.PI / 180) / 2) * dist;
+    const vW = vH * camera.aspect;
+    bgPlane.scale.set(vW, vH, 1);
+  }
+
   // ---- reflection backdrop: a plane behind the balloon carrying the hero's
   //      headline + ink tone, so the CubeCamera has the actual page copy to
   //      mirror onto the foil (the balloon lives on a WebGL canvas OVER the DOM,
@@ -216,48 +236,27 @@ export function initHeroBalloon(canvas) {
 
   const normalMap = makeFoilCrinkleNormalMap();
 
-  // POLISHED STAINLESS STEEL — neutral mirror metal. A metalness:1 mirror in a
-  // black room reflects black (silhouette); we DON'T fake that with a rim glow —
-  // instead the studio light-cards above give the mirror real bright streaks to
-  // reflect (product-shot lighting), so the steel reads as steel. clearcoat is a
-  // sharp lacquer top coat; the faint normalMap ripples the streaks like brushed
-  // liquid metal. A cool, faint Fresnel rim (white-blue) just cleans up the
-  // silhouette at grazing angles where a card might not land — no brand colour.
-  const fresnelUniforms = {
-    uFresnelColor: { value: new THREE.Color(0xbcd0ff) }, // cool steel-white rim
-    uFresnelPower: { value: 4.0 },                        // thin, subtle
-    uFresnelGain:  { value: 0.35 },                       // faint — cards do the real work
-  };
+  // CLEAR REFRACTIVE GLASS — the glyph is a transparent glass object that bends
+  // the background image seen THROUGH it. transmission=1 makes the surface see-
+  // through; ior 1.5 + thickness set how hard the light bends (the visible warp);
+  // roughness 0 keeps it clear (not frosted). metalness 0 — it's a dielectric.
+  // envMap gives crisp surface highlights/reflections on the glass so it reads as
+  // a solid physical object, not just a hole. transmission samples the SCENE
+  // rendered behind the glass — so the bg image plane (added below) is what warps.
   const foil = new THREE.MeshPhysicalMaterial({
-    color: new THREE.Color(0xaab0b8),            // neutral steel gray
-    metalness: 1.0,
-    roughness: 0.13,                             // soft polished steel: bright from the env, text ghosts through
+    color: new THREE.Color(0xffffff),            // clear (no tint)
+    metalness: 0.0,
+    roughness: 0.0,                              // clear glass, not frosted
+    transmission: 1.0,                           // fully see-through -> refraction
+    ior: 1.5,                                    // glass index of refraction
+    thickness: 1.6,                              // how much light bends through the body
     clearcoat: 1.0,
-    clearcoatRoughness: 0.06,
-    normalMap,                                   // faint brushed-metal ripple
-    normalScale: new THREE.Vector2(0.1, 0.1),
-    // Reflect the live CubeCamera (bright studio env as background + the headline
-    // backdrop) so the steel MIRRORS THE TEXT. This only works now that the cube
-    // capture has a bright background (scene.background = env during capture) —
-    // previously the cube was mostly black, which caused the silhouette bug.
-    envMap: cubeRT.texture,
-    envMapIntensity: 1.4,
+    clearcoatRoughness: 0.0,
+    // no explicit envMap — the glass inherits scene.environment (the bright PMREM)
+    // for its surface highlights. The old CubeCamera reflection of the hero text
+    // is removed (glass refracts the bg image; it doesn't need to mirror the copy).
+    envMapIntensity: 1.0,
   });
-  // Faint cool Fresnel rim to hold the silhouette where no light-card reflects.
-  foil.onBeforeCompile = (shader) => {
-    shader.uniforms.uFresnelColor = fresnelUniforms.uFresnelColor;
-    shader.uniforms.uFresnelPower = fresnelUniforms.uFresnelPower;
-    shader.uniforms.uFresnelGain  = fresnelUniforms.uFresnelGain;
-    shader.fragmentShader =
-      'uniform vec3 uFresnelColor;\nuniform float uFresnelPower;\nuniform float uFresnelGain;\n'
-      + shader.fragmentShader.replace(
-        '#include <emissivemap_fragment>',
-        `#include <emissivemap_fragment>
-         float _fdNV = clamp(dot(normalize(normal), normalize(vViewPosition)), 0.0, 1.0);
-         float _fres = pow(1.0 - _fdNV, uFresnelPower) * uFresnelGain;
-         totalEmissiveRadiance += uFresnelColor * _fres;`
-      );
-  };
 
   let model = null, baseScale = 1, baseY = 0, ready = false;
 
@@ -295,23 +294,23 @@ export function initHeroBalloon(canvas) {
     renderer.setSize(w, h, false);
     camera.aspect = w / h; camera.updateProjectionMatrix();
     const portrait = w < 760;
-    pivot.position.x = portrait ? 0.4 : 1.8;
+    pivot.position.x = 0;                          // centered (was 1.8, right-offset)
     baseY = portrait ? 0.1 : 0.25;
     pivot.position.y = baseY;
     baseScale = portrait ? 0.85 : Math.min(1.15, h / 640);
     pivot.scale.setScalar(baseScale);
+    fitBg();                                       // keep the bg image covering the view
   }
   fit();
   addEventListener('resize', fit, { passive: true });
 
-  // ---- pointer + scroll parallax --------------------------------------------
-  let px = 0, py = 0, tpx = 0, tpy = 0, scrollT = 0;
+  // ---- pointer parallax (no scroll term: the hero pins, glyph holds still) ----
+  let px = 0, py = 0, tpx = 0, tpy = 0;
   if (!reduced) {
     addEventListener('pointermove', e => {
       tpx = (e.clientX / innerWidth - 0.5) * 2;
       tpy = (e.clientY / innerHeight - 0.5) * 2;
     }, { passive: true });
-    addEventListener('scroll', () => { scrollT = scrollY / innerHeight; }, { passive: true });
   }
 
   let t0 = performance.now(), raf = 0, running = true, frameCount = 0;
@@ -325,36 +324,19 @@ export function initHeroBalloon(canvas) {
         pivot.rotation.set(0, -0.2, 0);
         pivot.position.y = baseY;
       } else {
-        pivot.position.y = baseY + Math.sin(t * 0.6) * 0.12 - scrollT * 0.5;
+        // NOTE: no scrollT term — the hero PINS and the reader scrolls THROUGH it
+        // to swap the headline lines, so scroll-linked drift would make the glyph
+        // wander while it should hold. Idle bob + pointer parallax only.
+        pivot.position.y = baseY + Math.sin(t * 0.6) * 0.12;
         pivot.rotation.y = -0.15 + px * 0.5 + Math.sin(t * 0.35) * 0.18;
-        pivot.rotation.x = -py * 0.2 - scrollT * 0.2 + Math.sin(t * 0.5) * 0.05;
+        pivot.rotation.x = -py * 0.2 + Math.sin(t * 0.5) * 0.05;
         pivot.rotation.z = Math.sin(t * 0.45) * 0.05 + px * 0.06;
         pivot.scale.setScalar(baseScale * (1 + Math.sin(t * 0.9) * 0.02));
       }
 
-      // refresh the reflection: put the cube camera where the balloon is, show the
-      // backdrop (headline) AND set the bright PMREM env as the scene BACKGROUND so
-      // the empty cube faces reflect the studio (not black — that was the silhouette
-      // bug); hide the balloon so it doesn't mirror itself; capture; then restore
-      // (background back to null so the PAGE stays black). Every 2nd frame (~30fps).
-      if ((frameCount++ & 1) === 0) {
-        // sync the reflected text to the hero by swapping to the current beat's
-        // pre-baked texture (opaque, solid — so the reflection never flickers to
-        // "bare"; fading a transparent backdrop let the black void bleed through
-        // the mirror and pop). The card stays a steady ink plane; only the WORDS
-        // change on beat swap.
-        syncActiveBeat();
-        pivot.getWorldPosition(cubeCam.position);
-        scene.background = env;                 // bright studio fills the mirror
-        backdrop.visible = true;                // + the headline text to reflect
-        studio.visible = true;
-        model.visible = false;
-        cubeCam.update(renderer, scene);
-        model.visible = true;
-        studio.visible = false;
-        backdrop.visible = false;
-        scene.background = null;                // page background stays transparent/black
-      }
+      // (Text-reflection removed: the glass refracts the bg image and takes its
+      // surface highlights from scene.environment, so no per-frame CubeCamera
+      // capture of the hero headline is needed.)
     }
     renderer.render(scene, camera);
     raf = requestAnimationFrame(frame);
@@ -378,6 +360,7 @@ export function initHeroBalloon(canvas) {
       cubeRT.dispose(); backdrop.geometry.dispose();
       beatTextures.forEach(t => t.dispose()); backdrop.material.dispose();
       studio.children.forEach(m => { m.geometry.dispose(); m.material.dispose(); });
+      bgPlane.material.map?.dispose(); bgPlane.geometry.dispose(); bgPlane.material.dispose();
       renderer.dispose();
     },
   };
