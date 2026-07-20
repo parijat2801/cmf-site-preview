@@ -16,6 +16,7 @@
 @font-face{font-family:'NHG';src:url('fonts/NeueHaasDisplayBlack.ttf') format('truetype');font-weight:900;font-style:normal;font-display:swap}
 @font-face{font-family:'NHG';src:url('fonts/NeueHaasDisplayBlackItalic.ttf') format('truetype');font-weight:900;font-style:italic;font-display:swap}
 @font-face{font-family:'NHG';src:url('fonts/NeueHaasDisplayThinItalic.ttf') format('truetype');font-weight:200;font-style:italic;font-display:swap}
+@font-face{font-family:'Caveat';src:url('fonts/Caveat-SemiBold.woff2') format('woff2');font-weight:600;font-style:normal;font-display:swap}
 :root{
   /* brand palette — exact values from brand.css (the brand book) */
   --ink:#231F20;--cream:#E7E1D4;--white:#FFFFFF;
@@ -124,14 +125,16 @@ body.no-grain::after{opacity:0}
 
 /* ============ HERO (CRT) — video field, white type, red accent ============ */
 .hero{position:relative;isolation:isolate}
-/* background video — fills the card, sits under every other hero layer */
-.hero .hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;z-index:0;pointer-events:none;
-  filter:grayscale(1) contrast(1.05)}   /* keep the balloon video B&W; the CRT .tv overlay sits on top */
+/* 3D balloon field — a WebGL canvas fills the card, sits under every other
+   hero layer. The poster is a CSS background fallback (WebGL off / reduced
+   motion / load failure) and keeps the same B&W treatment the video had. */
+.hero .hero-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;display:block;
+  background:#231F20 center/cover no-repeat}
+.hero .hero-canvas.poster{background-image:url('assets/brand/balloon-glyph-1k.png');
+  background-size:auto 78%;background-position:66% 42%;filter:grayscale(1) contrast(1.05)}
 /* legibility scrim — darker on the left where the copy sits, lighter on the right */
 .hero::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
   background:linear-gradient(95deg,rgba(0,0,0,.9) 0%,rgba(0,0,0,.68) 34%,rgba(0,0,0,.25) 62%,rgba(0,0,0,.5) 100%)}
-/* mobile: crop the video toward the key area */
-@media(max-width:760px){.hero .hero-video{object-position:66% 38%}}
 .hero .content{position:relative;z-index:10;display:block;flex:1;
   align-items:flex-start;text-align:left;padding-top:clamp(70px,8vh,120px)}
 /* the three beats stack in ONE slot so they crossfade in place — no layout
@@ -321,6 +324,10 @@ body.no-grain::after{opacity:0}
    image sit close, and the image is large (fills its column). No mid-row void. */
 .offer{display:grid;grid-template-columns:1fr 1fr;gap:clamp(24px,3vw,64px);align-items:center;
   padding-block:clamp(24px,4vh,56px);border-top:var(--hair) solid rgba(231,225,212,.16)}
+/* alternating layout, like the Acts (.witem): on even offers the image + text
+   swap columns so the section zig-zags. Markup order is .oshot then .otext. */
+.offer:nth-of-type(even) .oshot{order:2}
+.offer:nth-of-type(even) .otext{order:1}
 /* larger image, like Acts (up to 72vh), filling its column */
 .oshot{position:relative;aspect-ratio:1/1;width:min(100%,72vh);justify-self:start;overflow:hidden;user-select:none;background:#1B1818;--edge:var(--co)}
 .oshot::before{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;box-shadow:inset 0 0 0 0 var(--edge);transition:box-shadow .5s var(--ease)}
@@ -397,27 +404,46 @@ body.no-grain::after{opacity:0}
 .mproof b{font-weight:900;font-style:italic;color:var(--yellow)}
 @media(hover:none){.mcell img{filter:brightness(.9)}}
 
-/* ============ VERTICAL MODAL ============ */
+/* ============ VERTICAL MODAL — image left, paragraphs right, ‹ › ✕ bottom ============ */
 .vmodal{position:fixed;inset:0;z-index:950;display:flex;opacity:0;pointer-events:none;transition:opacity .45s var(--ease)}
 .vmodal.open{opacity:1;pointer-events:auto}
-.vscrim{position:absolute;inset:0;background:rgba(16,14,15,.78)}
-.vpanel{position:relative;margin:auto;width:min(1100px,94vw);max-height:88vh;overflow:auto;overscroll-behavior:contain;
-  background:var(--ink);border:var(--hair) solid rgba(231,225,212,.18);color:var(--cream);
-  padding:clamp(24px,4vh,56px) clamp(22px,3vw,56px);
+.vscrim{position:absolute;inset:0;background:rgba(16,14,15,.72)}
+/* CONTAINED panel (floats with margin, not full-bleed) on the site's exact dark
+   card surface — same radial ink gradient as .card.dark. Two columns: square
+   image | text; a bottom nav row spans both. */
+.vpanel{position:relative;margin:auto;width:min(1180px,90vw);max-height:88vh;color:var(--cream);
+  background:radial-gradient(120% 120% at 50% 35%,#2A2526,#231F20 78%);
+  border:var(--hair) solid rgba(231,225,212,.14);
+  padding:clamp(22px,3vw,52px);
+  display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);
+  gap:clamp(30px,3.4vw,72px);align-items:stretch;
   transform:translateY(26px);transition:transform .5s var(--ease)}
 .vmodal.open .vpanel{transform:none}
-.vclose{position:absolute;top:clamp(16px,2vh,28px);right:clamp(16px,2vw,28px);z-index:2;
-  background:none;border:var(--hair) solid rgba(231,225,212,.4);color:var(--cream);font-family:var(--font);
-  font-size:var(--t-label);font-weight:500;letter-spacing:.18em;text-transform:uppercase;padding:.5em 1em;cursor:pointer;
-  transition:background .4s var(--ease),color .4s var(--ease)}
-.vclose:hover{background:var(--cream);color:var(--ink)}
-.vtitle{margin-top:clamp(24px,4vh,44px);font-weight:900;letter-spacing:-.03em;line-height:.94;font-size:clamp(2rem,4.5vw,4.2rem);color:var(--vc,var(--cream));max-width:16ch}
-.vkick{margin-top:.9em;font-size:var(--t-label);font-weight:500;letter-spacing:.2em;text-transform:uppercase;opacity:.6}
-.vbody{margin-top:.9em;font-weight:300;font-size:var(--t-lead);line-height:1.3;max-width:42ch}
-.vbody b{font-weight:900;font-style:italic}
-.vgrid{grid-template-columns:repeat(3,1fr);margin-top:clamp(18px,3vh,36px)}
-.vgrid .mcell{height:clamp(120px,24vh,260px)}
-@media(max-width:860px){.vgrid{grid-template-columns:repeat(2,1fr)}}
+.vfig{grid-column:1;margin:0;aspect-ratio:1/1;width:100%;overflow:hidden;background:#1B1818}
+.vfig img{width:100%;height:100%;object-fit:cover;display:block}
+/* text column matches the image height; body scrolls, nav row pins to the bottom
+   (= bottom of the image). arrows on the left, close on the right. */
+.vtextcol{grid-column:2;display:flex;flex-direction:column;min-height:0}
+.vbody{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding-right:.4em;
+  font-weight:500;font-size:clamp(1.05rem,1.5vw,1.6rem);line-height:1.28;letter-spacing:-.01em;max-width:34ch}
+.vbody p{margin:0}
+.vbody p + p{margin-top:1.1em}
+.vbody b{font-weight:900}
+/* nav row: sits at the bottom of the text column, level with the image bottom */
+.vnav{display:flex;align-items:center;justify-content:space-between;margin-top:clamp(18px,2.4vh,34px)}
+.varrows{display:flex;gap:clamp(14px,1.6vw,26px)}
+.varrows button,.vclose{background:none;border:0;color:var(--cream);cursor:pointer;padding:6px;line-height:0;
+  opacity:.9;transition:opacity .3s var(--ease),transform .3s var(--ease)}
+.varrows button:hover,.vclose:hover{opacity:1}
+.varrows .vprev:hover{transform:translateX(-3px)}
+.varrows .vnext:hover{transform:translateX(3px)}
+.varrows button:disabled{opacity:.26;cursor:default;transform:none}
+.vmodal.single .varrows{visibility:hidden}      /* single-slide: keep close aligned */
+@media(max-width:860px){
+  .vpanel{grid-template-columns:1fr;gap:22px;align-items:start}
+  .vfig{grid-column:1}
+  .vtextcol{grid-column:1;min-height:0}
+}
 
 /* ============ PARTNER CTA — the page finally asks its audience to act ============ */
 .cta{text-align:left}
@@ -542,7 +568,8 @@ body.no-grain::after{opacity:0}
 .fb-copy .fb-list{margin-top:clamp(20px,3vh,36px)}
 .fb-yaxis{grid-row:1;grid-column:1;display:flex;align-items:center;justify-content:center}
 .fb-yaxis span{writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap;
-  font-weight:500;letter-spacing:.2em;text-transform:uppercase;font-size:var(--t-label);opacity:.6}
+  color:var(--cream);font-weight:700;letter-spacing:-.01em;line-height:1.08;
+  font-size:calc(clamp(.82rem,1.5vw,1.15rem)*var(--fz));opacity:.9}
 .fb-plot{grid-row:1;grid-column:2;position:relative;min-height:clamp(240px,34vh,420px);
   padding:clamp(20px,3vw,40px)}
 /* faint quadrant midlines so it reads as a 2x2, not just a corner bracket */
@@ -562,43 +589,53 @@ body.no-grain::after{opacity:0}
   transition:transform .8s var(--ease) 1s}                 /* draws RIGHT, after Y */
 /* axis arrowheads: pop in as each axis finishes drawing */
 .fb-arrow{position:absolute;width:0;height:0;z-index:1;opacity:0;transition:opacity .3s var(--ease)}
-.fb-arrow-y{top:-6px;left:calc(-1*var(--hair));transform:translateX(-50%);transition-delay:.95s;
+/* Y arrow points UP: 12px-wide base, tip up. Centered on the Y line's centerline
+   (x = hair/2), base bottom flush to the line top (top:0) so the tip caps the line. */
+.fb-arrow-y{top:-9px;left:calc(var(--hair)/2);transform:translateX(-50%);transition-delay:.95s;
   border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:9px solid rgba(231,225,212,.55)}
-.fb-arrow-x{bottom:calc(-1*var(--hair));right:-6px;transform:translateY(50%);transition-delay:1.75s;
+/* X arrow points RIGHT: 12px-tall base, tip right. Centered on the X line's centerline
+   (y = hair/2 from bottom), base right edge flush to the line end (right:0). */
+.fb-arrow-x{bottom:calc(var(--hair)/2);right:-9px;transform:translateY(50%);transition-delay:1.75s;
   border-top:6px solid transparent;border-bottom:6px solid transparent;border-left:9px solid rgba(231,225,212,.55)}
 /* fire the draw when the chart is in view */
 .fb-chart.in .fb-axis-y{transform:scaleY(1)}
 .fb-chart.in .fb-axis-x{transform:scaleX(1)}
 .fb-chart.in .fb-arrow{opacity:1}
 .fb-chart.in .fb-plot::before,.fb-chart.in .fb-plot::after{opacity:1}
-.fb-quad{max-width:22ch;font-weight:900;letter-spacing:-.02em;line-height:1.04;
-  font-size:calc(clamp(1.3rem,min(2.6vw,3.6vh),2.2rem)*var(--fz))}
-/* the target container just positions; the balloon and the callout animate
-   SEPARATELY so the question gets its own emphatic beat after the balloon. */
-.fb-target{position:absolute;top:clamp(14px,2.4vw,28px);right:clamp(14px,2.4vw,28px);
-  max-width:20ch;text-align:right}
-/* balloon pops in first (after the axes), from small, with an overshoot ease */
-.fb-target .fb-glyph{opacity:0;transform:translateY(-10px) scale(.6);transform-origin:top right;
-  transition:opacity .5s var(--ease) 1.95s,transform .6s cubic-bezier(.34,1.56,.64,1) 1.95s}
-.fb-chart.in .fb-target .fb-glyph{opacity:1;transform:none}
-/* THE PUNCHLINE — the question arrives last and BIG: scales up from smaller with
-   a longer, weightier ease and a beat's delay after the balloon, so it lands as
-   the emphasis moment, not just another fade. */
-.fb-target p{opacity:0;transform:scale(.82);transform-origin:top right;
-  transition:opacity .55s var(--ease) 2.35s,transform .7s cubic-bezier(.16,1,.3,1) 2.35s}
-.fb-chart.in .fb-target p{opacity:1;transform:none}
-.fb-target .fb-glyph{display:block;margin-left:auto;width:auto;height:clamp(84px,11vw,150px);margin-bottom:.55em;
-  object-fit:contain}
-.fb-target p{font-weight:900;font-style:italic;letter-spacing:-.01em;line-height:1.1;color:var(--red);
-  font-size:calc(clamp(1.2rem,min(2.2vw,3vh),1.9rem)*var(--fz))}
-.fb-xaxis{grid-row:2;grid-column:2;padding-top:.6em;
-  font-weight:500;letter-spacing:.2em;text-transform:uppercase;font-size:var(--t-label);opacity:.6}
+/* 2x2 quadrant labels — centered in each cell, cream, quiet; fade in with the
+   midlines. Rows = Scale (top high), cols = Cultural Impact (right high). */
+.fb-qlabel{position:absolute;z-index:2;max-width:9ch;text-align:center;color:var(--cream);
+  font-weight:700;letter-spacing:-.01em;line-height:1.08;
+  font-size:calc(clamp(.82rem,1.5vw,1.15rem)*var(--fz));
+  opacity:0;transition:opacity .6s var(--ease) 1.9s;transform:translate(-50%,-50%)}
+.fb-chart.in .fb-qlabel{opacity:.9}
+/* all 4 labels share the same vertical baseline per row (top pair at 28%,
+   bottom pair at 72%) and the same horizontal centers (25% / 75%). */
+.fb-q-tl{left:25%;top:28%}
+.fb-q-tr{left:75%;top:28%}
+.fb-q-bl{left:25%;top:72%}
+.fb-q-br{left:75%;top:72%}
+/* FINAL BEAT — handwritten note + arrow pointing at "Cultural Leaders".
+   Sits above/right of the plot; appears LAST, after the whole draw sequence. */
+/* FINAL BEAT — handwritten note sits in the TOP-RIGHT quadrant, above the
+   "Cultural Leaders" label; a short scribbled arrow drops from the note down to
+   the label. Appears LAST, after the whole draw sequence. */
+.fb-note{position:absolute;right:-2%;top:-16%;z-index:3;color:var(--red);
+  width:max-content;text-align:center;pointer-events:none;transform-origin:top right;
+  opacity:0;transform:translateY(8px) rotate(-3deg);
+  transition:opacity .6s var(--ease) 3.3s,transform .7s cubic-bezier(.16,1,.3,1) 3.3s}
+.fb-chart.in .fb-note{opacity:1;transform:rotate(-3deg)}
+.fb-note p{font-family:'Caveat',cursive;font-weight:600;line-height:1.02;letter-spacing:.01em;
+  font-size:calc(clamp(1.25rem,2vw,1.75rem)*var(--fz));max-width:20ch;margin:0}
+.fb-xaxis{grid-row:2;grid-column:2;padding-top:.6em;text-align:center;
+  color:var(--cream);font-weight:700;letter-spacing:-.01em;line-height:1.08;
+  font-size:calc(clamp(.82rem,1.5vw,1.15rem)*var(--fz));opacity:.9}
 @media(max-width:760px){
   .fb-cols{grid-template-columns:1fr;gap:clamp(28px,6vh,48px)}
   .fb-chart{grid-template-columns:22px 1fr;max-width:none}
-  .fb-target{position:static;margin-top:clamp(18px,4vh,32px);text-align:left;max-width:28ch}
-  .fb-target .fb-glyph{margin-left:0}
   .fb-copy .fb-lead{max-width:none}
+  /* give the note room above a shorter mobile plot */
+  .fb-note{top:-24%;font-size:1em}
 }
 .fb-sub{margin-top:calc(clamp(28px,5vh,60px)*var(--fz));font-weight:300;
   font-size:calc(var(--t-lead)*var(--fz));line-height:1.2;max-width:28ch}
@@ -671,7 +708,10 @@ body.no-grain::after{opacity:0}
        timer advances them so the brand signature always lands. Beat 1 is the
        rest state after power-on — the screen is never empty. -->
   <header class="card dark hero" data-nav="dark" data-navbg="#231F20">
-    <video class="hero-video" src="assets/quote-bg.mp4" poster="assets/quote-bg.jpg" muted loop playsinline autoplay preload="auto"></video>
+    <!-- 3D CMF-glyph balloon (real swept-tube geometry, foil material), rendered
+         B&W to sit inside the CRT hero. Falls back to a poster image if WebGL
+         is unavailable — see .hero-canvas.poster and hero-balloon.js. -->
+    <canvas class="hero-canvas" id="heroCanvas" aria-hidden="true"></canvas>
     <div class="tv"><div class="scan"></div><div class="roll"></div><div class="glass"></div></div>
     <div class="flash"></div>
     <div class="content wrap">
@@ -728,9 +768,9 @@ body.no-grain::after{opacity:0}
     <div class="mf-ustage">
       <div class="mf-uhead mf-rise">For every square hole, round peg and Misfit: tired of one-size-fits-all narratives?</div>
       <div class="mf-reel" id="mf-reel">
-        <figure class="mf-card" data-mfcard><img src="assets/brigade/3.png" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Curious</h4><div class="mf-q">Do you ask why and how, more than what?</div></figcaption></figure>
-        <figure class="mf-card" data-mfcard><img src="assets/brigade/2.png" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Expressive</h4><div class="mf-q">Do you use music, fashion and memes to introduce yourself?</div></figcaption></figure>
-        <figure class="mf-card" data-mfcard><img src="assets/brigade/9.png" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Culturally Fluid</h4><div class="mf-q">Do you live with contradictions — and are OK with it?</div></figcaption></figure>
+        <figure class="mf-card" data-mfcard><img src="assets/traits/curious.jpg" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Curious</h4><div class="mf-q">Do you ask why and how, more than what?</div></figcaption></figure>
+        <figure class="mf-card" data-mfcard><img src="assets/traits/expressive.jpg" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Expressive</h4><div class="mf-q">Do you use music, fashion and memes to introduce yourself?</div></figcaption></figure>
+        <figure class="mf-card" data-mfcard><img src="assets/traits/culturally-fluid.jpg" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Culturally Fluid</h4><div class="mf-q">Do you live with contradictions — and are OK with it?</div></figcaption></figure>
       </div>
     </div>
     <div class="mf-reel-runway" aria-hidden="true"></div>
@@ -800,7 +840,6 @@ body.no-grain::after{opacity:0}
           <span class="ticks"><i class="cur"></i><i></i><i></i></span>
         </div>
         <div class="otext" data-m>
-          <div class="onum">01</div>
           <h3>Culturist Network</h3>
           <p>Writers, anthropologists, designers, thinkers, and community-builders who document evolving cultures, identities, and truths. By bringing lived context to every story, they shape how narratives are told and co-create collective experiences.</p>
           <a class="more" href="#">Read more ↗</a>
@@ -813,20 +852,20 @@ body.no-grain::after{opacity:0}
           <span class="ticks"><i class="cur"></i><i></i><i></i></span>
         </div>
         <div class="otext" data-m>
-          <div class="onum">02</div>
           <h3>IRL &amp; Live Experiences</h3>
           <p>Experiences that feel less like events and more like temporary worlds. Built around subcultures, shared identities, and creative rituals, these IRL and live experiences are where misfit communities come together to express, exchange, and belong.</p>
-          <a class="more" href="#">Read more ↗</a>
+          <a class="more" href="#work" data-scroll>Explore ↗</a>
         </div>
       </article>
 
       <article class="offer reveal" id="film-studio" style="--co:var(--green)">
-        <div class="oshot" data-photos="assets/offer/film-1.webp,assets/offer/film-2.webp,assets/offer/film-3.webp">
-          <span class="idx">1/3</span>
-          <span class="ticks"><i class="cur"></i><i></i><i></i></span>
+        <!-- images come from VERTICALS['film-studio'].slides (same as the modal);
+             buildShot() rebuilds the ticks/idx to match the real count. -->
+        <div class="oshot">
+          <span class="idx">1/4</span>
+          <span class="ticks"><i class="cur"></i><i></i><i></i><i></i></span>
         </div>
         <div class="otext" data-m>
-          <div class="onum">03</div>
           <h3>Film Studio</h3>
           <p>Led by <b class="lead-name">Nirvair Rai</b>, this production and narrative arm of the Cultural (Mis)fits ecosystem collaborates with brands, media, fashion, and CSR initiatives to create authentic, culture-native content rooted in real communities.</p>
           <p class="partner">Partner with us to create:</p>
@@ -876,14 +915,19 @@ body.no-grain::after{opacity:0}
 
       <div class="fb-cols">
         <figure class="fb-chart reveal d2" data-m>
-          <div class="fb-yaxis"><span>Meaningful Scale</span></div>
+          <div class="fb-yaxis"><span>Scale</span></div>
           <div class="fb-plot">
             <span class="fb-axis fb-axis-y" aria-hidden="true"></span>
             <span class="fb-axis fb-axis-x" aria-hidden="true"></span>
             <span class="fb-arrow fb-arrow-y" aria-hidden="true"></span>
             <span class="fb-arrow fb-arrow-x" aria-hidden="true"></span>
-            <div class="fb-target">
-              <img class="fb-glyph" src="assets/brand/balloon-red.png" alt="" decoding="async">
+            <!-- 2x2 quadrant labels: low/high scale (rows) × low/high impact (cols) -->
+            <span class="fb-qlabel fb-q-tl">Niche</span>
+            <span class="fb-qlabel fb-q-tr">Cultural Leaders</span>
+            <span class="fb-qlabel fb-q-bl">Invisible</span>
+            <span class="fb-qlabel fb-q-br">Mainstream</span>
+            <!-- the handwritten note floats above the top-right quadrant -->
+            <div class="fb-note" aria-hidden="true">
               <p>If your brand isn't here, is it even culturally relevant?</p>
             </div>
           </div>
@@ -968,17 +1012,49 @@ body.no-grain::after{opacity:0}
 <div class="vmodal" id="vmodal" hidden>
   <div class="vscrim" data-close></div>
   <article class="vpanel" role="dialog" aria-modal="true">
-    <button class="vclose" data-close aria-label="Close">Close ✕</button>
-    <h3 class="vtitle" id="vtitle"></h3>
-    <p class="vkick" id="vkick"></p>
-    <p class="vbody" id="vbody"></p>
-    <div class="mwall vgrid peekzone" id="vgrid"></div>
+    <figure class="vfig"><img id="vimg" src="" alt="" decoding="async"></figure>
+    <div class="vtextcol">
+      <div class="vbody" id="vbody"></div>
+      <!-- nav row pinned to the bottom of the text column (level with the image bottom):
+           arrows on the left, close on the right -->
+      <div class="vnav">
+        <div class="varrows" aria-label="Slides">
+          <button class="vprev" id="vprev" aria-label="Previous">
+            <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5l-7 7 7 7"/></svg>
+          </button>
+          <button class="vnext" id="vnext" aria-label="Next">
+            <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+        <button class="vclose" data-close aria-label="Close">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+    </div>
   </article>
 </div>
 
 <script src="vendor/lenis.min.js"></script>
 <script src="vendor/gsap.min.js"></script>
 <script src="vendor/ScrollTrigger.min.js"></script>
+
+<!-- 3D hero balloon: init in its own module so a WebGL failure can't take down
+     the main hero/scroll engine. On success it clears the poster fallback. -->
+<script type="module">
+try {
+  const { initHeroBalloon } = await import('./vendor/hero-balloon.js');
+  const cv = document.getElementById('heroCanvas');
+  if (cv) {
+    // no poster by default (avoids the old flat image flashing before the model
+    // loads). Only reveal the poster if the model actually fails to load.
+    cv.addEventListener('balloonfailed', () => cv.classList.add('poster'), { once: true });
+    if (!initHeroBalloon(cv)) cv.classList.add('poster');   // WebGL unavailable
+  }
+} catch (e) {
+  document.getElementById('heroCanvas')?.classList.add('poster');
+}
+</script>
+
 <script type="module">
 /* pretext measures text without touching layout; if it can't load, the
    engine falls back to a rough per-block line estimate. */
@@ -1042,17 +1118,11 @@ document.querySelector('.hero .content')
   const hero=document.querySelector('.hero');
   if(!hero)return;
   const content=hero.querySelector('.content');
-  const vid=hero.querySelector('.hero-video');
-  /* slow the balloon video so it's still playing while the hero text animation
-     (power-on → typewriter beats → signature) runs in front. */
-  if(vid){ vid.playbackRate=0.5;
-    vid.addEventListener('loadedmetadata',()=>{vid.playbackRate=0.5;}); }
   const clipped=()=>content && getComputedStyle(content).clipPath!=='none';
   const settle=()=>{
     if(content) content.style.clipPath='none';
     if(mega && !mega.classList.contains('on')) mega.classList.add('on');
     hero.classList.add('settled');
-    if(vid) vid.play().catch(()=>{});
   };
   document.addEventListener('visibilitychange',()=>{ if(!document.hidden && clipped()) settle(); });
   // hard backstop well past the ~2.9s power-on sequence
@@ -1061,8 +1131,21 @@ document.querySelector('.hero .content')
 
 /* ---------- offerings: hover auto-cycles; touch taps advance ---------- */
 function buildShot(shot){
-  const srcs=(shot.dataset.photos||'').split(',').filter(Boolean);
+  // Single source of truth: if this .oshot belongs to a modal-linked .offer,
+  // use the SAME images the modal shows (VERTICALS[id].slides) so the section's
+  // cycle and the pop-up never drift apart. Otherwise fall back to data-photos.
+  const vid=shot.closest('.offer')?.id;
+  const linked=vid&&VERTICALS[vid]&&VERTICALS[vid].slides;
+  const srcs=linked
+    ? VERTICALS[vid].slides.map(s=>s.image)
+    : (shot.dataset.photos||'').split(',').filter(Boolean);
   if(!srcs.length||shot.dataset.built)return; shot.dataset.built='1';
+  // Rebuild the tick row to match the actual image count (may differ from the
+  // hardcoded markup once the linked list changes length).
+  const ticksEl=shot.querySelector('.ticks');
+  if(ticksEl&&ticksEl.children.length!==srcs.length){
+    ticksEl.innerHTML=srcs.map((_,i)=>i===0?'<i class="cur"></i>':'<i></i>').join('');
+  }
   const ticks=[...shot.querySelectorAll('.ticks i')];
   const idx=shot.querySelector('.idx');
   const imgs=srcs.map((s,i)=>{const im=new Image();im.src=s;im.alt='';im.decoding='async';
@@ -1161,27 +1244,60 @@ if(hoverable){
 }
 
 /* ---------- vertical modal: "Read more" opens the vertical's world ---------- */
+/* Each vertical is an ARRAY OF SLIDES. One slide = { image, paragraphs:[...] }.
+   The ‹ › arrows step through slides (image + its paragraphs advance together).
+   TO EXTEND: add another {image, paragraphs:[...]} object to a vertical's array;
+   add more paragraph strings to any slide's `paragraphs`. That's the whole API. */
 const VERTICALS={
-  'culturist-network':{num:'01',name:'Culturist Network',kick:'Stories from the margins',accent:'var(--red)',
-    body:'A media publication for the ones the algorithm skips — culture-led stories from emerging worlds and unheard voices. Long-form profiles, scene reports, and photo essays that treat the margins as the main stage. First dispatch: late 2026.',
-    photos:['assets/offer/net-1.webp','assets/offer/net-2.webp','assets/offer/net-3.webp','assets/photo-manifesto.webp','assets/photo-rooftop.webp','assets/photo-hands.webp']},
-  'irl-live':{num:'02',name:'IRL & Live Experiences',kick:'Gigs · rooms · tours',accent:'var(--yellow)',
-    body:'Temporary worlds you can stand inside. Ruhbaru — the sound of home as a cinematic live experience — and Jupiter Pe Juice, a 90-minute musical satire. Real rooms, real communities, built to tour India in 2026.',
-    photos:['assets/offer/live-1.webp','assets/offer/live-2.webp','assets/offer/live-3.webp','assets/photo-concert.webp','assets/photo-ruhbaru.webp','assets/photo-jupiter.webp']},
-  'film-studio':{num:'03',name:'Film Studio',kick:'Brand-native storytelling',accent:'var(--green)',
-    body:'Films and brand work that carry cultural consequence. We help brands participate in culture without flattening it — documentary instincts, cinematic craft, and access to scenes no agency deck can fake.',
-    photos:['assets/offer/film-1.webp','assets/offer/film-2.webp','assets/offer/film-3.webp','assets/photo-rooftop.webp','assets/photo-manifesto.webp','assets/photo-hands.webp']},
+  'culturist-network':{accent:'var(--red)',slides:[
+    {image:'assets/offer/net-1.webp',paragraphs:[
+      'A media publication for the ones the algorithm skips — culture-led stories from emerging worlds and unheard voices.',
+      'Long-form profiles, scene reports, and photo essays that treat the margins as the main stage. First dispatch: late 2026.']},
+    {image:'assets/photo-manifesto.webp',paragraphs:[
+      'We document evolving cultures, identities, and truths — bringing lived context to every story.',
+      'Writers, anthropologists, designers, thinkers, and community-builders shape how narratives are told and co-created.']},
+  ]},
+  'irl-live':{accent:'var(--yellow)',slides:[
+    {image:'assets/offer/live-1.webp',paragraphs:[
+      'Temporary worlds you can stand inside. Experiences that feel less like events and more like places.',
+      'Built around subcultures, shared identities, and creative rituals — where misfit communities come together to express, exchange, and belong.']},
+    {image:'assets/photo-ruhbaru.webp',paragraphs:[
+      'Ruhbaru — the sound of home, scaled into a cinematic live experience. India tour 2026.',
+      'Jupiter Pe Juice — a 90-minute musical satire where everyday absurdities become songs, punchlines, and cultural commentary.']},
+  ]},
+  'film-studio':{accent:'var(--green)',slides:[
+    {image:'assets/offer/nirvair-1.webp',paragraphs:[
+      'Films and brand work that carry cultural consequence. Led by Nirvair Rai.']},
+    {image:'assets/offer/nirvair-2.webp',paragraphs:[
+      'His body of work spans documentary projects such as Landless Kings, which followed the lives of Rohingya refugees along the Myanmar–Bangladesh border, and Memory of Land, a reflection on 100 years of the Jallianwala Bagh massacre and the afterlives of colonial trauma, exhibited internationally.']},
+    {image:'assets/offer/nirvair-3.webp',paragraphs:[
+      'Alongside this, Nirvair has built an extensive commercial and fashion portfolio, collaborating with brands and designers including Nike, Netflix, Sabyasachi, Tarun Tahiliani, Satya Paul, Vivo, Lenskart, Elle, and Vogue.']},
+    {image:'assets/offer/nirvair-4.webp',paragraphs:[
+      'We help brands participate in culture without flattening it — documentary instincts, cinematic craft, and access to scenes no agency deck can fake.']},
+  ]},
 };
 const vmodal=document.getElementById('vmodal');
+const vImg=document.getElementById('vimg'), vBody=document.getElementById('vbody');
+const vPrev=document.getElementById('vprev'), vNext=document.getElementById('vnext');
 let lenisRef=null;   // set by the scroll engine; modal pauses it while open
+let vSlides=[], vAt=0;
+
+// render one slide: image on the left, its paragraphs on the right.
+function renderSlide(i){
+  const s=vSlides[i]; if(!s)return;
+  vAt=i;
+  vImg.src=s.image; vImg.alt='';
+  vBody.innerHTML=(s.paragraphs||[]).map(p=>`<p>${p}</p>`).join('');
+  vBody.scrollTop=0;
+  // arrows disabled at the ends (single-slide verticals hide the arrows via CSS)
+  vPrev.disabled=i<=0;
+  vNext.disabled=i>=vSlides.length-1;
+  vmodal.classList.toggle('single',vSlides.length<=1);
+}
 function openVertical(id){
   const v=VERTICALS[id]; if(!v)return;
   vmodal.style.setProperty('--vc',v.accent);
-  document.getElementById('vkick').textContent=v.kick;
-  document.getElementById('vtitle').textContent=v.name;
-  document.getElementById('vbody').textContent=v.body;
-  document.getElementById('vgrid').innerHTML=v.photos.map((p,i)=>
-    `<figure class="mcell" data-photo="${p}"><img src="${p}" alt="" decoding="async"><span class="mno">0${i+1}</span></figure>`).join('');
+  vSlides=v.slides||[]; renderSlide(0);
   vmodal.hidden=false;
   setTimeout(()=>vmodal.classList.add('open'),20);
   lenisRef?.stop(); document.documentElement.style.overflow='hidden';
@@ -1191,12 +1307,20 @@ function closeVertical(){
   lenisRef?.start(); document.documentElement.style.overflow='';
   setTimeout(()=>{vmodal.hidden=true;},450);
 }
+const vGo=d=>renderSlide(Math.max(0,Math.min(vSlides.length-1,vAt+d)));
+vPrev.addEventListener('click',()=>vGo(-1));
+vNext.addEventListener('click',()=>vGo(1));
 document.querySelectorAll('.offer .more').forEach(a=>{
+  if(a.hasAttribute('data-scroll'))return;         // this one scrolls to a section (handled by the anchor handler), not the modal
   const id=a.closest('.offer').id;
   a.addEventListener('click',e=>{e.preventDefault();openVertical(id);});
 });
-vmodal.addEventListener('click',e=>{ if(e.target.dataset.close!==undefined)closeVertical(); });
-addEventListener('keydown',e=>{ if(e.key==='Escape'&&!vmodal.hidden)closeVertical(); });
+vmodal.addEventListener('click',e=>{ if(e.target.closest('[data-close]'))closeVertical(); });
+addEventListener('keydown',e=>{ if(vmodal.hidden)return;
+  if(e.key==='Escape')closeVertical();
+  else if(e.key==='ArrowLeft')vGo(-1);
+  else if(e.key==='ArrowRight')vGo(1);
+});
 
 /* ============================================================
    SCROLL ENGINE — Lenis (feel) + GSAP ScrollTrigger (pinned scenes).

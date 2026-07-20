@@ -1,12 +1,12 @@
-CMF — CRT editorial prototype (rebuilt)
----------------------------------------
-Serve it (ES modules need http, file:// won't work):
-  cd prototype && python3 -m http.server 4711  →  http://localhost:4711/
+CMF — landing page
+------------------
+Single-page site (index.html). ES modules need HTTP (file:// won't work):
 
-deck.html is the working source of truth; index.html is an identical copy
-(kept so "open index.html" muscle memory works). Everything is vendored:
-fonts, images (webp), gsap/ScrollTrigger/lenis/pretext in vendor/.
+  python3 -m http.server 4711   →   http://localhost:4711/
 
-This is a design-direction prototype, NOT the production site.
-Copy/photos/roster names are placeholder-real; CMS + port come later.
-See docs/plans/crt-editorial-handoff.md for the full architecture handoff.
+Everything is vendored (no build step, no network deps):
+  fonts/                 Neue Haas Grotesk
+  assets/                images (webp/jpg/mp4), grain, brand marks
+  vendor/                gsap, ScrollTrigger, lenis, pretext, three.js + loaders
+  vendor/hero-balloon.js the 3D hero balloon (see docs/HERO-BALLOON.md)
+  assets/brand/cmf-hunyuan-uv.glb   the 3D CMF-glyph balloon mesh
