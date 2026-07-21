@@ -101,6 +101,10 @@ body.no-grain::after{opacity:0}
 .klabel{margin-top:.4em;font-weight:500;letter-spacing:.2em;text-transform:uppercase;font-size:var(--t-label);opacity:.6}
 .lede{margin-top:calc(clamp(18px,2.6vh,34px)*var(--fz));font-weight:300;font-size:calc(var(--t-lead)*var(--fz));line-height:1.15;max-width:26ch}
 .lede b{font-weight:900;font-style:italic}
+/* .lede-wide: opt a lede OUT of the narrow 26ch measure so the sentence flows
+   across the column and only wraps when it runs out of real horizontal space
+   (capped at a still-readable measure, not full-bleed). */
+.lede-wide{max-width:52ch}
 
 /* editorial reveals — fade + rise + stagger on enter */
 .reveal{opacity:0;transform:translateY(34px);transition:opacity var(--dur) var(--ease),transform var(--dur) var(--ease)}
@@ -327,7 +331,7 @@ body.no-grain::after{opacity:0}
 .offer .otext .offer-list{margin-top:.5em;list-style:none;max-width:34ch}
 .offer .otext .offer-list li{font-weight:400;font-size:var(--t-body);line-height:1.2;opacity:.9;
   padding:.5em 0;border-top:var(--hair) solid rgba(231,225,212,.18)}
-.offer .otext .offer-list li::before{content:"—";color:var(--co);margin-right:.6em;font-weight:700}
+.offer .otext .offer-list li::before{content:"#";color:var(--co);margin-right:.6em;font-weight:700}
 .offer .otext .date{display:block;margin-top:1em;font-weight:500;letter-spacing:.18em;text-transform:uppercase;font-size:var(--t-label);opacity:.6}
 .offer .otext .more{margin-top:1.3em;display:inline-block;font-weight:500;letter-spacing:.18em;text-transform:uppercase;font-size:var(--t-label);border-bottom:var(--hair) solid var(--co);padding-bottom:.2em;text-decoration:none;color:var(--co);transition:opacity .5s var(--ease)}
 .offer .otext .more:hover{opacity:.6}
@@ -586,7 +590,8 @@ body.no-grain::after{opacity:0}
 /* all 4 labels share the same vertical baseline per row (top pair at 28%,
    bottom pair at 72%) and the same horizontal centers (25% / 75%). */
 .fb-q-tl{left:25%;top:28%}
-.fb-q-tr{left:75%;top:28%}
+.fb-q-tr{left:75%;top:28%;max-width:none;white-space:nowrap;
+  font-size:calc(clamp(1rem,1.9vw,1.45rem)*var(--fz))}
 .fb-q-bl{left:25%;top:72%}
 .fb-q-br{left:75%;top:72%}
 /* FINAL BEAT — handwritten note sits in the TOP-RIGHT quadrant, above the
@@ -596,6 +601,14 @@ body.no-grain::after{opacity:0}
   opacity:0;transform:translateY(8px) rotate(-3deg);
   transition:opacity .6s var(--ease) 3.3s,transform .7s cubic-bezier(.16,1,.3,1) 3.3s}
 .fb-chart.in .fb-note{opacity:1;transform:rotate(-3deg)}
+/* highlighter swipe on "Cultural Leaders" — the marker mechanism is the shared
+   .mark, but its trigger is .reveal.in (fires early); this quadrant label has no
+   .reveal ancestor, so re-arm the swipe on .fb-chart.in and delay it to 3.3s so
+   it lands in sync with the red note appearing above it. */
+.fb-q-tr .mark::before{transition-delay:3.3s}
+.fb-q-tr .mark{transition-delay:3.65s}
+.fb-chart.in .fb-q-tr .mark::before{transform:scaleX(1)}
+.fb-chart.in .fb-q-tr .mark.mark-w{color:var(--cream)}
 .fb-note p{font-family:'Caveat',cursive;font-weight:600;line-height:1.02;letter-spacing:.01em;
   font-size:calc(clamp(1.25rem,2vw,1.75rem)*var(--fz));max-width:20ch;margin:0}
 .fb-xaxis{grid-row:2;grid-column:2;padding-top:.6em;text-align:center;
@@ -611,7 +624,7 @@ body.no-grain::after{opacity:0}
 .fb-list{margin-top:.6em;list-style:none;max-width:44ch}
 .fb-list li{font-weight:400;font-size:var(--t-body);line-height:1.3;opacity:.9;
   padding:.6em 0;border-top:var(--hair) solid rgba(231,225,212,.18)}
-.fb-list li::before{content:"—";color:var(--red);margin-right:.6em;font-weight:700}
+.fb-list li::before{content:"#";color:var(--red);margin-right:.6em;font-weight:700}
 /* same scale as .fb-lead; the email carries a .mark highlight (no underline) */
 .fb-write{margin-top:calc(clamp(28px,4.5vh,56px)*var(--fz));font-weight:900;letter-spacing:-.02em;
   line-height:1.05;font-size:calc(clamp(1.5rem,min(3vw,4vh),2.8rem)*var(--fz));max-width:22ch}
@@ -720,8 +733,7 @@ body.no-grain::after{opacity:0}
        colliding with the deck's .card/.beat/.ph/.mk. ============================ -->
   <section class="mf-collage">
     <div class="mf-panel">
-      <div class="mf-eyebrow mf-rise">Manifesto</div>
-      <div class="mf-lede mf-rise">Mainstream or niche — a space to be seen, understood, and valued.</div>
+      <div class="mf-lede mf-rise">Mainstream or niche<br>a space to be seen, understood, and valued.</div>
       <!-- each beat is a 2-col ROW: text + its own photo in the SAME flow, so the
            photo always sits beside its line and moves with it at every size. The
            photo bleeds off the outer edge; sides alternate. -->
@@ -742,7 +754,7 @@ body.no-grain::after{opacity:0}
 
   <section class="mf-unite" id="audience">
     <div class="mf-ustage">
-      <div class="mf-uhead mf-rise">For every square hole, round peg and Misfit: tired of one-size-fits-all narratives?</div>
+      <div class="mf-uhead mf-rise">For every square hole, round peg and (mis)fit: tired of one-size-fits-all narratives?</div>
       <div class="mf-reel" id="mf-reel">
         <figure class="mf-card" data-mfcard tabindex="0" role="button"><img src="assets/traits/curious.jpg" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Curious</h4><div class="mf-q">Do you ask why and how, more than what?</div></figcaption></figure>
         <figure class="mf-card" data-mfcard tabindex="0" role="button"><img src="assets/traits/expressive.jpg" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Expressive</h4><div class="mf-q">Do you use music, fashion and memes to introduce yourself?</div></figcaption></figure>
@@ -759,8 +771,7 @@ body.no-grain::after{opacity:0}
        Names are PLACEHOLDER until the client supplies the real roster. -->
   <section class="card dark misfits tall" id="misfits" data-nav="dark" data-navbg="#231F20">
     <div class="wrap">
-      <h2 class="head reveal d1" data-m>The Misfits <span class="mark mark-w" style="--hl:var(--red)">Brigade</span></h2>
-      <p class="klabel reveal d1" data-m>Our Artists</p>
+      <h2 class="head reveal d1" data-m>The (Mis)fits <span class="mark mark-w" style="--hl:var(--red)">Brigade</span></h2>
       <!-- CONFIGURABLE ROSTER: uniform, repeating .mcell blocks (the shape TinaCMS
            will bind to later). To add an artist, copy one block and set its photo,
            name (.mname + alt + data-name), and number (.mno). The grid auto-fits
@@ -830,7 +841,7 @@ body.no-grain::after{opacity:0}
         </div>
         <div class="otext" data-m>
           <h3>IRL &amp; Live Experiences</h3>
-          <p>Experiences that feel less like events and more like temporary worlds. Built around subcultures, shared identities, and creative rituals, these IRL and live experiences are where misfit communities come together to express, exchange, and belong.</p>
+          <p>Experiences that feel less like events and more like temporary worlds. Built around subcultures, shared identities, and creative rituals, these IRL and live experiences are where (mis)fit communities come together to express, exchange, and belong.</p>
           <a class="more" href="#work" data-scroll>Explore ↗</a>
         </div>
       </article>
@@ -864,7 +875,7 @@ body.no-grain::after{opacity:0}
        handled by CSS (.witem:nth-child(even), :first-of-type) — no extra work. -->
   <section class="card red work tall" id="work" data-nav="dark" data-navbg="#DB1A21">
     <div class="wrap">
-      <h2 class="head reveal d1" data-m>The Misfits <span class="mark" style="--hl:var(--cream)">Acts.</span></h2>
+      <h2 class="head reveal d1" data-m>The (Mis)fits <span class="mark" style="--hl:var(--cream)">Acts.</span></h2>
       <div class="witem reveal d1">
         <div class="txt" data-m><h3>Ruhbaru</h3><p>The sound of home, scaled into a cinematic live experience. From Sufi to cinematic pop, ghazal to qawwali — an intimate world of longing, devotion, memory, and renewal. <b>Come face to face · India tour 2026.</b></p><a class="fl" href="https://www.instagram.com/ruhbaru.in/" target="_blank" rel="noopener">Follow ↗</a></div>
         <div class="oshot" data-photos="assets/photo-ruhbaru.webp,assets/photo-concert.webp,assets/photo-hands.webp" style="--co:var(--cream)">
@@ -887,7 +898,6 @@ body.no-grain::after{opacity:0}
        language: hairline rules, heavy display type, one accent (red). -->
   <section class="card dark for-brands tall" id="for-brands" data-nav="dark" data-navbg="#231F20">
     <div class="wrap">
-      <p class="klabel reveal d1" data-m>For Brands</p>
       <h2 class="head reveal d1" data-m>Cultural Relevance <span class="mark mark-w" style="--hl:var(--red)">Made Real</span></h2>
 
       <div class="fb-cols">
@@ -900,7 +910,7 @@ body.no-grain::after{opacity:0}
             <span class="fb-arrow fb-arrow-x" aria-hidden="true"></span>
             <!-- 2x2 quadrant labels: low/high scale (rows) × low/high impact (cols) -->
             <span class="fb-qlabel fb-q-tl">Mainstream</span>
-            <span class="fb-qlabel fb-q-tr">Cultural Leaders</span>
+            <span class="fb-qlabel fb-q-tr"><span class="mark mark-w" style="--hl:var(--red)">Cultural Leaders</span></span>
             <span class="fb-qlabel fb-q-bl">Invisible</span>
             <span class="fb-qlabel fb-q-br">Niche</span>
             <!-- the handwritten note floats above the top-right quadrant -->
@@ -931,6 +941,8 @@ body.no-grain::after{opacity:0}
   <section class="card dark calling tall" id="calling" data-nav="dark" data-navbg="#231F20">
     <div class="wrap">
       <h2 class="head reveal d1" data-m>We <span class="mark mark-w" style="--hl:var(--red)">work with</span></h2>
+
+      <p class="lede lede-wide reveal d2" data-m>We’re building a Cultural Operating System that moves forward with culture, with the help of those who don’t conform.</p>
 
       <div class="ww-list">
         <div class="ww-row reveal d1" data-m><span class="ww-no">01</span><p><b>Brands</b> who want to <i>participate in culture,</i> not interrupt it.</p></div>
@@ -972,7 +984,7 @@ body.no-grain::after{opacity:0}
         </div>
       </div>
       <div class="base">
-        <span>© 2023–2026 Cultural Misfits / All Rights Reserved.</span>
+        <span>© 2023–2026 Cultural (Mis)fits / All Rights Reserved.</span>
         <span>Made in the margins.</span>
       </div>
     </div>
@@ -1245,7 +1257,7 @@ const VERTICALS={
   'irl-live':{accent:'var(--yellow)',slides:[
     {image:'assets/offer/live-1.webp',paragraphs:[
       'Temporary worlds you can stand inside. Experiences that feel less like events and more like places.',
-      'Built around subcultures, shared identities, and creative rituals — where misfit communities come together to express, exchange, and belong.']},
+      'Built around subcultures, shared identities, and creative rituals — where (mis)fit communities come together to express, exchange, and belong.']},
     {image:'assets/photo-ruhbaru.webp',paragraphs:[
       'Ruhbaru — the sound of home, scaled into a cinematic live experience. India tour 2026.',
       'Jupiter Pe Juice — a 90-minute musical satire where everyday absurdities become songs, punchlines, and cultural commentary.']},
