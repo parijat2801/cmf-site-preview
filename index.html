@@ -1080,19 +1080,11 @@ addEventListener('scroll',()=>{
 
 /* ---------- hero: settle the CRT glow after power-on ---------- */
 const mega=document.getElementById('mega');   // = hero beat 1, the rest state
-/* The power-on "open" clip-path animation runs on .content. We must settle ONLY
-   when THAT animation ends — NOT on the many bubbled child-glyph 'strike'
-   animations (those end in ~0.3s and would settle far too early, mistiming the
-   power-on and letting content flash through). Filter by target + animationName;
-   idempotent so a stray/duplicate event can't re-blink. */
-(function(){
-  const heroEl=document.querySelector('.hero');
-  const content=heroEl?.querySelector('.content');
-  if(!content)return;
-  content.addEventListener('animationend',e=>{
-    if(e.target===content && e.animationName==='open') heroEl.classList.add('settled');
-  });
-})();
+// the power-on "open" clip-path animation runs on .content; when it ends the
+// broadcast has "tuned in", so soften the chroma glow. (Beat 1 no longer has
+// its own keyframe animation, so we key off .content, which does.)
+document.querySelector('.hero .content')
+  ?.addEventListener('animationend',()=>document.querySelector('.hero').classList.add('settled'),{once:true});
 
 /* Safety net: the power-on clip-path uses forwards-fill. If the tab loads
    backgrounded, throttled rAF can leave the content clipped shut. Guarantee
@@ -1430,12 +1422,6 @@ if(!reduce){
     const vh=()=>window.innerHeight;
     const dwells=new Array(cards.length).fill(0);
     const talls=new Array(cards.length).fill(false);
-    /* hero beat state — declared up here so computeAll() (which sizes the hero
-       pin from the beat count) and the beat engine (defined lower) both see them.
-       heroScrub.setBeat is published by the engine; the hero pin's onUpdate calls it. */
-    const heroScrub={ setBeat:null, lastBeatDone:null };
-    const reduceMain=matchMedia('(prefers-reduced-motion:reduce)').matches;
-    const hbeatCount=document.querySelectorAll('.hero .hbeat').length;
 
     /* fit pass: one-screen cards ([data-fit]) must FIT the window they're
        shown in. Shrink their display scale (--fz) until the card's real
@@ -1466,13 +1452,7 @@ if(!reduce){
            top-aligned would clip whatever hangs below the fold. */
         talls[i]=card.offsetHeight>vh()+2;
         let d;
-        if(card.classList.contains('hero')){
-          /* hero pins long enough to STEP through every beat by scroll: one
-             viewport of scroll advances one beat, plus a final dwell on the last
-             beat before the pin releases. SIG steps + ~0.7vh dwell. */
-          const sig=Math.max(1,hbeatCount-1);
-          d=vh()*(sig+0.7);
-        }
+        if(card.classList.contains('hero')) d=vh()*0.5;   // short hold; scroll releases to the manifesto collage
         else if(card.classList.contains('for-brands')) d=vh()*1.8;  // hold long enough for the chart choreography (~3s) so a fast scroll can't skip it
         else{
           const lines=measureLines(card);
@@ -1489,10 +1469,6 @@ if(!reduce){
     computeAll();
     ScrollTrigger.addEventListener('refreshInit',computeAll);
 
-    /* the hero beat engine (defined further down) publishes its scroll hooks
-       here so the hero PIN's onUpdate can drive beat index from scroll progress
-       — identical on desktop and touch (touch scroll moves scroll position →
-       ScrollTrigger progress, same as wheel). */
     /* pins: dwell solo, then one viewport of being covered */
     cards.forEach((card,i)=>{
       if(i===cards.length-1)return;
@@ -1508,7 +1484,7 @@ if(!reduce){
          reserve its own room and release cleanly. Its separate .spacer is then
          redundant (that caused a double-gap), so we zero it below. */
       const heroPin=card.classList.contains('hero');
-      const cfg={
+      const st=ScrollTrigger.create({
         trigger:card,
         start:()=>talls[i]?'bottom bottom':'top top',
         /* pin until the NEXT card has fully covered: dwell + the distance its
@@ -1517,29 +1493,7 @@ if(!reduce){
            its dwell, then releases (pinSpacing:true reserves exactly that room). */
         end:()=>heroPin?'+='+dwells[i]:'+='+(dwells[i]+(talls[i]?vh():card.offsetHeight)),
         pin:true,pinSpacing:heroPin,invalidateOnRefresh:true,
-      };
-      /* HERO: STEP through beats by scroll. The pin spans (SIG + 0.7) viewports:
-         each of the first SIG viewports advances one beat (progress→discrete
-         index via floor), and the trailing 0.7vh is dwell on the final beat
-         before the pin releases. Advancing to a beat restarts its typewriter
-         (go() snaps the previous beat done — that's the "skip on scroll"). Same
-         on desktop and touch (both move scroll position → progress). */
-      if(heroPin && hbeatCount>1 && !reduceMain){
-        const SIG=hbeatCount-1, SPAN=SIG+0.7;
-        cfg.onUpdate=self=>{
-          heroScrub.setBeat?.(Math.min(SIG,Math.floor(self.progress*SPAN)));
-          /* HOLD THE PIN until the last beat has FULLY printed: if the user
-             scrolls to the release edge while beat SIG is still typing, pull the
-             scroll back just inside the pin so it can't leave mid-print. Once the
-             final line finishes, scroll passes through normally. */
-          if(self.progress>=1 && heroScrub.lastBeatDone && !heroScrub.lastBeatDone()){
-            const hold=self.end-2;
-            self.scroll(hold);
-            lenisRef?.scrollTo?.(hold,{immediate:true});
-          }
-        };
-      }
-      const st=ScrollTrigger.create(cfg);
+      });
       if(heroPin) spacers[i].style.height='0px';   // no double-count: pinSpacing reserves the room
       if(card.id)anchorTargets[card.id]=()=>talls[i]?st.start-(card.offsetHeight-vh()):st.start;
       /* rows inside a card (the three verticals) anchor to their own offset,
@@ -1596,7 +1550,7 @@ if(!reduce){
       b.append(ink);
     });
 
-    if(hi>-1 && hbeats.length && !reduce){
+    if(hi>-1 && !talls[hi] && hbeats.length && !reduce){
       /* ---- SINGLE SOURCE OF TRUTH beat engine ----
          Two earlier attempts leaked state (async animationend cleanup + class
          juggling) and let beats stack. This model makes overlap STRUCTURALLY
@@ -1664,38 +1618,51 @@ if(!reduce){
         kick();
       }
 
-      /* setBeat: the ONE entry point. Clamp → go() (restarts the beat's
-         typewriter, snaps the previous beat done). After landing on a beat, arm
-         the AUTO-ADVANCE timer to move to the next one on its own; SCROLL can
-         skip ahead early by calling setBeat with a higher index (the timer is
-         re-armed each call, so scroll and auto never double-fire). */
-      const armAuto=()=>{ if(timer){clearTimeout(timer);timer=null;}
-        if(active>=SIG)return;                       // last beat: hold, pin releases on scroll
-        timer=setTimeout(()=>{ setBeat(active+1); }, dur[active]+DWELL);
+      // idle auto-advance: type a beat, fill the meter over the dwell, advance.
+      function runMeter(onFull){ meterAt=performance.now(); scrollCue?.classList.remove('hint');
+        (function m(now){ if(killed)return;
+          const p=Math.min(1,(now-meterAt)/DWELL); meterEl?.style.setProperty('--mp',p.toFixed(3));
+          if(p<1) requestAnimationFrame(m); else onFull&&onFull();
+        })(performance.now());
+      }
+      const tick=()=>{ if(killed)return;
+        if(active<SIG){ go(active+1); runMeter(()=>{ if(!killed) timer=setTimeout(tick,50); }); }
+        else scrollCue?.classList.add('hint');
       };
-      const setBeat=n=>{ n=Math.max(0,Math.min(SIG,n)); if(n===active)return;
-        go(n); if(n>0) scrollCue?.classList.add('took'); armAuto(); };
-      /* the LAST beat is "done printing" once its full type duration has elapsed.
-         The hero pin uses this to refuse to release until the final line has
-         fully printed (a fast scroll can otherwise leave mid-print). */
-      heroScrub.lastBeatDone=()=> active>=SIG && (performance.now()-typeAt)>=dur[SIG];
 
-      // beat 0 starts immediately after the CRT power-on blink (.content "open"
-      // anim → .settled), then beats auto-advance; scroll can skip ahead.
+      // beat 0 waits for the CRT power-on to finish (.content "open" anim → .settled)
       const heroEl=document.querySelector('.hero');
-      const startBeats=()=>{ if(active>-1)return; setBeat(0); };
+      const startBeats=()=>{ if(killed||active>-1)return;
+        go(0); timer=setTimeout(tick,DWELL); };
       if(heroEl?.classList.contains('settled')){ startBeats(); }
       else{
-        document.querySelector('.hero .content')?.addEventListener('animationend',e=>{
-          if(e.target.classList.contains('content')&&e.animationName==='open') startBeats();
-        });
+        document.querySelector('.hero .content')?.addEventListener('animationend',startBeats,{once:true});
         setTimeout(startBeats,1600);
       }
 
-      // publish the scroll hook so the hero PIN's onUpdate steps the beat index
-      // from scroll position (desktop wheel + mobile touch, identically).
-      heroScrub.setBeat=setBeat;
+      // handoff: first real user scroll locks the signature FOREVER. render()'s
+      // killed branch forces active=SIG, opacity 1, no ghost — scroll-up re-pin
+      // can't resurrect anything because render always clears all-but-active.
+      const kill=()=>{ if(killed)return; killed=true;
+        if(timer){clearTimeout(timer);timer=null;}
+        ghost=null; active=SIG; scrollCue?.classList.add('took');
+        cancelAnimationFrame(raf); render(performance.now());   // one authoritative paint
+      };
+      ['wheel','touchmove','keydown'].forEach(ev=>
+        addEventListener(ev,e=>{ if(ev==='keydown'&&!['ArrowDown','PageDown',' ','Spacebar'].includes(e.key))return; kill(); },{passive:true,once:false}));
       anchorTargets['top']=()=>0;
+    }else if(hi>-1 && hbeats.length && !reduce){
+      /* fallback (phones where the card is tall, or no scrub): no pin, no
+         timer. Un-grid the stage so the beats flow vertically (no overlap),
+         step them in with a stagger, and leave ALL visible so nothing is
+         stranded and nothing clips. Reduced-motion is CSS-only (all visible). */
+      document.querySelector('.hero .hstage')?.classList.add('flowed');
+      document.getElementById('hscroll')?.classList.add('took');   // no idle meter in flow mode
+      hbeats.forEach((b,i)=>{
+        b.classList.add('notype');                                 // ink shown full, no caret
+        gsap.to(b,{autoAlpha:1,y:0,duration:.7,ease:'power2.out',delay:.2+i*.5,
+          onStart:()=>b.classList.add('on')});
+      });
     }else if(hi>-1 && hbeats.length){   // reduced-motion: every beat visible, full ink, no cue
       hbeats.forEach(b=>b.classList.add('on','notype'));
       document.getElementById('hscroll')?.classList.add('took');
