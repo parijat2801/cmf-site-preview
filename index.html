@@ -1645,20 +1645,27 @@ if(!reduce){
         kick();
       }
 
-      /* setBeat: the ONE entry point. Clamp → go(). go() restarts the beat's
-         typewriter and snaps the previous beat done (the "skip on scroll"). No
-         idle timer: beat 0 starts on CRT settle, then SCROLL advances each beat
-         (via the pin's onUpdate). scrollCue hides once past beat 0. */
-      const setBeat=n=>{ n=Math.max(0,Math.min(SIG,n)); if(n!==active){ go(n);
-        if(n>0) scrollCue?.classList.add('took'); } };
+      /* setBeat: the ONE entry point. Clamp → go() (restarts the beat's
+         typewriter, snaps the previous beat done). After landing on a beat, arm
+         the AUTO-ADVANCE timer to move to the next one on its own; SCROLL can
+         skip ahead early by calling setBeat with a higher index (the timer is
+         re-armed each call, so scroll and auto never double-fire). */
+      const armAuto=()=>{ if(timer){clearTimeout(timer);timer=null;}
+        if(active>=SIG)return;                       // last beat: hold, pin releases on scroll
+        timer=setTimeout(()=>{ setBeat(active+1); }, dur[active]+DWELL);
+      };
+      const setBeat=n=>{ n=Math.max(0,Math.min(SIG,n)); if(n===active)return;
+        go(n); if(n>0) scrollCue?.classList.add('took'); armAuto(); };
 
       // beat 0 starts immediately after the CRT power-on blink (.content "open"
-      // anim → .settled). No wait for the user; scroll then steps through 1..SIG.
+      // anim → .settled), then beats auto-advance; scroll can skip ahead.
       const heroEl=document.querySelector('.hero');
       const startBeats=()=>{ if(active>-1)return; setBeat(0); };
       if(heroEl?.classList.contains('settled')){ startBeats(); }
       else{
-        document.querySelector('.hero .content')?.addEventListener('animationend',startBeats,{once:true});
+        document.querySelector('.hero .content')?.addEventListener('animationend',e=>{
+          if(e.target.classList.contains('content')&&e.animationName==='open') startBeats();
+        });
         setTimeout(startBeats,1600);
       }
 
