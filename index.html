@@ -148,7 +148,10 @@ body.no-grain::after{opacity:0}
 .nav .contact:hover{background:currentColor}
 .nav .contact:hover span{color:var(--ink)}
 .nav.thm-light .contact:hover span{color:var(--cream)}
-@media(max-width:760px){.nav .lk a:not(.contact){display:none}}
+/* Instagram icon link — outline glyph in the nav's currentColor, sits just before Contact */
+.nav .ig{display:flex;align-items:center;opacity:.7;line-height:0;padding:0;margin-right:-.4em}
+.nav .ig svg{display:block;width:clamp(20px,1.5vw,24px);height:auto}
+@media(max-width:760px){.nav .lk a:not(.contact):not(.ig){display:none}}
 
 /* ============ HERO (CRT) — video field, white type, red accent ============ */
 .hero{position:relative;isolation:isolate}
@@ -663,6 +666,13 @@ body.no-grain::after{opacity:0}
     <a href="#culturist-network">Culturist Network</a>
     <a href="#irl-live">IRL &amp; Live</a>
     <a href="#film-studio">Film Studio</a>
+    <a class="ig" href="https://www.instagram.com/culturalmisfits.live/" target="_blank" rel="noopener" aria-label="Follow us on Instagram">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+        <rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/>
+        <circle cx="12" cy="12" r="4.2"/>
+        <circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none"/>
+      </svg>
+    </a>
     <a class="contact" href="#contact"><span>Contact</span></a>
   </div>
 </nav>
