@@ -1422,6 +1422,12 @@ if(!reduce){
     const vh=()=>window.innerHeight;
     const dwells=new Array(cards.length).fill(0);
     const talls=new Array(cards.length).fill(false);
+    /* hero beat state — declared up here so computeAll() (which sizes the hero
+       pin from the beat count) and the beat engine (defined lower) both see them.
+       heroScrub.setBeat is published by the engine; the hero pin's onUpdate calls it. */
+    const heroScrub={ setBeat:null };
+    const reduceMain=matchMedia('(prefers-reduced-motion:reduce)').matches;
+    const hbeatCount=document.querySelectorAll('.hero .hbeat').length;
 
     /* fit pass: one-screen cards ([data-fit]) must FIT the window they're
        shown in. Shrink their display scale (--fz) until the card's real
@@ -1452,7 +1458,13 @@ if(!reduce){
            top-aligned would clip whatever hangs below the fold. */
         talls[i]=card.offsetHeight>vh()+2;
         let d;
-        if(card.classList.contains('hero')) d=vh()*0.5;   // short hold; scroll releases to the manifesto collage
+        if(card.classList.contains('hero')){
+          /* hero pins long enough to STEP through every beat by scroll: one
+             viewport of scroll advances one beat, plus a final dwell on the last
+             beat before the pin releases. SIG steps + ~0.7vh dwell. */
+          const sig=Math.max(1,hbeatCount-1);
+          d=vh()*(sig+0.7);
+        }
         else if(card.classList.contains('for-brands')) d=vh()*1.8;  // hold long enough for the chart choreography (~3s) so a fast scroll can't skip it
         else{
           const lines=measureLines(card);
@@ -1473,9 +1485,6 @@ if(!reduce){
        here so the hero PIN's onUpdate can drive beat index from scroll progress
        — identical on desktop and touch (touch scroll moves scroll position →
        ScrollTrigger progress, same as wheel). */
-    const heroScrub={ setBeat:null, claim:null };
-    const reduceMain=matchMedia('(prefers-reduced-motion:reduce)').matches;
-    const hbeatCount=document.querySelectorAll('.hero .hbeat').length;
     /* pins: dwell solo, then one viewport of being covered */
     cards.forEach((card,i)=>{
       if(i===cards.length-1)return;
@@ -1501,14 +1510,15 @@ if(!reduce){
         end:()=>heroPin?'+='+dwells[i]:'+='+(dwells[i]+(talls[i]?vh():card.offsetHeight)),
         pin:true,pinSpacing:heroPin,invalidateOnRefresh:true,
       };
-      /* HERO: map pin scroll-progress → beat index (0→1→2), snapping to a beat.
-         Works the same on desktop and mobile (touch scroll = scroll progress).
-         beatN = round(progress * SIG). onUpdate also pauses the idle auto-advance
-         so the two never fight. Gated to when the beat engine is live. */
+      /* HERO: STEP through beats by scroll. The pin spans (SIG + 0.7) viewports:
+         each of the first SIG viewports advances one beat (progress→discrete
+         index via floor), and the trailing 0.7vh is dwell on the final beat
+         before the pin releases. Advancing to a beat restarts its typewriter
+         (go() snaps the previous beat done — that's the "skip on scroll"). Same
+         on desktop and touch (both move scroll position → progress). */
       if(heroPin && hbeatCount>1 && !reduceMain){
-        const SIG=hbeatCount-1;
-        cfg.onUpdate=self=>{ heroScrub.claim?.(); heroScrub.setBeat?.(Math.round(self.progress*SIG)); };
-        cfg.snap={snapTo:1/(hbeatCount-1),duration:{min:.12,max:.3},delay:.08,ease:'power1.inOut',directional:false};
+        const SIG=hbeatCount-1, SPAN=SIG+0.7;
+        cfg.onUpdate=self=>{ heroScrub.setBeat?.(Math.min(SIG,Math.floor(self.progress*SPAN))); };
       }
       const st=ScrollTrigger.create(cfg);
       if(heroPin) spacers[i].style.height='0px';   // no double-count: pinSpacing reserves the room
@@ -1635,42 +1645,26 @@ if(!reduce){
         kick();
       }
 
-      // idle auto-advance: type a beat, fill the meter over the dwell, advance.
-      function runMeter(onFull){ meterAt=performance.now(); scrollCue?.classList.remove('hint');
-        (function m(now){ if(killed)return;
-          const p=Math.min(1,(now-meterAt)/DWELL); meterEl?.style.setProperty('--mp',p.toFixed(3));
-          if(p<1) requestAnimationFrame(m); else onFull&&onFull();
-        })(performance.now());
-      }
-      /* setBeat: the ONE entry point. Idempotent clamp → go(). Both the idle
-         chain and the pin's scroll onUpdate call this; whoever last called wins,
-         and go() is a no-op if the index is unchanged, so they can't fight. */
-      let scrollOwned=false;
-      const setBeat=n=>{ n=Math.max(0,Math.min(SIG,n)); if(n!==active) go(n); };
-      /* claim: the first real scroll intent PAUSES the idle auto-advance (it does
-         NOT jump to the end). From then, scroll position owns the beat index. */
-      const claim=()=>{ if(scrollOwned)return; scrollOwned=true;
-        if(timer){clearTimeout(timer);timer=null;} scrollCue?.classList.add('took'); };
+      /* setBeat: the ONE entry point. Clamp → go(). go() restarts the beat's
+         typewriter and snaps the previous beat done (the "skip on scroll"). No
+         idle timer: beat 0 starts on CRT settle, then SCROLL advances each beat
+         (via the pin's onUpdate). scrollCue hides once past beat 0. */
+      const setBeat=n=>{ n=Math.max(0,Math.min(SIG,n)); if(n!==active){ go(n);
+        if(n>0) scrollCue?.classList.add('took'); } };
 
-      // idle auto-advance: step 0→1→2 so a reader who never scrolls still reaches
-      // the signature; stops the moment the user scrolls (claim()).
-      const tick=()=>{ if(scrollOwned)return;
-        if(active<SIG){ setBeat(active+1); runMeter(()=>{ if(!scrollOwned) timer=setTimeout(tick,50); }); }
-        else scrollCue?.classList.add('hint');
-      };
-      // beat 0 waits for the CRT power-on to finish (.content "open" anim → .settled)
+      // beat 0 starts immediately after the CRT power-on blink (.content "open"
+      // anim → .settled). No wait for the user; scroll then steps through 1..SIG.
       const heroEl=document.querySelector('.hero');
-      const startBeats=()=>{ if(active>-1)return;
-        setBeat(0); if(!scrollOwned) timer=setTimeout(tick,DWELL); };
+      const startBeats=()=>{ if(active>-1)return; setBeat(0); };
       if(heroEl?.classList.contains('settled')){ startBeats(); }
       else{
         document.querySelector('.hero .content')?.addEventListener('animationend',startBeats,{once:true});
         setTimeout(startBeats,1600);
       }
 
-      // publish the scroll hooks so the hero PIN's onUpdate drives the beat index
-      // from scroll progress (desktop wheel + mobile touch, identically).
-      heroScrub.setBeat=setBeat; heroScrub.claim=claim;
+      // publish the scroll hook so the hero PIN's onUpdate steps the beat index
+      // from scroll position (desktop wheel + mobile touch, identically).
+      heroScrub.setBeat=setBeat;
       anchorTargets['top']=()=>0;
     }else if(hi>-1 && hbeats.length){   // reduced-motion: every beat visible, full ink, no cue
       hbeats.forEach(b=>b.classList.add('on','notype'));
