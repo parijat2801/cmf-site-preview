@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fluted Glass Lab — Filmstrip</title>
+<style>
+  :root{--ink:#231F20;--cream:#E7E1D4;--red:#DB1A21}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ink);color:var(--cream);
+    font-family:"Helvetica Neue",Arial,sans-serif;display:grid;grid-template-columns:1fr 320px;min-height:100vh}
+  .stage{display:flex;align-items:center;justify-content:center;gap:18px;padding:40px;flex-wrap:wrap}
+
+  /* a card = the parent ShaderMount draws its canvas INTO. Caption sits on top. */
+  .card{position:relative;width:min(30vw,300px);height:min(58vh,460px);background:#1B1818;
+    overflow:hidden;border-radius:2px;transition:width .5s cubic-bezier(.22,1,.36,1)}
+  .card.active{width:min(42vw,440px)}
+  /* raw photo base layer — always present, sharp. Shader canvas sits ON TOP of it. */
+  .card .raw{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 28%;display:block;z-index:0}
+  .card canvas{position:absolute;inset:0;width:100%!important;height:100%!important;display:block;z-index:1}
+  /* the OPEN card wears NO glass — hide its shader canvas so the raw photo shows */
+  .card.active canvas{display:none}
+  .cap{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:60px 18px 18px;
+    background:linear-gradient(0deg,rgba(35,31,32,.94) 30%,rgba(35,31,32,.5) 68%,transparent)}
+  .cap h4{margin:0;font-weight:900;letter-spacing:-.02em;font-size:1.5rem}
+  .cap p{margin:.3em 0 0;font-weight:300;opacity:.85;font-size:.95rem}
+
+  .panel{background:#1a1718;border-left:1px solid rgba(231,225,212,.12);padding:22px;overflow-y:auto;font-size:13px}
+  .panel h2{font-size:12px;letter-spacing:.16em;text-transform:uppercase;opacity:.6;margin:0 0 16px}
+  .ctl{margin-bottom:15px}
+  .ctl label{display:flex;justify-content:space-between;margin-bottom:5px;opacity:.85}
+  .ctl label b{font-weight:400;opacity:.6;font-variant-numeric:tabular-nums}
+  .ctl input[type=range]{width:100%;accent-color:var(--red)}
+  select{width:100%;background:#0f0d0e;color:var(--cream);border:1px solid rgba(231,225,212,.2);padding:.4em;border-radius:4px}
+  .hint{opacity:.55;font-size:11px;line-height:1.5;margin-top:14px}
+  .toggle{display:flex;gap:10px;align-items:center;margin:8px 0 18px}
+  .out{margin-top:16px;background:#0f0d0e;border:1px solid rgba(231,225,212,.12);border-radius:6px;padding:12px;
+    font-family:ui-monospace,Menlo,monospace;font-size:11px;line-height:1.5;white-space:pre-wrap;color:#9fd3a0}
+</style>
+</head>
+<body>
+  <div class="stage" id="stage">
+    <div class="card active" data-img="assets/traits/curious.jpg">
+      <img class="raw" src="assets/traits/curious.jpg" alt="">
+      <div class="cap"><h4>The Curious</h4><p>Ask "why" and "how", not just "what"</p></div>
+    </div>
+    <div class="card" data-img="assets/traits/expressive.jpg">
+      <img class="raw" src="assets/traits/expressive.jpg" alt="">
+      <div class="cap"><h4>The Expressive</h4><p>Music, fashion, memes to express identity</p></div>
+    </div>
+    <div class="card" data-img="assets/traits/culturally-fluid.jpg">
+      <img class="raw" src="assets/traits/culturally-fluid.jpg" alt="">
+      <div class="cap"><h4>The Culturally Fluid</h4><p>Mix tradition with modern life</p></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Fluted Glass Lab</h2>
+    <p class="hint">Click a card to make it "active" — watch its glass animate toward clear. Sliders below set the INACTIVE (frosted) look; active clears toward 0 distortion/blur.</p>
+
+    <div class="ctl"><label>Grid shape</label>
+      <select id="shape">
+        <option value="1" selected>lines</option>
+        <option value="2">lines irregular</option>
+        <option value="3">wave</option>
+        <option value="4">zigzag</option>
+      </select></div>
+    <div class="ctl"><label>Distortion refraction</label>
+      <select id="distortionShape">
+        <option value="1" selected>prism</option>
+        <option value="2">lens</option>
+        <option value="3">contour</option>
+        <option value="4">cascade</option>
+        <option value="5">flat</option>
+      </select></div>
+
+    <div class="ctl"><label>Flute size <b id="v-size"></b></label><input type="range" id="size" min="0.02" max="1" step="0.01" value="0.50"></div>
+    <div class="ctl"><label>Angle <b id="v-angle"></b></label><input type="range" id="angle" min="0" max="180" step="1" value="0"></div>
+    <div class="ctl"><label>Distortion (frosted) <b id="v-distortion"></b></label><input type="range" id="distortion" min="0" max="1" step="0.02" value="0.50"></div>
+    <div class="ctl"><label>Blur (frosted) <b id="v-blur"></b></label><input type="range" id="blur" min="0" max="1" step="0.02" value="0.0"></div>
+    <div class="ctl"><label>Shadows <b id="v-shadows"></b></label><input type="range" id="shadows" min="0" max="1" step="0.02" value="0.25"></div>
+    <div class="ctl"><label>Highlights <b id="v-highlights"></b></label><input type="range" id="highlights" min="0" max="1" step="0.02" value="0.10"></div>
+    <div class="ctl"><label>Clear-anim speed <b id="v-speed"></b></label><input type="range" id="speed" min="0" max="2" step="0.05" value="0.6"></div>
+
+    <div class="out" id="out"></div>
+  </div>
+
+<script type="module">
+  import { ShaderMount, flutedGlassFragmentShader } from './vendor/paper-shaders/index.js';
+
+  // Paper Shaders "Default" preset values
+  const P = {
+    shape:1, distortionShape:1, size:0.50, angle:0,
+    distortion:0.50, blur:0.0, shadows:0.25, highlights:0.10, speed:0.6
+  };
+
+  // preload an image → HTMLImageElement (the mount wants an element, not a URL)
+  function loadImg(src){ return new Promise(res=>{ const i=new Image(); i.crossOrigin='anonymous'; i.onload=()=>res(i); i.onerror=()=>res(i); i.src=src; }); }
+
+  const cards=[...document.querySelectorAll('.card')];
+  const mounts=[];
+
+  function baseUniforms(img, active){
+    return {
+      u_image: img,
+      u_colorBack:[0,0,0,0],
+      u_colorShadow:[0,0,0,1],
+      u_colorHighlight:[1,1,1,1],
+      u_shadows:P.shadows,
+      u_highlights:P.highlights,
+      u_size:P.size,
+      u_shape:P.shape,
+      u_angle:P.angle,
+      u_distortionShape:P.distortionShape,
+      // every canvas renders the full frosted glass; the ACTIVE card simply hides
+      // its canvas via CSS (.card.active canvas{display:none}) → raw photo shows
+      u_distortion:P.distortion,
+      u_blur:P.blur,
+      u_shift:0, u_stretch:0, u_edges:0.25,
+      u_marginLeft:0,u_marginRight:0,u_marginTop:0,u_marginBottom:0,
+      u_grainMixer:0, u_grainOverlay:0,
+      // sizing system defaults (object-fit cover)
+      u_fit:2, u_scale:1, u_rotation:0, u_offsetX:0, u_offsetY:0,
+      u_originX:0.5, u_originY:0.5, u_worldWidth:0, u_worldHeight:0,
+    };
+  }
+
+  async function build(){
+    for(const card of cards){
+      const img=await loadImg(card.dataset.img);
+      const active=card.classList.contains('active');
+      // speed>0 keeps the shader animating (subtle glass motion); fine at 0 too
+      const mount=new ShaderMount(card, flutedGlassFragmentShader, baseUniforms(img,active), undefined, P.speed);
+      mounts.push({card,mount,img});
+    }
+    render();
+  }
+
+  function updateAll(){
+    mounts.forEach(({card,mount,img})=>{
+      const active=card.classList.contains('active');
+      mount.setUniforms(baseUniforms(img,active));
+    });
+  }
+
+  // click to toggle active
+  cards.forEach(c=>c.addEventListener('click',()=>{
+    cards.forEach(x=>x.classList.remove('active'));
+    c.classList.add('active');
+    updateAll();
+  }));
+
+  // wire sliders + selects
+  const bind=(id,isSelect)=>{
+    const el=document.getElementById(id);
+    const set=()=>{ P[id]= isSelect? +el.value : parseFloat(el.value);
+      const lbl=document.getElementById('v-'+id); if(lbl) lbl.textContent=(isSelect?el.value:P[id]);
+      updateAll(); render(); };
+    el.addEventListener('input',set); el.addEventListener('change',set); set();
+  };
+  ['size','angle','distortion','blur','shadows','highlights','speed'].forEach(id=>bind(id,false));
+  ['shape','distortionShape'].forEach(id=>bind(id,true));
+
+  function render(){
+    document.getElementById('out').textContent=
+`/* frosted (inactive) recipe */
+shape:${P.shape}  distortionShape:${P.distortionShape}
+size:${P.size}  angle:${P.angle}
+distortion:${P.distortion}  blur:${P.blur}
+shadows:${P.shadows}  highlights:${P.highlights}
+active card → distortion:0 blur:0 (clears)`;
+  }
+
+  build();
+</script>
+</body>
+</html>

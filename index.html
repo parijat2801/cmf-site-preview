@@ -130,6 +130,20 @@ body.no-grain::after{opacity:0}
    on dark cards), so the highlighted word isn't a different, cooler white. */
 .reveal.in .mark.mark-w,.mark.mark-w{color:var(--cream)}
 @media(prefers-reduced-motion:reduce){.mark::before{transform:scaleX(1)}.mark{color:var(--ink)}.mark.mark-w{color:var(--cream)}}
+/* SHADER HIGHLIGHTER: when JS confirms WebGL, it adds .mark-shader to each .mark
+   and mounts a canvas behind the word (the shader draws the marker stroke). The
+   CSS swipe below is then the FALLBACK for no-WebGL — suppress it here so the two
+   don't both render. Text color is driven by --rv (0→1, the stroke's tip position,
+   updated per-frame by JS): the word colors in left→right AS the tip passes it,
+   matching the shader progress. Ahead of the tip it sits at a dimmer resting tone. */
+.mark-shader::before{display:none}
+.mark-shader{--rv:0;
+  background:linear-gradient(90deg,
+    var(--mark-lit,var(--cream)) 0 calc(var(--rv)*100%),
+    var(--mark-dim,rgba(231,225,212,.62)) calc(var(--rv)*100%) 100%);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+/* the shader's own canvas, mounted behind the text */
+.mark-shader > canvas{position:absolute;z-index:-1;pointer-events:none}
 
 /* ============ NAV — themed per card, auto-hides on scroll down ============ */
 .nav{position:fixed;top:0;left:0;right:0;z-index:900;display:flex;align-items:center;justify-content:space-between;
@@ -467,6 +481,9 @@ body.no-grain::after{opacity:0}
    scale (near the "Where…" beats), cream. */
 .mf-lede{font-weight:900;letter-spacing:-.03em;line-height:.94;color:var(--cream);
   font-size:clamp(2rem,min(6vw,7vh),5.4rem);max-width:16ch;margin-bottom:clamp(50px,9vh,120px)}
+/* wide variant: same size as the beat headings (.mf-beat h3), full width — the
+   sentence flows and wraps only at the column edge, no forced line break. */
+.mf-lede-wide{font-size:clamp(2.4rem,min(6.5vw,8vh),5.4rem);max-width:none}
 
 /* Each beat is a 2-column ROW (text | photo), so text and photo are in the same
    flow and always stay aligned at every window size — no absolute drift, no
@@ -627,7 +644,7 @@ body.no-grain::after{opacity:0}
 .fb-list li::before{content:"#";color:var(--red);margin-right:.6em;font-weight:700}
 /* same scale as .fb-lead; the email carries a .mark highlight (no underline) */
 .fb-write{margin-top:calc(clamp(28px,4.5vh,56px)*var(--fz));font-weight:900;letter-spacing:-.02em;
-  line-height:1.05;font-size:calc(clamp(1.5rem,min(3vw,4vh),2.8rem)*var(--fz));max-width:22ch}
+  line-height:1.05;font-size:calc(clamp(1.5rem,min(3vw,4vh),2.8rem)*var(--fz));max-width:none}
 .fb-write a{color:inherit;text-decoration:none;transition:opacity .5s var(--ease)}
 .fb-write a:hover{opacity:.75}
 
@@ -733,20 +750,20 @@ body.no-grain::after{opacity:0}
        colliding with the deck's .card/.beat/.ph/.mk. ============================ -->
   <section class="mf-collage">
     <div class="mf-panel">
-      <div class="mf-lede mf-rise">Mainstream or niche<br>a space to be seen, understood, and valued.</div>
+      <div class="mf-lede mf-lede-wide mf-rise">Mainstream or niche, a space to be seen, understood, and valued.</div>
       <!-- each beat is a 2-col ROW: text + its own photo in the SAME flow, so the
            photo always sits beside its line and moves with it at every size. The
            photo bleeds off the outer edge; sides alternate. -->
       <div class="mf-beat mf-beat-r mf-rise">
-        <div class="mf-txt"><h3>Where new languages are formed.</h3><p>Slang, sound, and syntax the mainstream hasn't caught up to yet.</p></div>
+        <div class="mf-txt"><h3>Where new <span class="mark mark-w" style="--hl:var(--red)">languages</span> are formed.</h3><p>Slang, sound, and syntax the mainstream hasn't caught up to yet.</p></div>
         <figure class="mf-ph"><img src="assets/collage/blur.png" alt="" decoding="async"></figure>
       </div>
       <div class="mf-beat mf-beat-l mf-rise">
         <figure class="mf-ph"><img src="assets/collage/arcade.png" alt="" decoding="async"></figure>
-        <div class="mf-txt"><h3>Where new aesthetics are tested.</h3><p>Looks and worlds tried on in public, long before they trend.</p></div>
+        <div class="mf-txt"><h3>Where new <span class="mark mark-w" style="--hl:var(--red)">aesthetics</span> are tested.</h3><p>Looks and worlds tried on in public, long before they trend.</p></div>
       </div>
       <div class="mf-beat mf-beat-r mf-rise">
-        <div class="mf-txt"><h3>Where new truths are spoken.</h3><p>The things people actually mean, said out loud without translation.</p></div>
+        <div class="mf-txt"><h3>Where new <span class="mark mark-w" style="--hl:var(--red)">truths</span> are spoken.</h3><p>The things people actually mean, said out loud without translation.</p></div>
         <figure class="mf-ph"><img src="assets/collage/banana.png" alt="" decoding="async"></figure>
       </div>
     </div>
@@ -754,7 +771,7 @@ body.no-grain::after{opacity:0}
 
   <section class="mf-unite" id="audience">
     <div class="mf-ustage">
-      <div class="mf-uhead mf-rise">For every square hole, round peg and (mis)fit: tired of one-size-fits-all narratives?</div>
+      <div class="mf-uhead mf-rise">For every <span class="mark mark-w" style="--hl:var(--red)">square hole, round peg</span> and (mis)fit: tired of one-size-fits-all narratives?</div>
       <div class="mf-reel" id="mf-reel">
         <figure class="mf-card" data-mfcard tabindex="0" role="button"><img src="assets/traits/curious.jpg" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Curious</h4><div class="mf-q">Do you ask why and how, more than what?</div></figcaption></figure>
         <figure class="mf-card" data-mfcard tabindex="0" role="button"><img src="assets/traits/expressive.jpg" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Expressive</h4><div class="mf-q">Do you use music, fashion and memes to introduce yourself?</div></figcaption></figure>
@@ -1752,6 +1769,162 @@ if(!reduce){
   document.fonts.ready.then(()=>ScrollTrigger.refresh());
   let rto;addEventListener('resize',()=>{clearTimeout(rto);rto=setTimeout(()=>ScrollTrigger.refresh(),200);});
 }
+</script>
+
+<!-- SHADER HIGHLIGHTER: draws each .mark's marker stroke with a WebGL shader
+     (Paper Shaders ShaderMount + a custom fragment shader). Progressive
+     enhancement — if WebGL2 is unavailable or reduced-motion is set, this module
+     does nothing and the CSS .mark swipe (above) remains as the fallback. -->
+<script type="module">
+(async () => {
+  const reduce = matchMedia('(prefers-reduced-motion:reduce)').matches;
+  if (reduce) return;                                  // CSS fallback (static filled)
+
+  // WebGL2 probe — bail to the CSS swipe if unavailable
+  try { const t=document.createElement('canvas').getContext('webgl2'); if(!t) return; }
+  catch(_) { return; }
+
+  let ShaderMount, simplexNoise;
+  try {
+    ({ ShaderMount } = await import('./vendor/paper-shaders/index.js'));
+    ({ simplexNoise } = await import('./vendor/paper-shaders/shader-utils.js'));
+  } catch(_) { return; }                               // import failed → CSS fallback
+
+  // locked recipe from the lab
+  const R = { draw:0.9, wet:0.95, wetw:0.02, dry:3, tipr:0.006, edge:0,
+              streak:0.78, bub:0.4, alpha:0.68, skewMag:0.05 };
+  const OVERHANG=6, VPAD=8;
+
+  const frag = `#version 300 es
+  precision mediump float;
+  uniform float u_time;
+  uniform vec2  u_res;
+  uniform float u_progress;
+  uniform vec3  u_color;
+  uniform float u_alpha, u_wet, u_wetWidth, u_streak, u_bubbles, u_tipRag, u_edgeRag, u_skew, u_seed;
+  out vec4 fragColor;
+  ${simplexNoise}
+  void main(){
+    vec2 uv = gl_FragCoord.xy / u_res.xy; uv.y = 1.0 - uv.y;
+    float aspect = u_res.x / u_res.y;
+    vec2 nuv = vec2(uv.x*aspect, uv.y);
+    float midTop=0.12, midBot=0.88;
+    float slant=(uv.x-0.5)*u_skew;
+    float top=midTop+slant + u_edgeRag*0.12*snoise(vec2(uv.x*7.0+u_seed,1.3));
+    float bot=midBot+slant - u_edgeRag*0.12*snoise(vec2(uv.x*6.0+u_seed*1.7,4.1));
+    float body=smoothstep(top,top+0.03,uv.y)*(1.0-smoothstep(bot-0.03,bot,uv.y));
+    if(body<=0.001){ fragColor=vec4(0.0); return; }
+    float tip=u_progress + u_tipRag*snoise(vec2(uv.y*5.0+u_seed*2.3,u_progress*3.0));
+    float inked=1.0-smoothstep(tip-0.012,tip+0.004,uv.x);
+    if(inked<=0.001){ fragColor=vec4(0.0); return; }
+    float streaks=0.5+0.5*snoise(vec2(uv.x*2.0,uv.y*46.0+u_seed));
+    float density=1.0-u_streak*(0.55*streaks+0.45*(0.5+0.5*snoise(nuv*9.0+u_seed)));
+    density=clamp(density,0.0,1.0);
+    float bub=snoise(nuv*14.0+u_seed*3.1);
+    float holes=clamp(1.0-u_bubbles*smoothstep(0.55,0.78,bub),0.0,1.0);
+    float ink=u_alpha*body*inked*density*holes;
+    float behind=tip-uv.x;
+    float wetBand=smoothstep(u_wetWidth,0.0,behind)*step(0.0,behind);
+    float dryOut=1.0-smoothstep(0.9,1.0,u_progress);
+    float wet=u_wet*wetBand*dryOut*body*inked*holes;
+    vec3 col=mix(u_color, mix(u_color,vec3(1.0),0.55), clamp(wet,0.0,1.0));
+    fragColor=vec4(col, clamp(ink+wet*0.6,0.0,1.0));
+  }`;
+
+  // parse a computed color (hex or rgb()) to [r,g,b] floats 0..1
+  const parseColor = (raw) => {
+    raw = (raw||'').trim();
+    const el=document.createElement('span'); el.style.color=raw; document.body.appendChild(el);
+    const m=getComputedStyle(el).color.match(/[\d.]+/g); el.remove();
+    if(!m) return [0.859,0.102,0.129];
+    return [ (+m[0])/255, (+m[1])/255, (+m[2])/255 ];
+  };
+
+  const marks=[];
+  document.querySelectorAll('.mark').forEach((el,i)=>{
+    // resolve the accent color from the element's own --hl (falls back to red)
+    const hl = getComputedStyle(el).getPropertyValue('--hl');
+    const color = parseColor(hl || '#DB1A21');
+    // text-flip colors: lit = the mark's resting text color; dim = a muted version
+    const litText = getComputedStyle(el).color;
+    el.style.setProperty('--mark-lit', litText);
+    // random per-mark tilt (stable) so no two highlights match
+    const jr = Math.sin(i*127.1+3.7)*43758.5453; const jitter=(jr-Math.floor(jr))*2-1;
+    const skew = +(jitter*R.skewMag).toFixed(4);
+    const seed = 1.0 + i*7.13;
+
+    el.classList.add('mark-shader');                   // suppress CSS swipe, enable --rv text
+    const u=(p,cv)=>({ u_res:[cv?cv.width:300, cv?cv.height:80], u_progress:p, u_color:color,
+      u_alpha:R.alpha, u_wet:R.wet, u_wetWidth:R.wetw, u_streak:R.streak, u_bubbles:R.bub,
+      u_tipRag:R.tipr, u_edgeRag:R.edge, u_skew:skew, u_seed:seed });
+    let mount;
+    try { mount=new ShaderMount(el, frag, u(0,null), undefined, 0.0); }
+    catch(_) { el.classList.remove('mark-shader'); return; }  // this mark → CSS fallback
+    const cv=el.querySelector('canvas');
+    if(cv){ cv.style.position='absolute'; cv.style.zIndex='-1'; cv.style.pointerEvents='none';
+      cv.style.left=(-OVERHANG)+'px'; cv.style.top=(-VPAD)+'px';
+      cv.style.width='calc(100% + '+(OVERHANG*2)+'px)';
+      cv.style.height='calc(100% + '+(VPAD*2)+'px)'; }
+
+    // trigger element: the chart label keys off .fb-chart.in; the manifesto beats
+    // reveal via .mf-rise; everything else via its nearest .reveal ancestor. All
+    // three gain .in through the same IntersectionObserver.
+    const trigger = el.closest('.fb-chart') || el.closest('.reveal') || el.closest('.mf-rise') || el;
+    marks.push({ el, mount, cv, u, trigger, armed:false, start:0, prog:0, visible:true });
+  });
+  if(!marks.length) return;
+
+  // pause shaders whose mark is off-screen (cap live GPU work)
+  const vis=new IntersectionObserver(es=>es.forEach(e=>{
+    const m=marks.find(x=>x.el===e.target); if(m) m.visible=e.isIntersecting;
+  }),{threshold:0});
+  marks.forEach(m=>vis.observe(m.el));
+
+  // arm/replay a mark: reset progress and (re)start its draw
+  const arm = (m) => { m.armed=true; m.start=performance.now(); m.prog=0; };
+  const disarm = (m) => { m.armed=false; m.prog=0; m.el.style.setProperty('--rv','0');
+    if(m.cv) m.mount.setUniforms(m.u(0,m.cv)); };
+
+  // watch each trigger's class list for .in (added → arm, removed → reset so
+  // #for-brands replays on re-entry). Fire immediately if already .in.
+  marks.forEach(m=>{
+    const check = () => {
+      const on=m.trigger.classList.contains('in') || m.trigger.classList.contains('settled');
+      if(on && !m.armed) arm(m);
+      else if(!on && m.armed) disarm(m);
+    };
+    new MutationObserver(check).observe(m.trigger,{attributes:true,attributeFilter:['class']});
+    check();
+  });
+
+  // single rAF drives every armed, visible mark's u_progress 0→1
+  const tick = (now) => {
+    marks.forEach(m=>{
+      if(!m.armed || !m.visible || !m.cv) return;
+      const p=Math.min(1,(now-m.start)/(R.draw*1000));
+      if(p===m.prog) return;                            // no change → skip GPU write
+      m.prog=p;
+      m.el.style.setProperty('--rv', p.toFixed(3));     // text colors in with the tip
+      m.mount.setUniforms(m.u(p,m.cv));
+    });
+    requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+
+  // re-push uniforms for every mark at its CURRENT progress + CURRENT canvas size.
+  // The rAF skips writes once a stroke completes (p===prog), so if the canvas
+  // buffer resizes AFTER that — most commonly when web fonts load and reflow the
+  // word wider — u_res would stay stale and the stroke clips (e.g. "lan" instead
+  // of "languages"). Call this on fonts-ready and resize to correct the size.
+  const resync=()=>marks.forEach(m=>{ if(!m.cv) return;
+    // force ShaderMount to re-measure its canvas buffer + u_resolution from the
+    // (now-final) box, THEN re-push our u_res at the current progress.
+    try{ m.mount.handleResize && m.mount.handleResize(); }catch(_){}
+    m.mount.setUniforms(m.u(m.prog,m.cv));
+  });
+  addEventListener('resize',resync);
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>{ resync(); requestAnimationFrame(resync); setTimeout(resync,150); });
+})();
 </script>
 </body>
 </html>
