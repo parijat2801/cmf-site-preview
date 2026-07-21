@@ -502,13 +502,16 @@ body.no-grain::after{opacity:0}
    tonal seam line right at the boundary. Flat ink = seamless. */
 #misfits{box-shadow:none;background:var(--ink)}
 .mf-card{position:relative;flex:1 1 0;height:min(58vh,560px);background:#1B1818;overflow:hidden;
-  filter:grayscale(.15) brightness(.5);transition:filter .6s var(--ease),flex-grow .6s var(--ease)}
-.mf-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 28%}
-.mf-cap{position:absolute;left:0;right:0;bottom:0;padding:clamp(14px,2vw,26px);z-index:2;
-  background:linear-gradient(0deg,rgba(35,31,32,.9),transparent)}
+  transition:flex-grow .6s var(--ease)}
+/* dim only the IMAGE when inactive — the caption copy stays full-brightness */
+.mf-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 28%;
+  filter:grayscale(.15) brightness(.5);transition:filter .6s var(--ease)}
+.mf-cap{position:absolute;left:0;right:0;bottom:0;padding:clamp(48px,7vw,90px) clamp(14px,2vw,26px) clamp(14px,2vw,26px);z-index:2;
+  background:linear-gradient(0deg,rgba(35,31,32,.94) 30%,rgba(35,31,32,.6) 68%,transparent)}
 .mf-card h4{font-weight:900;letter-spacing:-.03em;line-height:.95;font-size:clamp(1rem,min(1.6vw,2.2vh),1.9rem)}
 .mf-q{font-weight:300;font-size:var(--t-body);opacity:0;max-height:0;overflow:hidden;transition:opacity .5s,max-height .5s}
-.mf-card.active{filter:none;flex-grow:2.6}
+.mf-card.active img{filter:none}
+.mf-card.active{flex-grow:2.6}
 .mf-card.active h4{font-size:clamp(1.6rem,min(2.6vw,3.4vh),3rem)}
 .mf-card.active .mf-q{opacity:.85;max-height:4em;margin-top:.4em}
 @media(max-width:760px){
