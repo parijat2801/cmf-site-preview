@@ -1080,11 +1080,19 @@ addEventListener('scroll',()=>{
 
 /* ---------- hero: settle the CRT glow after power-on ---------- */
 const mega=document.getElementById('mega');   // = hero beat 1, the rest state
-// the power-on "open" clip-path animation runs on .content; when it ends the
-// broadcast has "tuned in", so soften the chroma glow. (Beat 1 no longer has
-// its own keyframe animation, so we key off .content, which does.)
-document.querySelector('.hero .content')
-  ?.addEventListener('animationend',()=>document.querySelector('.hero').classList.add('settled'),{once:true});
+/* The power-on "open" clip-path animation runs on .content. We must settle ONLY
+   when THAT animation ends — NOT on the many bubbled child-glyph 'strike'
+   animations (those end in ~0.3s and would settle far too early, mistiming the
+   power-on and letting content flash through). Filter by target + animationName;
+   idempotent so a stray/duplicate event can't re-blink. */
+(function(){
+  const heroEl=document.querySelector('.hero');
+  const content=heroEl?.querySelector('.content');
+  if(!content)return;
+  content.addEventListener('animationend',e=>{
+    if(e.target===content && e.animationName==='open') heroEl.classList.add('settled');
+  });
+})();
 
 /* Safety net: the power-on clip-path uses forwards-fill. If the tab loads
    backgrounded, throttled rAF can leave the content clipped shut. Guarantee
@@ -1425,7 +1433,7 @@ if(!reduce){
     /* hero beat state — declared up here so computeAll() (which sizes the hero
        pin from the beat count) and the beat engine (defined lower) both see them.
        heroScrub.setBeat is published by the engine; the hero pin's onUpdate calls it. */
-    const heroScrub={ setBeat:null };
+    const heroScrub={ setBeat:null, lastBeatDone:null };
     const reduceMain=matchMedia('(prefers-reduced-motion:reduce)').matches;
     const hbeatCount=document.querySelectorAll('.hero .hbeat').length;
 
@@ -1518,7 +1526,18 @@ if(!reduce){
          on desktop and touch (both move scroll position → progress). */
       if(heroPin && hbeatCount>1 && !reduceMain){
         const SIG=hbeatCount-1, SPAN=SIG+0.7;
-        cfg.onUpdate=self=>{ heroScrub.setBeat?.(Math.min(SIG,Math.floor(self.progress*SPAN))); };
+        cfg.onUpdate=self=>{
+          heroScrub.setBeat?.(Math.min(SIG,Math.floor(self.progress*SPAN)));
+          /* HOLD THE PIN until the last beat has FULLY printed: if the user
+             scrolls to the release edge while beat SIG is still typing, pull the
+             scroll back just inside the pin so it can't leave mid-print. Once the
+             final line finishes, scroll passes through normally. */
+          if(self.progress>=1 && heroScrub.lastBeatDone && !heroScrub.lastBeatDone()){
+            const hold=self.end-2;
+            self.scroll(hold);
+            lenisRef?.scrollTo?.(hold,{immediate:true});
+          }
+        };
       }
       const st=ScrollTrigger.create(cfg);
       if(heroPin) spacers[i].style.height='0px';   // no double-count: pinSpacing reserves the room
@@ -1656,6 +1675,10 @@ if(!reduce){
       };
       const setBeat=n=>{ n=Math.max(0,Math.min(SIG,n)); if(n===active)return;
         go(n); if(n>0) scrollCue?.classList.add('took'); armAuto(); };
+      /* the LAST beat is "done printing" once its full type duration has elapsed.
+         The hero pin uses this to refuse to release until the final line has
+         fully printed (a fast scroll can otherwise leave mid-print). */
+      heroScrub.lastBeatDone=()=> active>=SIG && (performance.now()-typeAt)>=dur[SIG];
 
       // beat 0 starts immediately after the CRT power-on blink (.content "open"
       // anim → .settled), then beats auto-advance; scroll can skip ahead.
