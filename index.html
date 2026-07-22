@@ -58,7 +58,7 @@ img{display:block;max-width:100%}
    Covers nav links, .more/.fl "read more" links, .biglink CTA, footer links,
    and the modal's prev/next/close controls. */
 .nav a:focus-visible,.more:focus-visible,.fl:focus-visible,.biglink:focus-visible,
-.foot .fnav a:focus-visible,.foot .lnx a:focus-visible,
+.foot .frow a:focus-visible,
 .varrows button:focus-visible,.vclose:focus-visible,
 [data-mfcard]:focus-visible{
   outline:2px solid var(--red);outline-offset:3px;border-radius:2px}
@@ -87,12 +87,10 @@ body.no-grain::after{opacity:0}
    the engine so their content ALWAYS fits the window; display type and the
    vertical rhythm shrink together. 1 everywhere else. */
 .card{--fz:1;position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:center;
-  padding-block:calc(var(--sec-y)*var(--fz));overflow:hidden;contain:layout paint;
-  box-shadow:0 -12px 32px rgba(0,0,0,.3)}
+  padding-block:calc(var(--sec-y)*var(--fz));overflow:hidden;contain:layout paint}
 .card.tall{justify-content:flex-start}
-/* .nopin cards are excluded from the pinned-deck stacking (they scroll normally,
-   in flow). Drop the top-edge drop-shadow so there's no "card sliding over card"
-   seam — these read as plain stacked sections. */
+/* (the old top-edge drop-shadow that marked where one card slid over another has
+   been removed — sections read as continuous, no divider seam.) */
 .card.nopin{box-shadow:none}
 .card.dark{background:radial-gradient(120% 120% at 50% 35%,#2A2526,#231F20 78%);color:var(--cream)}
 .card.red{background:var(--red);color:var(--cream)}
@@ -113,7 +111,7 @@ body.no-grain::after{opacity:0}
 /* editorial reveals — fade + rise + stagger on enter */
 .reveal{opacity:0;transform:translateY(34px);transition:opacity var(--dur) var(--ease),transform var(--dur) var(--ease)}
 .reveal.in{opacity:1;transform:none}
-.reveal.d1{transition-delay:.1s}.reveal.d2{transition-delay:.2s}.reveal.d3{transition-delay:.3s}.reveal.d4{transition-delay:.4s}.reveal.d5{transition-delay:.5s}
+.reveal.d1{transition-delay:.1s}.reveal.d2{transition-delay:.2s}.reveal.d3{transition-delay:.3s}.reveal.d4{transition-delay:.4s}.reveal.d5{transition-delay:.5s}.reveal.d6{transition-delay:.6s}
 @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
 
 /* ============================================================
@@ -301,17 +299,6 @@ body.no-grain::after{opacity:0}
 .hero.settled .flash{display:none;animation:none}
 @media(prefers-reduced-motion:reduce){.hero .flash,.tv .roll{display:none}.hero .content{clip-path:none;animation:none}}
 
-/* ============ AUDIENCE — editorial index + hover photo reveal ============ */
-/* floating photo that trails the cursor over the index (pointer devices) */
-.apeek{position:fixed;left:0;top:0;z-index:1200;width:min(340px,26vw);aspect-ratio:340/420;overflow:hidden;
-  pointer-events:none;clip-path:inset(100% 0 0 0);transition:clip-path .55s var(--ease-io);will-change:transform}
-.apeek.on{clip-path:inset(0 0 0 0)}
-.apeek img{width:100%;height:100%;object-fit:cover}
-.apeek figcaption{position:absolute;left:12px;bottom:10px;right:12px;font-weight:900;font-style:italic;font-size:1rem;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.7)}
-.apeek figcaption:empty{display:none}
-@media(hover:none){
-  .apeek{display:none}
-}
 
 /* ============ OFFERINGS — three pillars, hover auto-cycles the photos ============ */
 /* matches the Acts (.witem) layout: equal columns + a TIGHT gap so the text and
@@ -391,8 +378,15 @@ body.no-grain::after{opacity:0}
 .mcell img{width:100%;height:100%;object-fit:cover;filter:brightness(.78);
   transition:filter .6s var(--ease),transform .6s var(--ease)}
 .mcell:hover img{filter:brightness(1);transform:scale(1.04)}
-.mcell .mno{position:absolute;top:10px;left:12px;font-weight:900;font-style:italic;font-size:.95rem;color:#fff;opacity:.85;text-shadow:0 1px 6px rgba(0,0,0,.5)}
-.mcell .mname{position:absolute;left:12px;bottom:10px;right:12px;font-weight:900;font-size:clamp(.95rem,1.1vw,1.3rem);letter-spacing:-.01em;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.65)}
+/* .mno is now the CMF alien mark (was a number). Small white badge, top-left. */
+.mcell .mno{position:absolute;top:10px;left:12px;width:clamp(16px,1.6vw,22px);height:auto;opacity:.9;
+  filter:drop-shadow(0 1px 4px rgba(0,0,0,.55))}
+/* name sits just above the role tag; small gap keeps the two close together */
+.mcell .mname{position:absolute;left:12px;right:12px;bottom:calc(12px + 1.55em);font-weight:900;font-size:clamp(.95rem,1.1vw,1.3rem);letter-spacing:-.01em;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.65)}
+/* role = a compact white-on-red pill tag, bottom-left */
+.mcell .mrole{position:absolute;left:12px;bottom:12px;display:inline-block;background:var(--red);color:#fff;
+  font-weight:700;font-size:clamp(.58rem,.72vw,.75rem);letter-spacing:.12em;text-transform:uppercase;
+  padding:.32em .6em;border-radius:3px;line-height:1}
 .mproof{margin-top:calc(clamp(18px,3vh,40px)*var(--fz));font-weight:300;font-size:calc(var(--t-lead)*var(--fz))}
 .mproof b{font-weight:900;font-style:italic;color:var(--yellow)}
 @media(hover:none){.mcell img{filter:brightness(.9)}}
@@ -423,6 +417,13 @@ body.no-grain::after{opacity:0}
 .vbody p{margin:0}
 .vbody p + p{margin-top:1.1em}
 .vbody b{font-weight:900}
+/* artist modal: name heading + red role pill above the bio */
+.vbody .vname{margin:0 0 .35em;font-weight:900;letter-spacing:-.02em;line-height:1;
+  font-size:clamp(1.6rem,2.6vw,2.6rem)}
+.vbody .vrole{display:inline-block;margin:0 0 1em;background:var(--red);color:#fff;
+  font-weight:700;font-size:clamp(.62rem,.8vw,.8rem);letter-spacing:.12em;text-transform:uppercase;
+  padding:.34em .7em;border-radius:3px;line-height:1}
+.vbody .vrole + p{margin-top:0}
 /* nav row: sits at the bottom of the text column, level with the image bottom */
 .vnav{display:flex;align-items:center;justify-content:space-between;margin-top:clamp(18px,2.4vh,34px)}
 .varrows{display:flex;gap:clamp(14px,1.6vw,26px)}
@@ -449,21 +450,26 @@ body.no-grain::after{opacity:0}
 .cta .biglink .arr{font-style:normal;color:var(--red)}
 
 /* ============ FOOTER — slim strip; the memo lives here now ============ */
-.foot{min-height:auto;padding-block:clamp(40px,5vw,80px);justify-content:flex-start;background:#1B1818;color:var(--cream)}
-.foot .cols{display:grid;grid-template-columns:1.2fr 1fr auto;gap:clamp(24px,4vw,80px);align-items:start;border-top:var(--hair) solid rgba(231,225,212,.28);padding-top:clamp(24px,3vw,44px)}
-.foot .mk{font-weight:900;font-style:italic;font-size:clamp(1.2rem,1.6vw,1.8rem)}
-.foot .mk .mis{color:var(--red)}
-.foot .about p{margin-top:.8em;font-weight:300;font-size:var(--t-body);opacity:.8;max-width:44ch;line-height:1.5}
-.foot .about p b{font-weight:900}
-/* footer site-nav: same uppercase link treatment as the social column */
-.foot .fnav{display:flex;flex-direction:column;gap:.7em;align-items:flex-start}
-.foot .fnav a{color:inherit;text-decoration:none;font-size:var(--t-label);font-weight:500;letter-spacing:.18em;text-transform:uppercase;opacity:.7;transition:opacity .5s var(--ease)}
-.foot .fnav a:hover{opacity:1}
-.foot .lnx{display:flex;flex-direction:column;gap:.7em;align-items:flex-start}
-.foot .lnx a{color:inherit;text-decoration:none;font-size:var(--t-label);font-weight:500;letter-spacing:.18em;text-transform:uppercase;opacity:.7;transition:opacity .5s var(--ease)}
-.foot .lnx a:hover{opacity:1}
-.foot .base{margin-top:clamp(28px,3vw,48px);display:flex;justify-content:space-between;gap:2em;font-size:var(--t-label);letter-spacing:.08em;opacity:.45}
-@media(max-width:860px){.foot .cols{grid-template-columns:1fr;gap:32px}.foot .base{flex-direction:column;gap:.6em}}
+/* FOOTER — a big closing block: About Us heading + blurb, then stacked rows of
+   pipe-separated links (Home / site nav / socials), then the © base line. */
+.foot{min-height:auto;padding-block:clamp(56px,8vw,120px);justify-content:flex-start;background:#1B1818;color:var(--cream)}
+.foot .about{border-top:var(--hair) solid rgba(231,225,212,.28);padding-top:clamp(32px,4vw,56px);max-width:60ch}
+.foot .fh{font-weight:900;letter-spacing:-.03em;line-height:.95;font-size:clamp(2.2rem,min(5.5vw,7vh),4.4rem);color:var(--cream)}
+.foot .about p{margin-top:.7em;font-weight:300;font-size:clamp(1rem,1.4vw,1.35rem);opacity:.82;line-height:1.5}
+/* link rows: pipe-separated inline lists. Same uppercase link treatment. */
+.foot .frow{display:flex;flex-wrap:wrap;align-items:center;gap:.9em 1.1em;margin-top:clamp(22px,3vw,38px)}
+.foot .frow-home{margin-top:clamp(32px,4.5vw,60px)}
+.foot .frow a{color:inherit;text-decoration:none;font-size:var(--t-label);font-weight:500;letter-spacing:.18em;text-transform:uppercase;opacity:.7;transition:opacity .5s var(--ease);position:relative}
+.foot .frow a:hover{opacity:1}
+/* pipe between items (not after the last) */
+.foot .frow a:not(:last-child)::after{content:"|";position:absolute;right:calc(-.55em - 1px);opacity:.35;font-weight:300}
+.foot .base{margin-top:clamp(40px,5vw,72px);display:flex;justify-content:space-between;gap:2em;font-size:var(--t-label);letter-spacing:.08em;opacity:.45}
+@media(max-width:860px){
+  /* rows stack vertically; drop the pipes so nothing overflows */
+  .foot .frow{flex-direction:column;align-items:flex-start;gap:.7em}
+  .foot .frow a:not(:last-child)::after{display:none}
+  .foot .base{flex-direction:column;gap:.6em}
+}
 
 /* ============================================================
    MANIFESTO COLLAGE (ported from protos/m.html). All classes mf-prefixed to
@@ -487,7 +493,7 @@ body.no-grain::after{opacity:0}
   font-size:clamp(2rem,min(6vw,7vh),5.4rem);max-width:16ch;margin-bottom:clamp(50px,9vh,120px)}
 /* wide variant: same size as the beat headings (.mf-beat h3), full width — the
    sentence flows and wraps only at the column edge, no forced line break. */
-.mf-lede-wide{font-size:clamp(2.4rem,min(6.5vw,8vh),5.4rem);max-width:none}
+.mf-lede-wide{font-size:clamp(2.4rem,min(6.5vw,8vh),5.4rem);max-width:none;margin-top:clamp(50px,9vh,120px)}
 
 /* Each beat is a 2-column ROW (text | photo), so text and photo are in the same
    flow and always stay aligned at every window size — no absolute drift, no
@@ -556,9 +562,8 @@ body.no-grain::after{opacity:0}
 /* 2-column layout: graph left, copy right. Stacks on mobile. */
 .fb-cols{margin-top:calc(clamp(36px,6vh,84px)*var(--fz));display:grid;
   grid-template-columns:1.1fr 1fr;gap:clamp(32px,5vw,88px);align-items:center}
-/* the right-column copy reveals LAST — after the axes draw and the target lands.
-   Push its reveal transition-delay past the ~1.05s target beat. */
-.fb-copy.reveal{transition-delay:2.9s !important}
+/* copy reveals with the chart now (choreography removed) — no special delay;
+   it uses its normal .reveal.d2 stagger like the rest of the section. */
 .fb-chart{display:grid;grid-template-columns:clamp(28px,3vw,52px) 1fr;grid-template-rows:1fr clamp(28px,3vw,52px);
   gap:clamp(10px,1.4vw,20px)}
 /* right column: the position lead + the offer bullets */
@@ -573,63 +578,34 @@ body.no-grain::after{opacity:0}
   padding:clamp(20px,3vw,40px)}
 /* faint quadrant midlines so it reads as a 2x2, not just a corner bracket */
 .fb-plot::before,.fb-plot::after{content:"";position:absolute;background:rgba(231,225,212,.14);
-  opacity:0;transition:opacity .6s var(--ease) 1.7s}
+  opacity:0;transition:opacity .6s var(--ease)}
 .fb-plot::before{left:0;right:0;top:50%;height:var(--hair)}
 .fb-plot::after{top:0;bottom:0;left:50%;width:var(--hair)}
-/* ---- CHOREOGRAPHY: axes DRAW in (Y up, then X right), then the balloon target
-   lands, then the midlines + copy. All driven by one trigger — the site adds
-   .in to .fb-chart when it scrolls into view — and sequenced by transition
-   delays. Pure CSS, no JS. ---- */
-/* the two axis LINES (scalable divs, replacing the old borders) */
-.fb-axis{position:absolute;background:rgba(231,225,212,.32);z-index:0}
-.fb-axis-y{left:0;bottom:0;width:var(--hair);height:100%;transform:scaleY(0);transform-origin:bottom;
-  transition:transform .8s var(--ease) .2s}                /* draws UP, first */
-.fb-axis-x{left:0;bottom:0;height:var(--hair);width:100%;transform:scaleX(0);transform-origin:left;
-  transition:transform .8s var(--ease) 1s}                 /* draws RIGHT, after Y */
-/* axis arrowheads: pop in as each axis finishes drawing */
-.fb-arrow{position:absolute;width:0;height:0;z-index:1;opacity:0;transition:opacity .3s var(--ease)}
-/* Y arrow points UP: 12px-wide base, tip up. Centered on the Y line's centerline
-   (x = hair/2), base bottom flush to the line top (top:0) so the tip caps the line. */
-.fb-arrow-y{top:-9px;left:calc(var(--hair)/2);transform:translateX(-50%);transition-delay:.95s;
+/* The chart used to DRAW in as a staged sequence (axes scale up, arrows, alien,
+   note, one after another). That choreography is removed: every part just fades
+   in together when the section scrolls into view — a plain reveal like the rest
+   of the site. Axes/gridlines are drawn at full size; only opacity animates. */
+.fb-axis{position:absolute;background:rgba(231,225,212,.32);z-index:0;opacity:0;transition:opacity .6s var(--ease)}
+.fb-axis-y{left:0;bottom:0;width:var(--hair);height:100%}
+.fb-axis-x{left:0;bottom:0;height:var(--hair);width:100%}
+.fb-arrow{position:absolute;width:0;height:0;z-index:1;opacity:0;transition:opacity .6s var(--ease)}
+.fb-arrow-y{top:-9px;left:calc(var(--hair)/2);transform:translateX(-50%);
   border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:9px solid rgba(231,225,212,.55)}
-/* X arrow points RIGHT: 12px-tall base, tip right. Centered on the X line's centerline
-   (y = hair/2 from bottom), base right edge flush to the line end (right:0). */
-.fb-arrow-x{bottom:calc(var(--hair)/2);right:-9px;transform:translateY(50%);transition-delay:1.75s;
+.fb-arrow-x{bottom:calc(var(--hair)/2);right:-9px;transform:translateY(50%);
   border-top:6px solid transparent;border-bottom:6px solid transparent;border-left:9px solid rgba(231,225,212,.55)}
-/* fire the draw when the chart is in view */
-.fb-chart.in .fb-axis-y{transform:scaleY(1)}
-.fb-chart.in .fb-axis-x{transform:scaleX(1)}
+/* everything fades in together on scroll-in — no stagger, no draw */
+.fb-chart.in .fb-axis{opacity:1}
 .fb-chart.in .fb-arrow{opacity:1}
 .fb-chart.in .fb-plot::before,.fb-chart.in .fb-plot::after{opacity:1}
-/* 2x2 quadrant labels — centered in each cell, cream, quiet; fade in with the
-   midlines. Rows = Scale (top high), cols = Cultural Impact (right high). */
-.fb-qlabel{position:absolute;z-index:2;max-width:9ch;text-align:center;color:var(--cream);
-  font-weight:700;letter-spacing:-.01em;line-height:1.08;
-  font-size:calc(clamp(.82rem,1.5vw,1.15rem)*var(--fz));
-  opacity:0;transition:opacity .6s var(--ease) 1.9s;transform:translate(-50%,-50%)}
-.fb-chart.in .fb-qlabel{opacity:.9}
-/* all 4 labels share the same vertical baseline per row (top pair at 28%,
-   bottom pair at 72%) and the same horizontal centers (25% / 75%). */
-.fb-q-tl{left:25%;top:28%}
-.fb-q-tr{left:75%;top:28%;max-width:none;white-space:nowrap;
-  font-size:calc(clamp(1rem,1.9vw,1.45rem)*var(--fz))}
-.fb-q-bl{left:25%;top:72%}
-.fb-q-br{left:75%;top:72%}
-/* FINAL BEAT — handwritten note sits in the TOP-RIGHT quadrant, above the
-   "Cultural Leaders" label. Appears LAST, after the whole draw sequence. */
+/* alien mark in the top-right quadrant — fades in with everything else */
+.fb-alien{position:absolute;top:28%;left:75%;transform:translate(-50%,-50%);z-index:2;
+  width:clamp(40px,5.5vw,76px);height:auto;opacity:0;transition:opacity .6s var(--ease)}
+.fb-chart.in .fb-alien{opacity:1}
+/* handwritten note — fades in with everything else (no longer the delayed final beat) */
 .fb-note{position:absolute;right:-2%;top:-16%;z-index:3;color:var(--red);
   width:max-content;text-align:center;pointer-events:none;transform-origin:top right;
-  opacity:0;transform:translateY(8px) rotate(-3deg);
-  transition:opacity .6s var(--ease) 3.3s,transform .7s cubic-bezier(.16,1,.3,1) 3.3s}
-.fb-chart.in .fb-note{opacity:1;transform:rotate(-3deg)}
-/* highlighter swipe on "Cultural Leaders" — the marker mechanism is the shared
-   .mark, but its trigger is .reveal.in (fires early); this quadrant label has no
-   .reveal ancestor, so re-arm the swipe on .fb-chart.in and delay it to 3.3s so
-   it lands in sync with the red note appearing above it. */
-.fb-q-tr .mark::before{transition-delay:3.3s}
-.fb-q-tr .mark{transition-delay:3.65s}
-.fb-chart.in .fb-q-tr .mark::before{transform:scaleX(1)}
-.fb-chart.in .fb-q-tr .mark.mark-w{color:var(--cream)}
+  opacity:0;transform:rotate(-3deg);transition:opacity .6s var(--ease)}
+.fb-chart.in .fb-note{opacity:1}
 .fb-note p{font-family:'Caveat',cursive;font-weight:600;line-height:1.02;letter-spacing:.01em;
   font-size:calc(clamp(1.25rem,2vw,1.75rem)*var(--fz));max-width:20ch;margin:0}
 .fb-xaxis{grid-row:2;grid-column:2;padding-top:.6em;text-align:center;
@@ -707,7 +683,7 @@ body.no-grain::after{opacity:0}
         <circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none"/>
       </svg>
     </a>
-    <a class="contact" href="#contact"><span>Contact</span></a>
+    <a class="contact" href="mailto:hello@culturalmisfits.com"><span>Contact</span></a>
   </div>
 </nav>
 
@@ -754,7 +730,6 @@ body.no-grain::after{opacity:0}
        colliding with the deck's .card/.beat/.ph/.mk. ============================ -->
   <section class="mf-collage">
     <div class="mf-panel">
-      <div class="mf-lede mf-lede-wide mf-rise">Mainstream or niche, a space to be seen, understood, and valued.</div>
       <!-- each beat is a 2-col ROW: text + its own photo in the SAME flow, so the
            photo always sits beside its line and moves with it at every size. The
            photo bleeds off the outer edge; sides alternate. -->
@@ -770,12 +745,13 @@ body.no-grain::after{opacity:0}
         <div class="mf-txt"><h3>Where new <span class="mark mark-w" style="--hl:var(--red)">truths</span> are spoken.</h3><p>The things people actually mean, said out loud without translation.</p></div>
         <figure class="mf-ph"><img src="assets/collage/banana.png" alt="" decoding="async"></figure>
       </div>
+      <div class="mf-lede mf-lede-wide mf-rise">Mainstream or niche, a space to be seen, understood, and valued.</div>
     </div>
   </section>
 
   <section class="mf-unite" id="audience">
     <div class="mf-ustage">
-      <div class="mf-uhead mf-rise">For every <span class="mark mark-w" style="--hl:var(--red)">square hole, round peg</span> and (mis)fit: tired of one-size-fits-all narratives?</div>
+      <div class="mf-uhead mf-rise">Who are we <span class="mark mark-w" style="--hl:var(--red)">building for?</span></div>
       <div class="mf-reel" id="mf-reel">
         <figure class="mf-card" data-mfcard tabindex="0" role="button"><img src="assets/traits/curious.jpg" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Curious</h4><div class="mf-q">Do you ask why and how, more than what?</div></figcaption></figure>
         <figure class="mf-card" data-mfcard tabindex="0" role="button"><img src="assets/traits/expressive.jpg" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Expressive</h4><div class="mf-q">Do you use music, fashion and memes to introduce yourself?</div></figcaption></figure>
@@ -793,46 +769,47 @@ body.no-grain::after{opacity:0}
   <section class="card dark misfits tall" id="misfits" data-nav="dark" data-navbg="#231F20">
     <div class="wrap">
       <h2 class="head reveal d1" data-m>The (Mis)fits <span class="mark mark-w" style="--hl:var(--red)">Brigade</span></h2>
+      <p class="lede lede-wide reveal d2" data-m>[Placeholder] A short line about the artists and creators we work with — the misfits shaping culture alongside us.</p>
       <!-- CONFIGURABLE ROSTER: uniform, repeating .mcell blocks (the shape TinaCMS
            will bind to later). To add an artist, copy one block and set its photo,
            name (.mname + alt + data-name), and number (.mno). The grid auto-fits
            and cells are ordered BY THE NUMBER, so source order doesn't matter. -->
-      <div class="mwall peekzone reveal d1">
-        <figure class="mcell" data-photo="assets/brigade/1.png" data-name="Aakash Odedra">
+      <div class="mwall reveal d1">
+        <figure class="mcell" data-photo="assets/brigade/1.png" data-name="Aakash Odedra" data-order="01" data-bio="British South Asian dancer and choreographer trained in Kathak and Bharatanatyam, founder of Aakash Odedra Company. Regarded as one of the leading Kathak dancers of his generation, he was awarded a British Empire Medal in 2021 for services to dance.">
           <img src="assets/brigade/1.png" alt="Aakash Odedra" loading="lazy" decoding="async">
-          <span class="mno">01</span><span class="mname">Aakash Odedra</span>
+          <img class="mno" src="assets/brand/alien-white.png" alt="" aria-hidden="true"><span class="mname">Aakash Odedra</span><span class="mrole">Dancer</span>
         </figure>
-        <figure class="mcell" data-photo="assets/brigade/2.png" data-name="Eshna Kutty">
+        <figure class="mcell" data-photo="assets/brigade/2.png" data-name="Eshna Kutty" data-order="02" data-bio="Delhi-based self-taught hoop dancer and flow artist with a postgraduate background in dance movement therapy. She gained wide recognition after a hula-hoop dance video went viral, and now teaches hoop workshops across India.">
           <img src="assets/brigade/2.png" alt="Eshna Kutty" loading="lazy" decoding="async">
-          <span class="mno">02</span><span class="mname">Eshna Kutty</span>
+          <img class="mno" src="assets/brand/alien-white.png" alt="" aria-hidden="true"><span class="mname">Eshna Kutty</span><span class="mrole">Hoop Artist</span>
         </figure>
-        <figure class="mcell" data-photo="assets/brigade/3.png" data-name="Nicki Wells">
+        <figure class="mcell" data-photo="assets/brigade/3.png" data-name="Nicki Wells" data-order="03" data-bio="English singer, composer and songwriter known for blending Indian classical, Western classical, folk and jazz influences. She rose to prominence as featured vocalist in Nitin Sawhney&#x27;s band and released her debut album under the name TURYA before recording as Nicki Wells.">
           <img src="assets/brigade/3.png" alt="Nicki Wells" loading="lazy" decoding="async">
-          <span class="mno">03</span><span class="mname">Nicki Wells</span>
+          <img class="mno" src="assets/brand/alien-white.png" alt="" aria-hidden="true"><span class="mname">Nicki Wells</span><span class="mrole">Singer</span>
         </figure>
-        <figure class="mcell" data-photo="assets/brigade/4.png" data-name="Nirvair Singh Rai">
+        <figure class="mcell" data-photo="assets/brigade/4.png" data-name="Nirvair Singh Rai" data-order="04" data-bio="Independent visual artist and filmmaker working across documentary, fashion, and commercial photography, trained at Pathshala in Dhaka, Bangladesh. He is listed as a collaborator with Aakash Odedra Company, a UK dance organisation in the same cultural circle as this roster.">
           <img src="assets/brigade/4.png" alt="Nirvair Singh Rai" loading="lazy" decoding="async">
-          <span class="mno">04</span><span class="mname">Nirvair Singh Rai</span>
+          <img class="mno" src="assets/brand/alien-white.png" alt="" aria-hidden="true"><span class="mname">Nirvair Singh Rai</span><span class="mrole">Photographer</span>
         </figure>
-        <figure class="mcell" data-photo="assets/brigade/5.png" data-name="Ravi-Ra">
+        <figure class="mcell" data-photo="assets/brigade/5.png" data-name="Ravi-Ra" data-order="05" data-bio="Lyricist, singer-songwriter and screenwriter working in India&#x27;s film and music industry, credited in the music departments of films including Forensic (2022), Half CA (2023) and Anu Aur DI (2023).">
           <img src="assets/brigade/5.png" alt="Ravi-Ra" loading="lazy" decoding="async">
-          <span class="mno">05</span><span class="mname">Ravi-Ra</span>
+          <img class="mno" src="assets/brand/alien-white.png" alt="" aria-hidden="true"><span class="mname">Ravi-Ra</span><span class="mrole">Musician</span>
         </figure>
-        <figure class="mcell" data-photo="assets/brigade/6.png" data-name="Rushil Ranjan">
+        <figure class="mcell" data-photo="assets/brigade/6.png" data-name="Rushil Ranjan" data-order="06" data-bio="British composer, arranger and producer who founded the Orchestral Qawwali Project with singer Abi Sampa, blending Sufi and orchestral classical music. He is an Associate Artist of the Royal Albert Hall and has collaborated with A. R. Rahman on major concert works.">
           <img src="assets/brigade/6.png" alt="Rushil Ranjan" loading="lazy" decoding="async">
-          <span class="mno">06</span><span class="mname">Rushil Ranjan</span>
+          <img class="mno" src="assets/brand/alien-white.png" alt="" aria-hidden="true"><span class="mname">Rushil Ranjan</span><span class="mrole">Composer</span>
         </figure>
-        <figure class="mcell" data-photo="assets/brigade/7.png" data-name="Gopal Datt">
+        <figure class="mcell" data-photo="assets/brigade/7.png" data-name="Gopal Datt" data-order="07" data-bio="Indian actor and writer, full name Gopal Datt Tiwari, trained at the National School of Drama. Known for comedic roles in web series such as TVF Pitchers and Bachelors, and films including Tere Naam and the National Award-winning Filmistaan.">
           <img src="assets/brigade/7.png" alt="Gopal Datt" loading="lazy" decoding="async">
-          <span class="mno">07</span><span class="mname">Gopal Datt</span>
+          <img class="mno" src="assets/brand/alien-white.png" alt="" aria-hidden="true"><span class="mname">Gopal Datt</span><span class="mrole">Actor</span>
         </figure>
-        <figure class="mcell" data-photo="assets/brigade/8.png" data-name="Parikshit Balochi">
+        <figure class="mcell" data-photo="assets/brigade/8.png" data-name="Parikshit Balochi" data-order="08" data-bio="Dubai-based radio presenter and travel blogger, host of the breakfast show on Bollywood music station City 101.6. Originally from India, he has since travelled to over 80 countries and built a career in broadcasting and travel content.">
           <img src="assets/brigade/8.png" alt="Parikshit Balochi" loading="lazy" decoding="async">
-          <span class="mno">08</span><span class="mname">Parikshit Balochi</span>
+          <img class="mno" src="assets/brand/alien-white.png" alt="" aria-hidden="true"><span class="mname">Parikshit Balochi</span><span class="mrole">Radio Host</span>
         </figure>
-        <figure class="mcell" data-photo="assets/brigade/9.png" data-name="Abi Sampa">
+        <figure class="mcell" data-photo="assets/brigade/9.png" data-name="Abi Sampa" data-order="09" data-bio="London-born Sufi and Carnatic-trained singer and veena player of Sri Lankan Tamil heritage, first Asian-tradition singer to appear on The Voice UK (2013). She co-founded the Orchestral Qawwali Project with composer Rushil Ranjan and qualified as a dentist in 2011.">
           <img src="assets/brigade/9.png" alt="Abi Sampa" loading="lazy" decoding="async">
-          <span class="mno">09</span><span class="mname">Abi Sampa</span>
+          <img class="mno" src="assets/brand/alien-white.png" alt="" aria-hidden="true"><span class="mname">Abi Sampa</span><span class="mrole">Singer</span>
         </figure>
       </div>
     </div>
@@ -929,11 +906,8 @@ body.no-grain::after{opacity:0}
             <span class="fb-axis fb-axis-x" aria-hidden="true"></span>
             <span class="fb-arrow fb-arrow-y" aria-hidden="true"></span>
             <span class="fb-arrow fb-arrow-x" aria-hidden="true"></span>
-            <!-- 2x2 quadrant labels: low/high scale (rows) × low/high impact (cols) -->
-            <span class="fb-qlabel fb-q-tl">Mainstream</span>
-            <span class="fb-qlabel fb-q-tr"><span class="mark mark-w" style="--hl:var(--red)">Cultural Leaders</span></span>
-            <span class="fb-qlabel fb-q-bl">Invisible</span>
-            <span class="fb-qlabel fb-q-br">Niche</span>
+            <!-- alien mark in the top-right quadrant (replaces the old 2x2 labels) -->
+            <img class="fb-alien" src="assets/brand/alien-red.png" alt="" aria-hidden="true">
             <!-- the handwritten note floats above the top-right quadrant -->
             <div class="fb-note" aria-hidden="true">
               <p>If your brand isn't here, is it even culturally relevant?</p>
@@ -961,49 +935,42 @@ body.no-grain::after{opacity:0}
        light weight, dull hairlines, .onum-style numerals. -->
   <section class="card dark calling tall nopin" id="calling" data-nav="dark" data-navbg="#231F20">
     <div class="wrap">
-      <h2 class="head reveal d1" data-m>We <span class="mark mark-w" style="--hl:var(--red)">work with</span></h2>
+      <h2 class="head reveal d1" data-m>Calling <span class="mark mark-w" style="--hl:var(--red)">Everybody</span></h2>
 
       <p class="lede lede-wide reveal d2" data-m>We’re building a Cultural Operating System that moves forward with culture, with the help of those who don’t conform.</p>
 
       <div class="ww-list">
-        <div class="ww-row reveal d1" data-m><span class="ww-no">01</span><p><b>Brands</b> who want to <i>participate in culture,</i> not interrupt it.</p></div>
-        <div class="ww-row reveal d2" data-m><span class="ww-no">02</span><p><b>Creators &amp; Artists</b> who have something <i>real to say.</i></p></div>
-        <div class="ww-row reveal d3" data-m><span class="ww-no">03</span><p><b>Media partners</b> who want to <i>reach audiences</i> that resist being reached.</p></div>
-        <div class="ww-row reveal d4" data-m><span class="ww-no">04</span><p><b>Communities</b> who are <i>tired of stories that flatten them.</i></p></div>
-        <div class="ww-row reveal d5" data-m><span class="ww-no">05</span><p><b>Partners</b> who understand that <i>culture is an economic force.</i></p></div>
+        <div class="ww-row reveal d1" data-m><span class="ww-no">01</span><p>Are you an <b>Artist or Creator</b> who wants to <i>join the Misfit Brigade?</i></p></div>
+        <div class="ww-row reveal d2" data-m><span class="ww-no">02</span><p>Are you a <b>Brand</b> who wants to <i>build Cultural Fluency?</i></p></div>
+        <div class="ww-row reveal d3" data-m><span class="ww-no">03</span><p>Are you a <b>Media Partner or Agency</b> who believes that <i>Misfits are a big deal?</i></p></div>
+        <div class="ww-row reveal d4" data-m><span class="ww-no">04</span><p>Are you a <b>Community</b> that is <i>tired of stories that keep flattening you?</i></p></div>
+        <div class="ww-row reveal d5" data-m><span class="ww-no">05</span><p>Are you <b>Anyone</b> who feels the way we feel <i>about Misfits?</i></p></div>
       </div>
+
+      <p class="fb-write reveal d6" data-m>Write to us at <a href="mailto:hello@culturalmisfits.com"><span class="mark mark-w" style="--hl:var(--red)">hello@culturalmisfits.com</span></a></p>
     </div>
   </section>
 
-  <!-- PARTNER CTA — ink field; pink is the page's ONE spectrum moment. -->
-  <section class="card dark cta nopin" id="contact" data-nav="dark" data-navbg="#231F20" data-fit>
-    <div class="wrap">
-      <h2 class="head reveal d1" data-m>Building something with <span class="it">cultural consequence?</span></h2>
-      <a class="biglink reveal d2" href="mailto:hello@culturalmisfits.com">Start a conversation <span class="arr">↗</span></a>
-    </div>
-  </section>
-
-  <!-- FOOTER — About Us blurb, site nav, and socials in three columns. -->
+  <!-- FOOTER — About Us blurb, site nav, and socials. -->
   <footer class="card foot" data-nav="dark" data-navbg="#1B1818">
     <div class="wrap">
-      <div class="cols">
-        <div class="about">
-          <div class="mk">Cultural <span class="mis">(Mis)</span>fits</div>
-          <p><b>About Us</b> — Built with the outliers, Cultural (Mis)fits is a next-generation culture platform that exists to deliver extraordinary, authentic commentary on topics that shape today's cultural movements.</p>
-        </div>
-        <nav class="fnav">
-          <a href="#top">Home</a>
-          <a href="#culturist-network">Culturist Network</a>
-          <a href="#irl-live">IRL &amp; Live Experiences</a>
-          <a href="#film-studio">Film Studio</a>
-        </nav>
-        <div class="lnx">
-          <a href="https://www.instagram.com/culturalmisfits.live/" target="_blank" rel="noopener">Instagram</a>
-          <a href="https://facebook.com/culturalmisfits" target="_blank" rel="noopener">Facebook</a>
-          <a href="https://youtube.com/@culturalmisfits" target="_blank" rel="noopener">Youtube</a>
-          <a href="mailto:hello@culturalmisfits.com">hello@culturalmisfits.com</a>
-        </div>
+      <div class="about">
+        <h3 class="fh">About Us</h3>
+        <p>Built with the outliers, Cultural (Mis)fits is a next-generation culture platform that exists to deliver extraordinary, authentic commentary on topics that shape today’s cultural movements.</p>
       </div>
+      <nav class="frow frow-home">
+        <a href="#top">Home</a>
+      </nav>
+      <nav class="frow">
+        <a href="#culturist-network">Culturist Network</a>
+        <a href="#irl-live">IRL &amp; Live Experiences</a>
+        <a href="#film-studio">Film Studio</a>
+      </nav>
+      <nav class="frow">
+        <a href="https://www.instagram.com/culturalmisfits.live/" target="_blank" rel="noopener">Instagram</a>
+        <a href="https://facebook.com/culturalmisfits" target="_blank" rel="noopener">Facebook</a>
+        <a href="https://youtube.com/@culturalmisfits" target="_blank" rel="noopener">Youtube</a>
+      </nav>
       <div class="base">
         <span>© 2023–2026 Cultural (Mis)fits / All Rights Reserved.</span>
         <span>Made in the margins.</span>
@@ -1012,10 +979,6 @@ body.no-grain::after{opacity:0}
   </footer>
 
 </div>
-
-<!-- floating audience photo lives OUTSIDE the deck: cards use contain:paint
-     and get pinned/transformed, either of which would hijack position:fixed -->
-<figure class="apeek" id="apeek"><img alt="" decoding="async"><figcaption></figcaption></figure>
 
 <!-- VERTICAL MODAL — "Read more" on a pillar opens its world:
      detail copy + a misfits-style photo grid, populated per vertical. -->
@@ -1077,31 +1040,16 @@ try{ pretext=await import('./vendor/pretext.esm.js'); }catch(_){ }
    jump, flick) can cross the viewport between IO callbacks and skip it.
    The sweep is the guarantee: anything the scroll position has already
    reached gets revealed, no matter how it got there. */
-/* The whole FOR BRANDS section is one narrative that REPLAYS as a unit (label →
-   heading → chart choreography → copy → write line). Its reveals are driven by a
-   dedicated observer below, so keep every reveal inside #for-brands out of the
-   once-only set. */
-const fbSection=document.getElementById('for-brands');
-const fbReveals=fbSection?[...fbSection.querySelectorAll('.reveal, .fb-chart')]:[];
-const pendingReveals=new Set([...document.querySelectorAll('.reveal, .mf-rise')].filter(el=>!fbReveals.includes(el)));
+/* For Brands is a plain reveal section (the staged chart choreography + replay
+   were removed) — its reveals and the .fb-chart go through the same once-only
+   observer as the rest of the site, fading in together on scroll-in. */
+const pendingReveals=new Set(document.querySelectorAll('.reveal, .mf-rise, .fb-chart'));
 function fireReveal(el){ el.classList.add('in'); pendingReveals.delete(el); io.unobserve(el); }
 const io=new IntersectionObserver((es)=>{
   es.forEach(e=>{ if(e.isIntersecting)fireReveal(e.target); });
 },{threshold:.15});
 pendingReveals.forEach(el=>io.observe(el));
 
-/* FOR BRANDS narrative replay: when the section enters view, fire ALL its
-   reveals together (they keep their own staggered transition-delays, so the
-   story plays in order — label, heading, axes drawing, target, copy). When it
-   leaves, reset them so the next scroll-in replays the whole thing. */
-if(fbSection){
-  new IntersectionObserver((es)=>{
-    es.forEach(e=>{
-      if(e.isIntersecting) fbReveals.forEach(el=>el.classList.add('in'));
-      else fbReveals.forEach(el=>el.classList.remove('in'));
-    });
-  },{threshold:.25}).observe(fbSection);
-}
 let sweepAt=0;
 addEventListener('scroll',()=>{
   const now=performance.now();
@@ -1190,76 +1138,18 @@ const oio=new IntersectionObserver((es)=>{
 },{rootMargin:'300px 0px'});
 document.querySelectorAll('.offer,.witem').forEach(o=>oio.observe(o));
 
-/* ---------- Brigade roster order: the NUMBER shown on each cell (.mno) is the
-   single source of truth for its position. Sort the .mcell nodes by that number
-   and re-append in order, so changing a cell's number (by hand or via TinaCMS
-   later) moves it in the grid — no need to reorder the source markup. The
-   auto-fit grid then flows them left-to-right in numeric order. ---------- */
+/* ---------- Brigade roster order: each cell's data-order is the single source of
+   truth for its position (the visible badge is now the alien mark, not a number).
+   Sort the .mcell nodes by data-order and re-append, so changing a cell's number
+   (by hand or via TinaCMS later) moves it in the grid — no need to reorder the
+   source markup. The auto-fit grid then flows them left-to-right in order. ------- */
 (function orderRoster(){
   const wall=document.querySelector('.mwall'); if(!wall)return;
-  const num=el=>{ const t=el.querySelector('.mno')?.textContent||''; const n=parseInt(t,10); return isNaN(n)?1e9:n; };
+  const num=el=>{ const n=parseInt(el.dataset.order,10); return isNaN(n)?1e9:n; };
   [...wall.querySelectorAll('.mcell')]
     .sort((a,b)=>num(a)-num(b))
     .forEach(cell=>wall.appendChild(cell));   // stable re-append in numeric order
 })();
-
-/* ---------- hover peek: the bigger image trails the cursor over any
-   .peekzone (the misfits wall) ---------- */
-const peek=document.getElementById('apeek');
-const peekImg=peek.querySelector('img');
-const peekCap=peek.querySelector('figcaption');
-const hoverable=matchMedia('(hover:hover)').matches;
-const peekReduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
-if(hoverable){
-  let px=0,py=0,tx=0,ty=0,rafOn=false,shownY=0;
-  function loop(){
-    px+=(tx-px)*.12; py+=(ty-py)*.12;
-    peek.style.transform=`translate(${px}px,${py}px)`;
-    if(rafOn)requestAnimationFrame(loop);
-  }
-  function showPeek(item,x,y){
-    peekImg.src=item.dataset.photo;
-    peekCap.textContent=item.dataset.name||'';
-    shownY=scrollY;
-    if(peekReduce){
-      // no cursor-trailing rAF loop: snap straight to position, stay put
-      px=x+28;py=y-210;
-      peek.style.transform=`translate(${px}px,${py}px)`;
-    }else if(!rafOn){px=x+28;py=y-210;rafOn=true;requestAnimationFrame(loop);}
-    peek.classList.add('on');
-  }
-  function hidePeek(){ peek.classList.remove('on'); rafOn=false; }
-  document.querySelectorAll('.peekzone').forEach(zone=>{
-    zone.addEventListener('pointermove',e=>{
-      tx=e.clientX+28; ty=e.clientY-210;
-      /* resurrect after a scroll-hide if the pointer is still over an item */
-      if(!rafOn){const it=e.target.closest('[data-photo]');if(it)showPeek(it,e.clientX,e.clientY);}
-    });
-    /* delegated (pointerover bubbles) so grids built later — the modal's —
-       work without rebinding */
-    zone.addEventListener('pointerover',e=>{
-      if(e.pointerType==='touch')return;
-      const it=e.target.closest('[data-photo]');
-      if(it)showPeek(it,e.clientX,e.clientY);
-    });
-    zone.addEventListener('pointerleave',hidePeek);
-  });
-  document.querySelector('.vpanel')?.addEventListener('scroll',hidePeek,{passive:true});
-  /* the photo must not outlive its item: kill it once the page scrolls on
-     (covers pointerleave never firing because the section scrolled away) */
-  addEventListener('scroll',()=>{ if(rafOn&&Math.abs(scrollY-shownY)>80)hidePeek(); },{passive:true});
-}else{
-  document.querySelectorAll('.arow').forEach(row=>{
-    row.addEventListener('click',()=>{
-      const im=row.querySelector('.aphoto img');
-      if(im&&!im.src)im.src=im.dataset.src;
-      const was=row.classList.contains('open');
-      document.querySelectorAll('.arow.open').forEach(r=>r.classList.remove('open'));
-      if(!was)row.classList.add('open');
-      if(window.ScrollTrigger)requestAnimationFrame(()=>ScrollTrigger.refresh());
-    });
-  });
-}
 
 /* ---------- vertical modal: "Read more" opens the vertical's world ---------- */
 /* Each vertical is an ARRAY OF SLIDES. One slide = { image, paragraphs:[...] }.
@@ -1374,6 +1264,41 @@ addEventListener('keydown',e=>{ if(vmodal.hidden)return;
   if(e.key==='Escape')closeVertical();
   else if(e.key==='ArrowLeft')vGo(-1);
   else if(e.key==='ArrowRight')vGo(1);
+});
+
+/* ---------- Brigade artists: click a photo → open the SAME modal, showing the
+   artist's photo + name + role pill + bio. Reuses openVertical's machinery
+   (inert bg, focus trap, scroll lock) but populates from the cell's data. A
+   single artist = one "slide", so vSlides is emptied and .single hides ‹ ›. --- */
+function openArtist(cell){
+  vTrigger=cell;
+  vmodal.style.setProperty('--vc','var(--red)');
+  vSlides=[]; vAt=0;                                  // no slide nav for a single artist
+  const name=cell.dataset.name||'';
+  const role=cell.querySelector('.mrole')?.textContent||'';
+  const bio=cell.dataset.bio||'';
+  vImg.src=cell.dataset.photo||cell.querySelector('img')?.src||''; vImg.alt=name;
+  vBody.innerHTML=
+    `<h3 class="vname">${name}</h3>`+
+    (role?`<span class="vrole">${role}</span>`:'')+
+    `<p>${bio}</p>`;
+  vBody.scrollTop=0;
+  if(vTitle) vTitle.textContent=name;
+  vmodal.classList.add('single');                    // hide the ‹ › arrows
+  vmodal.hidden=false;
+  setBgInert(true);
+  setTimeout(()=>{ vmodal.classList.add('open');
+    (vPanel?.querySelector('button:not(:disabled)')||vPanel)?.focus?.(); },20);
+  vPanel?.addEventListener('keydown',vTrapKeydown);
+  lenisRef?.stop(); document.documentElement.style.overflow='hidden';
+}
+document.querySelectorAll('.mwall .mcell').forEach(cell=>{
+  cell.style.cursor='pointer';
+  cell.setAttribute('role','button'); cell.setAttribute('tabindex','0');
+  cell.addEventListener('click',()=>openArtist(cell));
+  cell.addEventListener('keydown',e=>{
+    if(e.key==='Enter'||e.key===' '||e.key==='Spacebar'){ e.preventDefault(); openArtist(cell); }
+  });
 });
 
 /* ============================================================
@@ -1545,7 +1470,7 @@ if(!reduce){
 
     /* .nopin cards aren't pinned, so they have no ScrollTrigger start — their
        anchor is just their natural document position (minus nav headroom). Nav
-       links to #work / #for-brands / #contact resolve here. */
+       links to #work / #for-brands / #calling resolve here. */
     cards.forEach((card,i)=>{
       if(pinnable(card,i) || !card.id) return;
       anchorTargets[card.id]=()=>card.getBoundingClientRect().top+window.scrollY-80;
