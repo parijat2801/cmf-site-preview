@@ -39,7 +39,10 @@
   --red:#DB1A21;--yellow:#FFDD00;--green:#009E49;--blue:#084CA1;
   /* type + spacing scale with BOTH axes: min(vw, vh) keeps a short, wide
      window (laptops) from getting poster-sized type that overflows it */
-  --gutter:clamp(24px,6vw,120px);--sec-y:clamp(56px,9vh,160px);
+  /* --sec-y is THE vertical rhythm: every section's top/bottom breathing room.
+     --sec-y-tight is the deliberately smaller footer pad. Both scale on vh so the
+     whole page keeps one rhythm as the viewport changes. */
+  --gutter:clamp(24px,6vw,120px);--sec-y:clamp(56px,9vh,160px);--sec-y-tight:clamp(40px,6vh,104px);
   --t-label:clamp(.7rem,.8vw,.92rem);--t-body:clamp(1rem,1.15vw,1.35rem);
   --t-lead:clamp(1.3rem,min(2.2vw,3vh),2.4rem);--t-head:clamp(2.4rem,min(7.5vw,10vh),8.5rem);
   --hair:1.5px;--font:'NHG','Helvetica Neue',Helvetica,Arial,sans-serif;
@@ -91,7 +94,12 @@ body.no-grain::after{opacity:0}
 .card.tall{justify-content:flex-start}
 /* (the old top-edge drop-shadow that marked where one card slid over another has
    been removed — sections read as continuous, no divider seam.) */
-.card.nopin{box-shadow:none}
+/* .nopin sections scroll normally, so they don't need to fill a viewport. With
+   min-height:100vh they did, and a section whose content was shorter than the
+   screen left a big empty tail before the next one — making the gap depend on
+   content length instead of the spacing rhythm. Sizing them to their content
+   makes every boundary exactly --sec-y (bottom) + --sec-y (top). */
+.card.nopin{box-shadow:none;min-height:0}
 /* flat ink on all dark sections (no radial gradient) — a gradient's lighter
    centre meeting a flat neighbour showed a tonal SEAM at the boundary, so every
    dark surface is now the exact same colour. */
@@ -486,7 +494,9 @@ body.no-grain::after{opacity:0}
 /* ============ FOOTER — slim strip; the memo lives here now ============ */
 /* FOOTER — a big closing block: About Us heading + blurb, then stacked rows of
    pipe-separated links (Home / site nav / socials), then the © base line. */
-.foot{min-height:auto;padding-block:clamp(56px,8vw,120px);justify-content:flex-start;background:#1B1818;color:var(--cream)}
+/* the footer sits deliberately tighter than a full section, but on the SAME
+   vh-based rhythm as everything else (was a vw clamp, which drifted out of step) */
+.foot{min-height:auto;padding-block:var(--sec-y-tight);justify-content:flex-start;background:#1B1818;color:var(--cream)}
 .foot .about{padding-top:clamp(32px,4vw,56px);max-width:60ch}
 .foot .fh{font-weight:900;letter-spacing:-.03em;line-height:.95;font-size:clamp(2.2rem,min(5.5vw,7vh),4.4rem);color:var(--cream)}
 .foot .about p{margin-top:.7em;font-weight:300;font-size:clamp(1rem,1.4vw,1.35rem);opacity:.82;line-height:1.5}
