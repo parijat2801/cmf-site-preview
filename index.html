@@ -90,6 +90,10 @@ body.no-grain::after{opacity:0}
   padding-block:calc(var(--sec-y)*var(--fz));overflow:hidden;contain:layout paint;
   box-shadow:0 -12px 32px rgba(0,0,0,.3)}
 .card.tall{justify-content:flex-start}
+/* .nopin cards are excluded from the pinned-deck stacking (they scroll normally,
+   in flow). Drop the top-edge drop-shadow so there's no "card sliding over card"
+   seam — these read as plain stacked sections. */
+.card.nopin{box-shadow:none}
 .card.dark{background:radial-gradient(120% 120% at 50% 35%,#2A2526,#231F20 78%);color:var(--cream)}
 .card.red{background:var(--red);color:var(--cream)}
 .spacer{height:0;pointer-events:none}
@@ -835,7 +839,7 @@ body.no-grain::after{opacity:0}
   </section>
 
   <!-- OFFERINGS — ink field; pillar accents from the PRIMARIES: red / yellow / green. -->
-  <section class="card dark offerings tall" id="offerings" data-nav="dark" data-navbg="#231F20">
+  <section class="card dark offerings tall nopin" id="offerings" data-nav="dark" data-navbg="#231F20">
     <div class="wrap">
       <h2 class="head reveal d1" data-m style="margin-bottom:clamp(30px,4vw,64px)">How we bring these <span class="mark mark-w" style="--hl:var(--red)">narratives</span> to you.</h2>
 
@@ -890,7 +894,7 @@ body.no-grain::after{opacity:0}
        class (d2 → d3), and set the .txt h3 / p / Follow link + .oshot data-photos.
        The alternating image side, top borders, and even/odd ordering are all
        handled by CSS (.witem:nth-child(even), :first-of-type) — no extra work. -->
-  <section class="card red work tall" id="work" data-nav="dark" data-navbg="#DB1A21">
+  <section class="card red work tall nopin" id="work" data-nav="dark" data-navbg="#DB1A21">
     <div class="wrap">
       <h2 class="head reveal d1" data-m>The (Mis)fits <span class="mark" style="--hl:var(--cream)">Acts.</span></h2>
       <div class="witem reveal d1">
@@ -913,7 +917,7 @@ body.no-grain::after{opacity:0}
   <!-- FOR BRANDS — ink field, matching Offerings/Misfits. Positioning chart
        reinterprets the client's hand-drawn 2x2 sketch in the site's own
        language: hairline rules, heavy display type, one accent (red). -->
-  <section class="card dark for-brands tall" id="for-brands" data-nav="dark" data-navbg="#231F20">
+  <section class="card dark for-brands tall nopin" id="for-brands" data-nav="dark" data-navbg="#231F20">
     <div class="wrap">
       <h2 class="head reveal d1" data-m>Cultural Relevance <span class="mark mark-w" style="--hl:var(--red)">Made Real</span></h2>
 
@@ -955,7 +959,7 @@ body.no-grain::after{opacity:0}
        Offerings/Misfits/For Brands). .head + .mark heading (mark-w keeps
        the highlighted text cream over the red fill), cream body copy at
        light weight, dull hairlines, .onum-style numerals. -->
-  <section class="card dark calling tall" id="calling" data-nav="dark" data-navbg="#231F20">
+  <section class="card dark calling tall nopin" id="calling" data-nav="dark" data-navbg="#231F20">
     <div class="wrap">
       <h2 class="head reveal d1" data-m>We <span class="mark mark-w" style="--hl:var(--red)">work with</span></h2>
 
@@ -972,7 +976,7 @@ body.no-grain::after{opacity:0}
   </section>
 
   <!-- PARTNER CTA — ink field; pink is the page's ONE spectrum moment. -->
-  <section class="card dark cta" id="contact" data-nav="dark" data-navbg="#231F20" data-fit>
+  <section class="card dark cta nopin" id="contact" data-nav="dark" data-navbg="#231F20" data-fit>
     <div class="wrap">
       <h2 class="head reveal d1" data-m>Building something with <span class="it">cultural consequence?</span></h2>
       <a class="biglink reveal d2" href="mailto:hello@culturalmisfits.com">Start a conversation <span class="arr">↗</span></a>
@@ -1420,8 +1424,15 @@ if(!reduce){
   const cards=gsap.utils.toArray('.deck > .card');
   cards.forEach((c,i)=>c.style.zIndex=10+i);
 
-  /* spacers between cards give each pin its dwell room */
-  const spacers=cards.slice(0,-1).map(c=>{
+  /* .nopin cards opt OUT of the pinned-deck stacking: they scroll normally, in
+     flow, with no card-over-card overlap. A card pins only if it isn't .nopin and
+     isn't the footer (last). `pins` is the pinned subset the deck systems act on. */
+  const pinnable=(card,i)=> i<cards.length-1 && !card.classList.contains('nopin');
+
+  /* spacers give each PINNED card its dwell room. nopin cards get no spacer (they
+     reserve their own height in normal flow). */
+  const spacers=cards.map((c,i)=>{
+    if(!pinnable(c,i)) return null;
     const sp=document.createElement('div');sp.className='spacer';
     c.after(sp);return sp;
   });
@@ -1476,24 +1487,24 @@ if(!reduce){
     function computeAll(){
       fitPass();
       cards.forEach((card,i)=>{
-        if(i===cards.length-1)return;                       // footer never pins
+        if(!pinnable(card,i))return;                        // footer + .nopin cards never pin
         /* ANY card still taller than the viewport is "tall": it scrolls
            through its content first and pins from the bottom — pinning it
            top-aligned would clip whatever hangs below the fold. */
         talls[i]=card.offsetHeight>vh()+2;
         let d;
         if(card.classList.contains('hero')) d=vh()*0.5;   // short hold; scroll releases to the manifesto collage
-        else if(card.classList.contains('for-brands')) d=vh()*1.8;  // hold long enough for the chart choreography (~3s) so a fast scroll can't skip it
         else{
           const lines=measureLines(card);
           d=vh()*(0.45+0.055*lines);
           d=Math.max(vh()*0.55,Math.min(vh()*2.1,d));
         }
         dwells[i]=Math.round(d*k);
-        /* the hero pins with pinSpacing:true (it precedes the non-card manifesto),
-           so it reserves its own room — its .spacer must stay 0 to avoid a double
-           gap. All other cards use their spacer for the pin distance. */
-        spacers[i].style.height=(card.classList.contains('hero')?0:dwells[i])+'px';
+        /* a pinned card that reserves its OWN room (pinSpacing:true) needs a zero
+           spacer to avoid a double gap; that's the hero AND the last pinned card
+           before a .nopin region (see the pin loop). Others use their spacer. */
+        const selfSpace=card.classList.contains('hero') || !pinnable(cards[i+1],i+1);
+        if(spacers[i]) spacers[i].style.height=(selfSpace?0:dwells[i])+'px';
       });
     }
     computeAll();
@@ -1501,30 +1512,26 @@ if(!reduce){
 
     /* pins: dwell solo, then one viewport of being covered */
     cards.forEach((card,i)=>{
-      if(i===cards.length-1)return;
-      // NOTE: the hero uses this SAME standard pin (no bespoke trigger). Its beat
-      // typewriter is driven by a timer + kill-on-scroll only — scroll's job is
-      // just to release the pin to the manifesto collage, like every other card.
-      // (The manifesto collage sections are NOT .card, so they aren't in `cards`
-      //  and are never pinned here — they scroll plainly.)
-      /* The hero is the last pinned card before the NON-card manifesto collage.
-         With pinSpacing:false a card relies on the NEXT pinned card to scroll up
-         and cover it; the manifesto isn't a card, so nothing covers the hero and
-         it sat fixed OVER the manifesto. So the hero uses pinSpacing:true to
-         reserve its own room and release cleanly. Its separate .spacer is then
-         redundant (that caused a double-gap), so we zero it below. */
-      const heroPin=card.classList.contains('hero');
+      if(!pinnable(card,i))return;                    // footer + .nopin cards: no pin, normal flow
+      /* pinSpacing:false = the card stays fixed and relies on the NEXT pinned card
+         scrolling up to COVER it (the "layering" stack). That only works while the
+         following card also pins. A pinned card that is the LAST before a non-pinned
+         region — the hero (before the non-card manifesto) OR the last pinned card
+         before a .nopin section — has nothing to cover it, so it must use
+         pinSpacing:true to reserve its own room and release cleanly into flow.
+         Its spacer is then zeroed (below) to avoid a double gap. */
+      const selfSpace=card.classList.contains('hero') || !pinnable(cards[i+1],i+1);
       const st=ScrollTrigger.create({
         trigger:card,
         start:()=>talls[i]?'bottom bottom':'top top',
         /* pin until the NEXT card has fully covered: dwell + the distance its
            top must travel. From a bottom-pin that distance is one viewport;
-           from a top-pin it is this card's own height. The hero just holds for
-           its dwell, then releases (pinSpacing:true reserves exactly that room). */
-        end:()=>heroPin?'+='+dwells[i]:'+='+(dwells[i]+(talls[i]?vh():card.offsetHeight)),
-        pin:true,pinSpacing:heroPin,invalidateOnRefresh:true,
+           from a top-pin it is this card's own height. A self-spacing card just
+           holds for its dwell, then releases (pinSpacing:true reserves that room). */
+        end:()=>selfSpace?'+='+dwells[i]:'+='+(dwells[i]+(talls[i]?vh():card.offsetHeight)),
+        pin:true,pinSpacing:selfSpace,invalidateOnRefresh:true,
       });
-      if(heroPin) spacers[i].style.height='0px';   // no double-count: pinSpacing reserves the room
+      if(selfSpace && spacers[i]) spacers[i].style.height='0px';   // pinSpacing reserves the room
       if(card.id)anchorTargets[card.id]=()=>talls[i]?st.start-(card.offsetHeight-vh()):st.start;
       /* rows inside a card (the three verticals) anchor to their own offset,
          with headroom for the nav bar */
@@ -1533,6 +1540,17 @@ if(!reduce){
           const flow=talls[i]?st.start-(card.offsetHeight-vh()):st.start;
           return flow+row.offsetTop-80;
         };
+      });
+    });
+
+    /* .nopin cards aren't pinned, so they have no ScrollTrigger start — their
+       anchor is just their natural document position (minus nav headroom). Nav
+       links to #work / #for-brands / #contact resolve here. */
+    cards.forEach((card,i)=>{
+      if(pinnable(card,i) || !card.id) return;
+      anchorTargets[card.id]=()=>card.getBoundingClientRect().top+window.scrollY-80;
+      card.querySelectorAll('.offer[id]').forEach(row=>{
+        anchorTargets[row.id]=()=>row.getBoundingClientRect().top+window.scrollY-80;
       });
     });
 
