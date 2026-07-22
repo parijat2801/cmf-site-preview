@@ -43,7 +43,7 @@
      --sec-y-tight is the deliberately smaller footer pad. Both scale on vh so the
      whole page keeps one rhythm as the viewport changes. */
   --gutter:clamp(24px,6vw,120px);--sec-y:clamp(56px,9vh,160px);--sec-y-tight:clamp(40px,6vh,104px);
-  --t-label:clamp(.7rem,.8vw,.92rem);--t-body:clamp(1rem,1.15vw,1.35rem);
+  --t-label:clamp(.78rem,.8vw,.92rem);--t-body:clamp(1rem,1.15vw,1.35rem);
   --t-lead:clamp(1.3rem,min(2.2vw,3vh),2.4rem);--t-head:clamp(2.4rem,min(7.5vw,10vh),8.5rem);
   --hair:1.5px;--font:'NHG','Helvetica Neue',Helvetica,Arial,sans-serif;
   /* ONE motion language — heavy, decelerating, no bounce. */
@@ -410,7 +410,7 @@ body.no-grain::after{opacity:0}
   gap:clamp(8px,1vw,18px);margin-top:clamp(8px,1.5vh,20px)}
 @media(max-width:1100px){.mwall{grid-template-columns:repeat(4,1fr)}}
 @media(max-width:820px){.mwall{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:560px){.mwall{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.mwall{grid-template-columns:repeat(3,1fr);gap:6px}}
 .mcell{position:relative;aspect-ratio:4/5;overflow:hidden;background:#1B1818;margin:0}
 /* photos arrive already B&W, so we dim slightly at rest and lift brightness +
    scale on hover (no grayscale→colour reveal — that'd be a no-op on mono art). */
@@ -431,6 +431,22 @@ body.no-grain::after{opacity:0}
   padding:.32em .6em;border-radius:3px;line-height:1}
 .mproof{margin-top:calc(clamp(18px,3vh,40px)*var(--fz));font-weight:300;font-size:calc(var(--t-lead)*var(--fz))}
 .mproof b{font-weight:900;font-style:italic;color:var(--yellow)}
+/* phones stay 3-up (2-up made the roster read as a short list, not a wall), but a
+   3-up cell is only ~105px wide. Shrinking the OVERLAY type to fit inside the photo
+   drove the name to ~11px and the role pill to ~7px — technically non-overflowing,
+   practically unreadable. So on phones the caption moves OUT from over the photo and
+   sits beneath it, where it has the full cell width and can stay legible.
+   Must come AFTER the .mcell rules above: same specificity, so source order decides. */
+@media(max-width:560px){
+  .mcell{aspect-ratio:auto;overflow:visible;background:none}
+  .mcell img{aspect-ratio:4/5;height:auto;background:#1B1818}   /* photo keeps the portrait crop */
+  .mcell .mname{position:static;margin-top:6px;font-size:.82rem;letter-spacing:-.02em;line-height:1.12;text-shadow:none}
+  /* now that the caption is out of the photo it has the full cell width, so the
+     tag can sit at a readable size instead of the ~8px the overlay forced */
+  .mcell .mrole{position:static;display:inline-block;margin-top:4px;font-size:.7rem;letter-spacing:.04em;padding:.28em .42em;
+    white-space:normal}   /* PHOTOGRAPHER must still fit 105px — wrap rather than clip */
+  .mcell .mno{top:5px;left:5px;width:12px}
+}
 @media(hover:none){.mcell img{filter:brightness(.9)}}
 @media(prefers-reduced-motion:reduce){.mcell:hover img{transform:none}}
 
@@ -614,7 +630,30 @@ body.no-grain::after{opacity:0}
   .mf-beat,.mf-beat-r,.mf-beat-l{grid-template-columns:1fr;gap:clamp(16px,4vw,28px);margin-top:clamp(50px,10vh,90px)}
   .mf-beat-l .mf-ph,.mf-beat-r .mf-ph{margin-left:0;margin-right:calc(-1*14px - 6vw)}
   .mf-beat-l .mf-ph{order:1}   /* keep text first, photo after, on both sides */
-  .mf-card{height:44vh}.mf-card h4{font-size:clamp(.85rem,3.5vw,1.2rem)}.mf-card.active{flex-grow:3.4}
+  /* FOUR-TYPES REEL, PHONE: the horizontal accordion (thin sliver + one wide
+     card) can't fit readable text at this width — panels were clipping mid-word.
+     Product decision: go VERTICAL instead — four full-width panels stacked, all
+     readable, no sliver state. That retires the whole "active card" premise, so
+     the sticky pin + scroll-scrubbed .active toggle (JS, unchanged) is neutralised
+     here: un-stick the stage, let the runway collapse, and un-shrink each card. */
+  .mf-ustage{position:static;height:auto;padding-block:clamp(24px,4vh,56px)}
+  .mf-reel{flex-direction:column;gap:clamp(20px,5vw,32px)}
+  .mf-reel-runway{height:0}
+  /* neutralise the JS's flex-grow accordion math entirely — every card is a
+     full-width row now, so "active" can't mean "wider" any more */
+  .mf-card,.mf-card.active{flex:none!important;width:100%!important;flex-grow:0!important;height:auto}
+  /* banner crop instead of the tall sliver aspect — img stays absolute/cover,
+     the card box now sets the ratio via aspect-ratio instead of a vh height */
+  .mf-card{aspect-ratio:16/10}
+  /* colour choice: ALL panels shown in full colour, all the time. On phone every
+     card is always in view (no scroll-scrubbed "active" card to pick a winner),
+     so the black-and-white/colour split has no reference point left — keeping
+     it would just make 3 of 4 panels look permanently disabled/unclickable. */
+  .mf-card img{filter:none!important}
+  .mf-card h4{font-size:clamp(1.1rem,5.5vw,1.4rem)}
+  /* body copy is always shown (not just on .active) and never clamped/clipped */
+  .mf-card .mf-q,.mf-card.active .mf-q{opacity:.85!important;max-height:none!important;overflow:visible;margin-top:.4em}
+  .mf-cap{padding:clamp(24px,7vw,40px) clamp(14px,3vw,20px) clamp(14px,3vw,20px)}
 }
 @media(prefers-reduced-motion:reduce){.mf-rise{opacity:1;transform:none;transition:none}}
 
@@ -637,7 +676,7 @@ body.no-grain::after{opacity:0}
 .fb-yaxis,.fb-xaxis{position:absolute;z-index:2;color:var(--cream);font-weight:700;
   letter-spacing:-.01em;line-height:1.08;white-space:nowrap;opacity:.9;
   --lbl-gap:1.5em;
-  font-size:calc(clamp(.82rem,1.5vw,1.15rem)*var(--fz))}
+  font-size:calc(clamp(.9rem,1.5vw,1.15rem)*var(--fz))}
 /* "Scale": vertical, --lbl-gap to the LEFT of the upright, centred on it */
 .fb-yaxis{left:calc(10% - var(--lbl-gap));top:50%;writing-mode:vertical-rl;
   transform:translate(-100%,-50%) rotate(180deg)}
@@ -1131,6 +1170,36 @@ body.no-grain::after{opacity:0}
 <!-- 3D hero balloon: init in its own module so a WebGL failure can't take down
      the main hero/scroll engine. On success it clears the poster fallback. -->
 <script type="module">
+/* GFX — the one knob for decorative-GPU quality across the page (hero balloon,
+   crayon axes, text highlighters). Deliberately NOT a hard mobile kill-switch
+   (product call: newer phones can carry full quality) — instead every canvas
+   pauses off-screen + respects DPR caps, so cost scales down smoothly instead
+   of being switched off by device class. window.GFX (not a module-scoped
+   const) because each shader lives in its OWN <script type="module"> and
+   modules don't share scope — this is the one object all three read.
+     maxDPR_shader — cap for the 2D fragment-shader canvases (highlighters +
+       crayon axes). 1.5 keeps fill-rate sane on 3x-DPR phones; visually a
+       no-op since these are small, soft-edged marks (see per-canvas note).
+     maxDPR_hero   — cap for the WebGL hero balloon (real 3D geometry benefits
+       more from resolution, so it gets a higher ceiling than the flat shaders).
+     decorativeFPS — frame-time gate for the highlighters + crayon axes (NOT
+       the hero balloon, which should stay smooth): halves GPU work for
+       slow-moving decorative effects where 30fps reads identically to 60fps.
+     pauseOffscreen — IntersectionObserver gate; every rAF loop below checks it.
+     tier — 'auto' runs the coarse-but-robust signal (matchMedia max-width:860px
+       + prefers-reduced-motion) documented at the call sites; force 'low' or
+       'high' here (e.g. from the console: GFX.tier='low') to test either path
+       without spoofing a device. Kept coarse deliberately: deviceMemory is
+       Chrome-only, hardwareConcurrency is clamped to 2 on all iOS (unreliable
+       on iPhone), and WEBGL_debug_renderer_info strings are being sanitised —
+       none of those are robust tier signals, so we don't gate on them. */
+window.GFX = {
+  maxDPR_shader: 1.5,
+  maxDPR_hero: 2,
+  decorativeFPS: 30,
+  pauseOffscreen: true,
+  tier: 'auto',
+};
 try {
   const { initHeroBalloon } = await import('./vendor/hero-balloon.js');
   const cv = document.getElementById('heroCanvas');
@@ -1857,6 +1926,18 @@ if(!reduce){
               streak:0.78, bub:0.4, alpha:0.68, skewMag:0.05 };
   const OVERHANG=6, VPAD=8;
 
+  // GFX: the page's one quality knob (see window.GFX in the hero-balloon module
+  // block) — DPR cap + the 30fps gate for this decorative shader. Fallbacks let
+  // this module keep working even if that script hasn't run yet for some reason.
+  const GFX = window.GFX || { maxDPR_shader:1.5, decorativeFPS:30, pauseOffscreen:true };
+  // ShaderMount's own `minPixelRatio` is a FLOOR (renderScale = max(dpr, floor)),
+  // so it can't cap a 3x-DPR phone down to 1.5 — the actual ceiling knob it
+  // exposes is `maxPixelCount` (total rendered pixels). Convert our DPR cap into
+  // a pixel-count ceiling for a given CSS-pixel box so devicePixelRatio 3
+  // renders at ~1.5x instead of 3x on these small word-sized canvases.
+  const maxPixelsFor = (cssW, cssH) => Math.max(1, cssW) * Math.max(1, cssH) * GFX.maxDPR_shader * GFX.maxDPR_shader;
+  const FRAME_MS = 1000 / GFX.decorativeFPS;   // 30fps gate → skip GPU writes on off-cadence frames
+
   const frag = `#version 300 es
   precision mediump float;
   uniform float u_time;
@@ -1920,7 +2001,12 @@ if(!reduce){
       u_alpha:R.alpha, u_wet:R.wet, u_wetWidth:R.wetw, u_streak:R.streak, u_bubbles:R.bub,
       u_tipRag:R.tipr, u_edgeRag:R.edge, u_skew:skew, u_seed:seed });
     let mount;
-    try { mount=new ShaderMount(el, frag, u(0,null), undefined, 0.0); }
+    // minPixelRatio:1 (was the library default of 2 — a FLOOR, so leaving it at
+    // 2 would force 2x even on 1x screens); the real ceiling comes from
+    // maxPixelCount below, sized to the mark's own box so the DPR cap holds
+    // regardless of how big any individual highlighted word is.
+    const box=el.getBoundingClientRect();
+    try { mount=new ShaderMount(el, frag, u(0,null), undefined, 0.0, 0, 1, maxPixelsFor(box.width||300, box.height||80)); }
     catch(_) { el.classList.remove('mark-shader'); return; }  // this mark → CSS fallback
     const cv=el.querySelector('canvas');
     if(cv){ cv.style.position='absolute'; cv.style.zIndex='-1'; cv.style.pointerEvents='none';
@@ -1960,7 +2046,15 @@ if(!reduce){
   });
 
   // single rAF drives every armed, visible mark's u_progress 0→1
+  // frame-time gate (GFX.decorativeFPS): these strokes sweep over ~1s, so 30fps
+  // reads identically to 60fps — halves GPU writes for a purely decorative effect.
+  // document.hidden check: a backgrounded tab keeps intersecting (IO doesn't fire
+  // on tab-hide), so without this the writes would continue while unseen.
+  let lastTick=0;
   const tick = (now) => {
+    if(document.hidden){ requestAnimationFrame(tick); return; }
+    if(now-lastTick<FRAME_MS){ requestAnimationFrame(tick); return; }
+    lastTick=now;
     marks.forEach(m=>{
       if(!m.armed || !m.visible || !m.cv) return;
       const p=Math.min(1,(now-m.start)/(R.draw*1000));
@@ -1979,6 +2073,10 @@ if(!reduce){
   // word wider — u_res would stay stale and the stroke clips (e.g. "lan" instead
   // of "languages"). Call this on fonts-ready and resize to correct the size.
   const resync=()=>marks.forEach(m=>{ if(!m.cv) return;
+    // re-derive the DPR-cap pixel ceiling for the mark's CURRENT box (a word
+    // reflow can change its size) before re-measuring, so the cap stays correct.
+    const box=m.el.getBoundingClientRect();
+    try{ m.mount.setMaxPixelCount && m.mount.setMaxPixelCount(maxPixelsFor(box.width||300, box.height||80)); }catch(_){}
     // force ShaderMount to re-measure its canvas buffer + u_resolution from the
     // (now-final) box, THEN re-push our u_res at the current progress.
     try{ m.mount.handleResize && m.mount.handleResize(); }catch(_){}
@@ -2010,6 +2108,13 @@ if(!reduce){
   // recipe from the crayon-axes lab
   const R={draw:1.2,thick:0.028,rough:0.56,grain:0.78,gscale:40,streak:0.2,alpha:0.96,waver:0.004};
   const COLOR=[0.898,0.004,0.549];   // #e5018c magenta
+
+  // GFX: the page's one quality knob (see window.GFX in the hero-balloon module
+  // block). Same DPR-cap math as the highlighter module (ShaderMount's
+  // minPixelRatio is a floor, not a ceiling — maxPixelCount is the real cap).
+  const GFX = window.GFX || { maxDPR_shader:1.5, decorativeFPS:30, pauseOffscreen:true };
+  const maxPixelsFor = (cssW, cssH) => Math.max(1, cssW) * Math.max(1, cssH) * GFX.maxDPR_shader * GFX.maxDPR_shader;
+  const FRAME_MS = 1000 / GFX.decorativeFPS;   // 30fps gate for this one-shot draw-in
 
   const frag = `#version 300 es
   precision mediump float;
@@ -2064,15 +2169,30 @@ if(!reduce){
     u_alpha:R.alpha,u_thick:R.thick,u_rough:R.rough,u_grain:R.grain,u_gscale:R.gscale,u_streak:R.streak,u_waver:R.waver});
 
   let mount,cv;
-  try{ mount=new ShaderMount(plot, frag, u(0,null), undefined, 0.0); cv=plot.querySelector('canvas'); }
+  // minPixelRatio:1 (library default is 2, a FLOOR not a ceiling) + maxPixelCount
+  // sized to the plot's own box, so the DPR cap actually holds on 3x phones.
+  const plotBox=plot.getBoundingClientRect();
+  try{ mount=new ShaderMount(plot, frag, u(0,null), undefined, 0.0, 0, 1, maxPixelsFor(plotBox.width||600, plotBox.height||480)); cv=plot.querySelector('canvas'); }
   catch(_){ return; }                                   // fall back to CSS axes
   if(!cv) return;
   cv.classList.add('fb-crayon'); plot.classList.add('has-crayon');   // hide CSS axes
 
-  let raf=0,start=0,armed=false;
-  function step(now){ if(!start)start=now; const p=Math.min(1,(now-start)/(R.draw*1000));
+  // offscreen guard: this is a one-shot draw-in (step() stops itself at p>=1),
+  // but a fast scroll-past mid-draw could otherwise keep it rendering unseen —
+  // and a doc-hidden tab would too, since IO doesn't fire on tab-hide.
+  let plotVisible=true;
+  const plotIO=new IntersectionObserver(es=>{ plotVisible=es[0].isIntersecting; },{threshold:0});
+  plotIO.observe(plot);
+
+  let raf=0,start=0,armed=false,lastStep=0,pausedAt=0;
+  function step(now){
+    if(document.hidden||!plotVisible){ if(!pausedAt)pausedAt=now; raf=requestAnimationFrame(step); return; }   // paused, not stopped
+    if(pausedAt){ start+=now-pausedAt; pausedAt=0; }    // shift start forward so the sweep resumes where it left off, no jump-cut
+    if(now-lastStep<FRAME_MS){ raf=requestAnimationFrame(step); return; }           // 30fps gate
+    lastStep=now;
+    if(!start)start=now; const p=Math.min(1,(now-start)/(R.draw*1000));
     mount.setUniforms(u(p,cv)); if(p<1) raf=requestAnimationFrame(step); }
-  function play(){ cancelAnimationFrame(raf); start=0; raf=requestAnimationFrame(step); }
+  function play(){ cancelAnimationFrame(raf); start=0; lastStep=0; pausedAt=0; raf=requestAnimationFrame(step); }
   function reset(){ cancelAnimationFrame(raf); mount.setUniforms(u(0,cv)); }
 
   // draw when .fb-chart gains .in; reset on leave so it replays on re-enter
@@ -2081,7 +2201,10 @@ if(!reduce){
   new MutationObserver(check).observe(chart,{attributes:true,attributeFilter:['class']});
   check();
   // keep the draw sized correctly after fonts/layout settle
-  const resync=()=>{ try{ mount.handleResize&&mount.handleResize(); }catch(_){}; mount.setUniforms(u(armed?1:0,cv)); };
+  const resync=()=>{
+    const box=plot.getBoundingClientRect();
+    try{ mount.setMaxPixelCount&&mount.setMaxPixelCount(maxPixelsFor(box.width||600, box.height||480)); }catch(_){}
+    try{ mount.handleResize&&mount.handleResize(); }catch(_){}; mount.setUniforms(u(armed?1:0,cv)); };
   if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>{ resync(); setTimeout(resync,150); });
   addEventListener('resize',resync);
 })();

@@ -17,6 +17,12 @@ import { RoomEnvironment } from './RoomEnvironment.js';
 
 const MODEL = 'assets/brand/cmf-hunyuan-uv.glb';   // re-processed: smooth normals + UV unwrap
 
+// DPR ceiling for this canvas — read from the page's single GFX knob (see the
+// window.GFX block in index.html) so the hero balloon and the 2D shaders share
+// one config surface; 2 is also the fallback if this module ever loads without
+// it (e.g. a future standalone test page).
+const MAX_DPR_HERO = window.GFX?.maxDPR_hero ?? 2;
+
 export function initHeroBalloon(canvas) {
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -61,8 +67,20 @@ export function initHeroBalloon(canvas) {
   //      glass material's `transmission` samples the scene rendered BEHIND it, so
   //      THIS plane is what the glass refracts/bends. Swap BG_IMAGE for any asset.
   const BG_IMAGE = 'assets/crew.webp';              // crew shot (red/black streetwear)
-  const bgTex = new THREE.TextureLoader().load(BG_IMAGE);
+  let bgImgAspect = null;                           // set once the image loads (w/h)
+  const bgTex = new THREE.TextureLoader().load(BG_IMAGE, (tex) => {
+    // onLoad: now tex.image has real dimensions. Grab the image's own aspect so
+    // fitBgUV() can crop like CSS `object-fit: cover` instead of stretching to
+    // whatever shape the viewport happens to be.
+    if (tex.image && tex.image.width && tex.image.height) {
+      bgImgAspect = tex.image.width / tex.image.height;
+    }
+    fitBgUV();                                      // recompute crop now that we know it
+  });
   bgTex.colorSpace = THREE.SRGBColorSpace;
+  // ClampToEdge (not the default Repeat) so a repeat<1 crop shows a single
+  // centered slice of the image instead of tiling at the edges.
+  bgTex.wrapS = bgTex.wrapT = THREE.ClampToEdgeWrapping;
   const bgPlane = new THREE.Mesh(
     new THREE.PlaneGeometry(1, 1),
     new THREE.MeshBasicMaterial({ map: bgTex, toneMapped: false })
@@ -75,6 +93,27 @@ export function initHeroBalloon(canvas) {
     const vH = 2 * Math.tan((camera.fov * Math.PI / 180) / 2) * dist;
     const vW = vH * camera.aspect;
     bgPlane.scale.set(vW, vH, 1);
+  }
+  // CSS `object-fit: cover` for the bg texture: the plane itself still stretches
+  // to fill the viewport (fitBg above — that's fine, it's an untextured quad's
+  // shape), but the TEXTURE'S UVs are cropped so the photo keeps ITS OWN aspect
+  // and never distorts. This is also what the glass glyph refracts, so a
+  // stretched photo here reads as a "squished" glyph even though its mesh never
+  // changes. Guarded on bgImgAspect — until the image loads we fall back to the
+  // old full 0..1 UV rect (whatever the loader default is) so nothing breaks.
+  function fitBgUV() {
+    if (!bgImgAspect) return;                       // image not loaded yet — no-op
+    const planeAspect = camera.aspect;               // plane is scaled to the viewport shape
+    let repeatX = 1, repeatY = 1;
+    if (planeAspect > bgImgAspect) {
+      // viewport wider than the photo -> fit by width, crop top/bottom
+      repeatY = bgImgAspect / planeAspect;
+    } else {
+      // viewport taller/narrower than the photo -> fit by height, crop left/right
+      repeatX = planeAspect / bgImgAspect;
+    }
+    bgTex.repeat.set(repeatX, repeatY);
+    bgTex.offset.set((1 - repeatX) / 2, (1 - repeatY) / 2);   // keep the crop centered
   }
 
   // ---- reflection backdrop: a plane behind the balloon carrying the hero's
@@ -290,7 +329,7 @@ export function initHeroBalloon(canvas) {
   // ---- responsive framing: right-of-centre, like the old video's mobile crop
   function fit() {
     const w = canvas.clientWidth || 1, h = canvas.clientHeight || 1;
-    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(devicePixelRatio, MAX_DPR_HERO));
     renderer.setSize(w, h, false);
     camera.aspect = w / h; camera.updateProjectionMatrix();
     const portrait = w < 760;
@@ -299,7 +338,8 @@ export function initHeroBalloon(canvas) {
     pivot.position.y = baseY;
     baseScale = portrait ? 0.85 : Math.min(1.15, h / 640);
     pivot.scale.setScalar(baseScale);
-    fitBg();                                       // keep the bg image covering the view
+    fitBg();                                       // keep the bg plane's SHAPE filling the view
+    fitBgUV();                                     // keep the bg PHOTO itself un-stretched (cover-crop)
   }
   fit();
   addEventListener('resize', fit, { passive: true });
@@ -342,19 +382,37 @@ export function initHeroBalloon(canvas) {
     raf = requestAnimationFrame(frame);
   }
 
+  // pause/resume tracks TWO independent signals — on-screen (IO) and tab-visible
+  // (Page Visibility) — either one being false must stop the rAF loop, and it
+  // should only resume when BOTH are true again (e.g. don't resume a
+  // backgrounded tab's animation just because it happens to still intersect).
+  let inView = true, pageVisible = !document.hidden;
+  const setRunning = (next) => {
+    if (next === running) return;
+    running = next;
+    if (running) { t0 = performance.now(); raf = requestAnimationFrame(frame); }
+    else cancelAnimationFrame(raf);
+  };
+
   const hero = canvas.closest('.hero') || canvas.parentElement;
   const io = new IntersectionObserver(es => {
-    const vis = es[0].isIntersecting;
-    if (vis && !running) { running = true; t0 = performance.now(); raf = requestAnimationFrame(frame); }
-    else if (!vis) { running = false; cancelAnimationFrame(raf); }
+    inView = es[0].isIntersecting;
+    setRunning(inView && pageVisible);
   }, { threshold: 0.01 });
   io.observe(hero);
+
+  const onVisibility = () => {
+    pageVisible = !document.hidden;
+    setRunning(inView && pageVisible);
+  };
+  document.addEventListener('visibilitychange', onVisibility);
 
   raf = requestAnimationFrame(frame);
 
   return {
     destroy() {
       running = false; cancelAnimationFrame(raf); io.disconnect();
+      document.removeEventListener('visibilitychange', onVisibility);
       beatObserver?.disconnect();
       normalMap.dispose(); foil.dispose(); env.dispose();
       cubeRT.dispose(); backdrop.geometry.dispose();
