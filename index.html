@@ -89,7 +89,10 @@ body.no-grain::after{opacity:0}
 /* --fz: per-card fit factor. One-screen cards ([data-fit]) get it computed by
    the engine so their content ALWAYS fits the window; display type and the
    vertical rhythm shrink together. 1 everywhere else. */
-.card{--fz:1;position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:center;
+/* min-height:100vh then 100dvh — dvh tracks the URL bar so cards don't reflow
+   mid-scroll when it collapses/expands; 100vh stays first as the fallback for
+   browsers without dvh support. */
+.card{--fz:1;position:relative;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;justify-content:center;
   padding-block:calc(var(--sec-y)*var(--fz));overflow:hidden;contain:layout paint}
 .card.tall{justify-content:flex-start}
 /* (the old top-edge drop-shadow that marked where one card slid over another has
@@ -275,7 +278,11 @@ body.no-grain::after{opacity:0}
    that floor, so they must be allowed to wrap; overflowing off-screen is worse than
    a break. Balanced wrapping keeps the resulting lines even rather than leaving one
    orphaned word. */
-@media(max-width:760px){
+/* Scoped to match the .mega floor, which applies at EVERY width — so the escape
+   has to as well. Scoping this to 760px alone left a gap: at 768px the floor still
+   blocked the shrink but the phrase still couldn't wrap, and the beat rendered
+   814px wide in a 768px viewport. Tablets are narrow enough to hit that too. */
+@media(max-width:1024px){
   .hero .hbeat .ph{white-space:normal;text-wrap:balance;overflow-wrap:break-word}
 }
 .hero .hbeat .bp{display:block;line-height:0}
@@ -1948,7 +1955,24 @@ if(!reduce){
 
   /* re-measure after fonts arrive (metrics change line counts) */
   document.fonts.ready.then(()=>ScrollTrigger.refresh());
-  let rto;addEventListener('resize',()=>{clearTimeout(rto);rto=setTimeout(()=>ScrollTrigger.refresh(),200);});
+  /* On mobile the URL bar collapsing changes innerHeight by ~60-120px mid-scroll.
+     Refreshing pins on that recomputes every trigger and visibly jumps the page,
+     so only refresh when the width changes (a real layout change, incl. rotation)
+     or the height moves more than the browser chrome ever would. */
+  /* ScrollTrigger ALSO auto-refreshes on resize by itself, so gating our own
+     listener wasn't enough — a URL-bar nudge still refreshed once, via GSAP.
+     Drop "resize" from its auto-refresh events so the guard below is the single
+     decision point. (visibilitychange/DOMContentLoaded/load stay: they're the
+     safe ones.) Verified: without this, a height-only change still fired 1 refresh. */
+  ScrollTrigger.config({autoRefreshEvents:'visibilitychange,DOMContentLoaded,load'});
+  let lastW=innerWidth,lastH=innerHeight;
+  const URLBAR_SLOP=140;
+  let rto;addEventListener('resize',()=>{
+    const dw=Math.abs(innerWidth-lastW),dh=Math.abs(innerHeight-lastH);
+    if(dw===0&&dh<=URLBAR_SLOP)return;   // URL bar only — ignore
+    lastW=innerWidth;lastH=innerHeight;
+    clearTimeout(rto);rto=setTimeout(()=>ScrollTrigger.refresh(),200);
+  });
 }
 </script>
 
