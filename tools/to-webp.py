@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Convert site images to WebP and repoint index.html at them.
+Convert site images to WebP and repoint the source files at them.
 
 WHY: the repo had a mix of .png/.jpg/.jpeg/.webp. WebP is materially smaller for
 both photographs and alpha graphics, so everything the page loads should use it.
@@ -28,7 +28,13 @@ except ImportError:
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ASSETS = os.path.join(ROOT, "assets")
-HTML = os.path.join(ROOT, "index.html")
+# Every file that can reference an asset. index.html is the obvious one, but the
+# hero balloon loads a texture from JS — missing that broke the hero background
+# the first time this ran, so scan the vendored scripts too.
+SOURCE_FILES = [
+    os.path.join(ROOT, "index.html"),
+    os.path.join(ROOT, "vendor", "hero-balloon.js"),
+]
 
 # directories whose contents must stay in their original format
 SKIP_DIRS = {"favicon"}
@@ -73,22 +79,23 @@ def convert(src: str, apply: bool) -> tuple[str, int, int]:
     return dest, before, os.path.getsize(dest)
 
 
-def repoint_html(converted: list[str], apply: bool) -> int:
-    """Rewrite asset references in index.html to the .webp extension."""
-    with open(HTML, encoding="utf-8") as fh:
-        html = fh.read()
-    original = html
-    for src in converted:
-        rel = os.path.relpath(src, ROOT).replace(os.sep, "/")
-        html = html.replace(rel, os.path.splitext(rel)[0] + ".webp")
-    if apply and html != original:
-        with open(HTML, "w", encoding="utf-8") as fh:
-            fh.write(html)
-    # count how many individual references moved
-    return sum(
-        original.count(os.path.relpath(s, ROOT).replace(os.sep, "/"))
-        for s in converted
-    )
+def repoint_sources(converted: list[str], apply: bool) -> int:
+    """Rewrite asset references to .webp across every file in SOURCE_FILES."""
+    moved = 0
+    for path in SOURCE_FILES:
+        if not os.path.exists(path):
+            continue
+        with open(path, encoding="utf-8") as fh:
+            text = fh.read()
+        original = text
+        for src in converted:
+            rel = os.path.relpath(src, ROOT).replace(os.sep, "/")
+            moved += text.count(rel)
+            text = text.replace(rel, os.path.splitext(rel)[0] + ".webp")
+        if apply and text != original:
+            with open(path, "w", encoding="utf-8") as fh:
+                fh.write(text)
+    return moved
 
 
 def main() -> None:
@@ -127,7 +134,7 @@ def main() -> None:
         else:
             print(f"  {rel:44s} {before/1024:8.0f}K")
 
-    moved = repoint_html(converted, args.apply)
+    moved = repoint_sources(converted, args.apply)
 
     if args.apply and not args.keep_originals:
         for src in converted:
@@ -140,7 +147,7 @@ def main() -> None:
             f"{total_before/1024/1024:.1f}MB -> {total_after/1024/1024:.1f}MB "
             f"({(1 - total_after/total_before)*100:.0f}% smaller)"
         )
-        print(f"Repointed {moved} reference(s) in index.html")
+        print(f"Repointed {moved} reference(s) across {len(SOURCE_FILES)} source file(s)")
         if args.keep_originals:
             print("Originals kept.")
     else:

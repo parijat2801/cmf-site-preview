@@ -60,7 +60,7 @@ export function initHeroBalloon(canvas) {
   // ---- BACKGROUND IMAGE PLANE: a real visible plane behind the glass glyph. The
   //      glass material's `transmission` samples the scene rendered BEHIND it, so
   //      THIS plane is what the glass refracts/bends. Swap BG_IMAGE for any asset.
-  const BG_IMAGE = 'assets/crew.jpg';               // crew shot (red/black streetwear)
+  const BG_IMAGE = 'assets/crew.webp';              // crew shot (red/black streetwear)
   const bgTex = new THREE.TextureLoader().load(BG_IMAGE);
   bgTex.colorSpace = THREE.SRGBColorSpace;
   const bgPlane = new THREE.Mesh(

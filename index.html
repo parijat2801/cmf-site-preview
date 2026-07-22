@@ -667,8 +667,16 @@ body.no-grain::after{opacity:0}
 .fb-chart.in .fb-alien{opacity:1}
 /* curly arrow: sits to the RIGHT of the note and curls down-left to the alien.
    Drawn as a stroke so it can "draw itself" in with a dash animation. */
-.fb-curl{position:absolute;left:calc(75% + clamp(26px,3.4vw,54px));top:-6%;z-index:3;
-  width:clamp(52px,7vw,104px);height:auto;color:#e5018c;pointer-events:none;
+/* Anchored to the ALIEN: the arrow's tip is at (14,104) in a 120x120 viewBox —
+   11.7% across, 86.7% down. Placing the box at the alien's centre (75%/16%) and
+   pulling it back by those fractions would land the tip dead-centre ON the logo,
+   so back it off along the arrow's approach (up and to the right) by roughly the
+   logo's radius — the point then stops just outside the mark instead of overlapping. */
+.fb-curl{display:none;   /* PARKED — remove this line to bring the arrow back */
+  position:absolute;left:75%;top:16%;z-index:3;
+  width:clamp(64px,8vw,120px);aspect-ratio:1;height:auto;color:#e5018c;pointer-events:none;
+  transform:translate(-11.7%,-86.7%)
+            translate(clamp(22px,2.9vw,40px),calc(-1*clamp(14px,1.9vw,26px)));
   opacity:0;transition:opacity .5s var(--ease)}
 .fb-chart.in .fb-curl{opacity:1}
 /* draw the line + head on when the chart reveals */
@@ -1000,15 +1008,20 @@ body.no-grain::after{opacity:0}
             <span class="fb-xaxis">Cultural Impact</span>
             <!-- hand-drawn curly arrow: loops out from the end of the note and
                  sweeps back down-left into an arrowhead pointing at the alien -->
-            <svg class="fb-curl" viewBox="0 0 120 150" fill="none" aria-hidden="true">
-              <!-- the tail: rises from the note, spirals a loop, then dives down-left -->
+            <!-- The box is anchored so its BOTTOM-LEFT corner sits on the alien's
+                 centre (see .fb-curl), and the path ends there — so the arrowhead
+                 always lands on the logo regardless of viewport size. -->
+            <svg class="fb-curl" viewBox="0 0 120 120" fill="none" aria-hidden="true">
+              <!-- tail: starts top-right under the note, loops once, then sweeps
+                   down-left, finishing at (14,104) — the alien's centre. -->
               <path class="fb-curl-line"
-                d="M96 14 C112 26 116 46 100 54 C86 61 74 48 84 38 C95 27 116 34 112 60
-                   C108 88 84 108 50 120"
-                stroke="currentColor" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/>
-              <!-- arrowhead at the end, angled along the incoming sweep -->
-              <path class="fb-curl-head" d="M64 104 L48 121 L69 127"
-                stroke="currentColor" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/>
+                d="M92 10 C108 16 112 34 98 40 C86 45 78 32 88 26 C100 19 112 32 108 50
+                   C103 74 74 92 14 104"
+                stroke="currentColor" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <!-- arrowhead: two strokes meeting AT the path's end point (14,104),
+                   splayed back up-right along the incoming direction -->
+              <path class="fb-curl-head" d="M34 92 L14 104 L30 114"
+                stroke="currentColor" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             <!-- alien mark in the top-right quadrant (replaces the old 2x2 labels) -->
             <img class="fb-alien" src="assets/brand/alien-magenta.webp" alt="" aria-hidden="true">
