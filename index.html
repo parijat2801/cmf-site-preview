@@ -92,7 +92,10 @@ body.no-grain::after{opacity:0}
 /* (the old top-edge drop-shadow that marked where one card slid over another has
    been removed — sections read as continuous, no divider seam.) */
 .card.nopin{box-shadow:none}
-.card.dark{background:radial-gradient(120% 120% at 50% 35%,#2A2526,#231F20 78%);color:var(--cream)}
+/* flat ink on all dark sections (no radial gradient) — a gradient's lighter
+   centre meeting a flat neighbour showed a tonal SEAM at the boundary, so every
+   dark surface is now the exact same colour. */
+.card.dark{background:var(--ink);color:var(--cream)}
 .card.red{background:var(--red);color:var(--cream)}
 .spacer{height:0;pointer-events:none}
 .foot{box-shadow:none}
@@ -176,19 +179,28 @@ body.no-grain::after{opacity:0}
    follow the nav theme (white on dark cards, ink on light ones); the "(MIS)"
    paths are hard-set red. Height hugs the bar; width auto. */
 .nav .mk{display:flex;align-items:center;color:inherit;text-decoration:none}
-.nav .mk .brandlogo{display:block;height:clamp(30px,2.4vw,40px);width:auto}
-/* over a red section the logo's red "(Mis)" group would disappear into the
-   background — recolor it to the nav's text color so the whole mark stays legible */
+.nav .mk .brandlogo{display:block;height:clamp(30px,2.4vw,40px);width:auto;
+  /* tight OUTLINE-style halo: several stacked drop-shadows hug the mark's edges
+     from all sides, so it pops off ANY backdrop showing through the glass (red
+     content, photos, light or dark) — no visible plate, just a crisp dark edge */
+  filter:
+    drop-shadow(0 0 1px rgba(0,0,0,.9))
+    drop-shadow(1px 1px 1px rgba(0,0,0,.7))
+    drop-shadow(-1px -1px 1px rgba(0,0,0,.7))
+    drop-shadow(0 2px 4px rgba(0,0,0,.5))}
+/* over a solid red section, also recolor the red "(Mis)" group to the nav's text
+   color so it doesn't sit red-on-red (even the halo can't separate red-on-red) */
 .nav.over-red .brandlogo .mk-red{fill:currentColor}
 .nav .lk{display:flex;gap:2em;align-items:center}
-.nav a{color:inherit;text-decoration:none;font-size:var(--t-label);font-weight:500;letter-spacing:.18em;text-transform:uppercase;opacity:.7;transition:opacity .5s var(--ease)}
-.nav a:hover{opacity:1}
+.nav a{color:inherit;text-decoration:none;font-size:var(--t-label);font-weight:500;letter-spacing:.18em;text-transform:uppercase;opacity:1;transition:opacity .35s var(--ease)}
+.nav a:hover{opacity:.65}
 .nav .contact{border:var(--hair) solid currentColor;padding:.55em 1.1em;opacity:1;transition:background .5s var(--ease),color .5s var(--ease)}
 .nav .contact:hover{background:currentColor}
 .nav .contact:hover span{color:var(--ink)}
 .nav.thm-light .contact:hover span{color:var(--cream)}
 /* Instagram icon link — outline glyph in the nav's currentColor, sits just before Contact */
-.nav .ig{display:flex;align-items:center;opacity:.7;line-height:0;padding:0;margin-right:-.4em}
+.nav .ig{display:flex;align-items:center;opacity:1;line-height:0;padding:0;margin-right:-.4em;transition:opacity .35s var(--ease)}
+.nav .ig:hover{opacity:.65}
 .nav .ig svg{display:block;width:clamp(20px,1.5vw,24px);height:auto}
 @media(max-width:760px){.nav .lk a:not(.contact):not(.ig){display:none}}
 
@@ -401,9 +413,12 @@ body.no-grain::after{opacity:0}
 .mcell .mno{position:absolute;top:10px;left:12px;width:clamp(16px,1.6vw,22px);height:auto;opacity:.9;
   filter:drop-shadow(0 1px 4px rgba(0,0,0,.55))}
 /* name sits just above the role tag; small gap keeps the two close together */
-.mcell .mname{position:absolute;left:12px;right:12px;bottom:calc(12px + 1.55em);font-weight:900;font-size:clamp(.95rem,1.1vw,1.3rem);letter-spacing:-.01em;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.65)}
-/* role = a compact white-on-red pill tag, bottom-left */
-.mcell .mrole{position:absolute;left:12px;bottom:12px;display:inline-block;background:var(--red);color:#fff;
+/* name sits above the tag: tag is 8px from the photo bottom, name 8px above it.
+   Tag height ≈ its font (~.72rem) × line-height 1 + .64em padding ≈ ~20px, so the
+   name's bottom = 8 (base) + ~20 (tag) + 8 (gap) ≈ 36px. */
+.mcell .mname{position:absolute;left:12px;right:12px;bottom:36px;font-weight:900;font-size:clamp(1.1rem,1.35vw,1.55rem);letter-spacing:-.01em;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.65)}
+/* role tag: yellow pill, 8px from the photo's bottom-left */
+.mcell .mrole{position:absolute;left:12px;bottom:8px;display:inline-block;background:var(--yellow);color:var(--ink);
   font-weight:700;font-size:clamp(.58rem,.72vw,.75rem);letter-spacing:.12em;text-transform:uppercase;
   padding:.32em .6em;border-radius:3px;line-height:1}
 .mproof{margin-top:calc(clamp(18px,3vh,40px)*var(--fz));font-weight:300;font-size:calc(var(--t-lead)*var(--fz))}
@@ -439,7 +454,7 @@ body.no-grain::after{opacity:0}
 /* artist modal: name heading + red role pill above the bio */
 .vbody .vname{margin:0 0 .35em;font-weight:900;letter-spacing:-.02em;line-height:1;
   font-size:clamp(1.6rem,2.6vw,2.6rem)}
-.vbody .vrole{display:inline-block;margin:0 0 1em;background:var(--red);color:#fff;
+.vbody .vrole{display:inline-block;margin:0 0 1em;background:var(--yellow);color:var(--ink);
   font-weight:700;font-size:clamp(.62rem,.8vw,.8rem);letter-spacing:.12em;text-transform:uppercase;
   padding:.34em .7em;border-radius:3px;line-height:1}
 .vbody .vrole + p{margin-top:0}
@@ -472,7 +487,7 @@ body.no-grain::after{opacity:0}
 /* FOOTER — a big closing block: About Us heading + blurb, then stacked rows of
    pipe-separated links (Home / site nav / socials), then the © base line. */
 .foot{min-height:auto;padding-block:clamp(56px,8vw,120px);justify-content:flex-start;background:#1B1818;color:var(--cream)}
-.foot .about{border-top:var(--hair) solid rgba(231,225,212,.28);padding-top:clamp(32px,4vw,56px);max-width:60ch}
+.foot .about{padding-top:clamp(32px,4vw,56px);max-width:60ch}
 .foot .fh{font-weight:900;letter-spacing:-.03em;line-height:.95;font-size:clamp(2.2rem,min(5.5vw,7vh),4.4rem);color:var(--cream)}
 .foot .about p{margin-top:.7em;font-weight:300;font-size:clamp(1rem,1.4vw,1.35rem);opacity:.82;line-height:1.5}
 /* link rows: pipe-separated inline lists. Same uppercase link treatment. */
@@ -500,9 +515,12 @@ body.no-grain::after{opacity:0}
 .mf-rise.in{opacity:1;transform:none}
 
 /* CHANT COLLAGE — red frame, dark inset panel, photos bleed off edges */
-.mf-collage{position:relative;background:var(--red);overflow-x:clip;padding:clamp(30px,6vh,80px) 0 0}
+/* red frame: equal band top AND bottom (padding), plus the sides (panel margin),
+   so the red wraps the dark panel symmetrically — a matching red edge after the
+   "Mainstream…valued." line, mirroring the band above the beats. */
+.mf-collage{position:relative;background:var(--red);overflow-x:clip;padding:clamp(30px,6vh,80px) 0}
 .mf-panel{position:relative;background:var(--ink);overflow:visible;
-  margin:0 clamp(30px,8vw,120px);padding:clamp(30px,4vw,56px) clamp(28px,4vw,60px) clamp(50px,8vh,120px)}
+  margin:0 clamp(30px,8vw,120px);padding:clamp(30px,4vw,56px) clamp(28px,4vw,60px) clamp(28px,4vw,52px)}
 /* small uppercase section label above the opening line */
 .mf-eyebrow{font-weight:500;letter-spacing:.22em;text-transform:uppercase;font-size:var(--t-label);
   color:var(--cream);opacity:.6;margin-bottom:clamp(14px,2.2vh,26px)}
@@ -512,7 +530,7 @@ body.no-grain::after{opacity:0}
   font-size:clamp(2rem,min(6vw,7vh),5.4rem);max-width:16ch;margin-bottom:clamp(50px,9vh,120px)}
 /* wide variant: same size as the beat headings (.mf-beat h3), full width — the
    sentence flows and wraps only at the column edge, no forced line break. */
-.mf-lede-wide{font-size:clamp(2.4rem,min(6.5vw,8vh),5.4rem);max-width:none;margin-top:clamp(50px,9vh,120px)}
+.mf-lede-wide{font-size:clamp(2.4rem,min(6.5vw,8vh),5.4rem);max-width:none;margin-top:clamp(50px,9vh,120px);margin-bottom:0}
 
 /* Each beat is a 2-column ROW (text | photo), so text and photo are in the same
    flow and always stay aligned at every window size — no absolute drift, no
@@ -525,6 +543,15 @@ body.no-grain::after{opacity:0}
 .mf-beat-l{grid-template-columns:minmax(0,42%) 1fr}
 .mf-beat h3{font-weight:900;color:var(--cream);letter-spacing:-.03em;line-height:.86;font-size:clamp(2.4rem,min(6.5vw,8vh),5.4rem)}
 .mf-beat p{margin-top:.6em;font-weight:400;color:var(--cream);font-size:clamp(1.1rem,min(1.8vw,2.4vh),1.7rem);opacity:.95;line-height:1.3;max-width:34ch}
+/* "Manifesto" eyebrow above the first beat's heading — same look as the beat's
+   description <p>, but sits ABOVE the <h3> with a gap below (no top margin) */
+/* "MANIFESTO" eyebrow — red, roman weight, uppercase, WIDE tracking (~3-letter
+   gap) as a spaced label above the first beat. Neue Haas Grotesk roman = NHG 400.
+   The right-side letter-spacing adds a trailing gap, so pull it back with a
+   negative margin to keep the block left-aligned to the heading. */
+.mf-beat .mf-beat-eyebrow{margin:0 0 1em;font-family:var(--font);font-weight:400;color:var(--red);
+  text-transform:uppercase;font-size:clamp(.85rem,1.2vw,1.15rem);line-height:1;
+  letter-spacing:1.3em;margin-right:-1.3em}
 /* the photo: fixed aspect, fills its column, bleeds off the outer panel edge */
 .mf-ph{margin:0;overflow:hidden;box-shadow:0 16px 46px rgba(0,0,0,.5);aspect-ratio:4/3}
 .mf-ph img{width:100%;height:100%;object-fit:cover;display:block}
@@ -537,12 +564,14 @@ body.no-grain::after{opacity:0}
    The section is red; the sticky stage's dark interior is inset so the red bands
    run down the edges continuous with the collage + answer above. A tall runway
    sibling gives the scrub its scroll distance. */
-.mf-unite{position:relative;background:var(--red)}
+/* dark section (was a red frame) — flat ink to match the dark cards around it,
+   no seam. The inner sticky stage fills edge-to-edge but keeps the filmstrip scrub */
+.mf-unite{position:relative;background:var(--ink);color:var(--cream)}
 /* the sticky reel stage centres its content so the pinned reel has no big void
    above or below. A small "uniting…" header stays INSIDE the stage so the reel
    never reads as a headless floating row while it's pinned. */
 .mf-ustage{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;justify-content:center;overflow:hidden;
-  background:var(--ink);margin:0 clamp(30px,8vw,120px);padding:clamp(24px,4vh,56px) clamp(28px,4vw,60px)}
+  padding:clamp(24px,4vh,56px) var(--gutter)}
 /* HEADING for the reel — a real section header, not a faint whisper. Heavy,
    cream, sized to command the top of the pinned stage above the four cards. */
 .mf-uhead{font-weight:900;letter-spacing:-.03em;font-size:clamp(2.4rem,min(6.5vw,8vh),5.4rem);color:var(--cream);
@@ -617,13 +646,14 @@ body.no-grain::after{opacity:0}
 .fb-chart.in .fb-arrow{opacity:1}
 .fb-chart.in .fb-plot::before,.fb-chart.in .fb-plot::after{opacity:1}
 /* alien mark in the top-right quadrant — fades in with everything else */
-.fb-alien{position:absolute;top:28%;left:75%;transform:translate(-50%,-50%);z-index:2;
-  width:clamp(40px,5.5vw,76px);height:auto;opacity:0;transition:opacity .6s var(--ease)}
+.fb-alien{position:absolute;top:16%;left:75%;transform:translate(-50%,-50%);z-index:2;
+  width:clamp(28px,3.8vw,52px);height:auto;opacity:0;transition:opacity .6s var(--ease)}
 .fb-chart.in .fb-alien{opacity:1}
-/* handwritten note — fades in with everything else (no longer the delayed final beat) */
-.fb-note{position:absolute;right:-2%;top:-16%;z-index:3;color:var(--red);
-  width:max-content;text-align:center;pointer-events:none;transform-origin:top right;
-  opacity:0;transform:rotate(-3deg);transition:opacity .6s var(--ease)}
+/* handwritten note — sits directly ABOVE the alien, sharing its horizontal
+   centre (left:75%) so the two line up vertically */
+.fb-note{position:absolute;left:75%;top:-16%;z-index:3;color:var(--red);
+  width:max-content;max-width:22ch;text-align:center;pointer-events:none;transform-origin:center bottom;
+  opacity:0;transform:translateX(-50%) rotate(-3deg);transition:opacity .6s var(--ease)}
 .fb-chart.in .fb-note{opacity:1}
 .fb-note p{font-family:'Caveat',cursive;font-weight:600;line-height:1.02;letter-spacing:.01em;
   font-size:calc(clamp(1.25rem,2vw,1.75rem)*var(--fz));max-width:20ch;margin:0}
@@ -639,7 +669,7 @@ body.no-grain::after{opacity:0}
 }
 .fb-list{margin-top:.6em;list-style:none;max-width:44ch}
 .fb-list li{font-weight:400;font-size:var(--t-body);line-height:1.3;opacity:.9;
-  padding:.6em 0;border-top:var(--hair) solid rgba(231,225,212,.18)}
+  padding:.6em 0}
 .fb-list li::before{content:"#";color:var(--red);margin-right:.6em;font-weight:700}
 /* same scale as .fb-lead; the email carries a .mark highlight (no underline) */
 .fb-write{margin-top:calc(clamp(28px,4.5vh,56px)*var(--fz));font-weight:900;letter-spacing:-.02em;
@@ -769,7 +799,7 @@ body.no-grain::after{opacity:0}
            photo always sits beside its line and moves with it at every size. The
            photo bleeds off the outer edge; sides alternate. -->
       <div class="mf-beat mf-beat-r mf-rise">
-        <div class="mf-txt"><h3>Where new <span class="mark mark-w" style="--hl:var(--red)">languages</span> are formed.</h3><p>Slang, sound, and syntax the mainstream hasn't caught up to yet.</p></div>
+        <div class="mf-txt"><p class="mf-beat-eyebrow">Manifesto</p><h3>Where new <span class="mark mark-w" style="--hl:var(--red)">languages</span> are formed.</h3><p>Slang, sound, and syntax the mainstream hasn't caught up to yet.</p></div>
         <figure class="mf-ph"><img src="assets/collage/blur.png" alt="" decoding="async"></figure>
       </div>
       <div class="mf-beat mf-beat-l mf-rise">
@@ -803,7 +833,7 @@ body.no-grain::after{opacity:0}
        Names are PLACEHOLDER until the client supplies the real roster. -->
   <section class="card dark misfits tall" id="misfits" data-nav="dark" data-navbg="#231F20">
     <div class="wrap">
-      <h2 class="head reveal d1" data-m>The (Mis)fits <span class="mark mark-w" style="--hl:var(--red)">Brigade</span></h2>
+      <h2 class="head reveal d1" data-m>The (Mis)fit <span class="mark" style="--hl:var(--yellow)">Brigade</span></h2>
       <p class="lede lede-wide reveal d2" data-m>[Placeholder] A short line about the artists and creators we work with — the misfits shaping culture alongside us.</p>
       <!-- CONFIGURABLE ROSTER: uniform, repeating .mcell blocks (the shape TinaCMS
            will bind to later). To add an artist, copy one block and set its photo,
