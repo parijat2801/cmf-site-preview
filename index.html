@@ -7,24 +7,24 @@
 <meta name="description" content="Cultural (Mis)fits: a culture company for the culturally fluid generation — Culturist Network, IRL &amp; Live experiences, and a Film Studio for misfit communities." />
 <!-- Open Graph / Twitter: og:url, og:image, and the canonical URL below use a
      placeholder domain (culturalmisfits.com, inferred from the hello@culturalmisfits.com
-     contact address on this page) and a placeholder social image (assets/crew.jpg,
+     contact address on this page) and a placeholder social image (assets/crew.webp,
      an existing large photo asset). Confirm/replace both before relying on them. -->
 <meta property="og:type" content="website" />
 <meta property="og:title" content="Cultural (Mis)fits — A Catalyst for Culture" />
 <meta property="og:description" content="Cultural (Mis)fits: a culture company for the culturally fluid generation — Culturist Network, IRL &amp; Live experiences, and a Film Studio for misfit communities." />
 <meta property="og:url" content="https://culturalmisfits.com/" />
-<meta property="og:image" content="assets/crew.jpg" />
+<meta property="og:image" content="assets/crew.webp" />
 <meta property="og:site_name" content="Cultural (Mis)fits" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Cultural (Mis)fits — A Catalyst for Culture" />
 <meta name="twitter:description" content="Cultural (Mis)fits: a culture company for the culturally fluid generation — Culturist Network, IRL &amp; Live experiences, and a Film Studio for misfit communities." />
-<meta name="twitter:image" content="assets/crew.jpg" />
+<meta name="twitter:image" content="assets/crew.webp" />
 <link rel="canonical" href="https://culturalmisfits.com/" />
 <link rel="icon" href="assets/favicon/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon/favicon-16x16.png">
 <link rel="apple-touch-icon" href="assets/favicon/apple-touch-icon.png">
-<link rel="preload" as="image" href="assets/quote-bg.jpg">
+<link rel="preload" as="image" href="assets/quote-bg.webp">
 <style>
 @font-face{font-family:'NHG';src:url('fonts/NeueHaasDisplayLight.ttf') format('truetype');font-weight:300;font-style:normal;font-display:swap}
 @font-face{font-family:'NHG';src:url('fonts/NeueHaasDisplayRoman.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
@@ -69,7 +69,7 @@ img{display:block;max-width:100%}
 /* Film grain: pre-baked 128px noise tile. Normal blend + its own layer —
    no per-frame SVG turbulence compositing. */
 body::after{content:"";position:fixed;inset:0;z-index:8000;pointer-events:none;opacity:.05;
-  background:url('assets/grain.png');background-size:128px 128px;transform:translateZ(0);
+  background:url('assets/grain.webp');background-size:128px 128px;transform:translateZ(0);
   transition:opacity .4s var(--ease,ease)}
 /* suppress grain over photographic sections (e.g. manifesto) so the image reads clean */
 body.no-grain::after{opacity:0}
@@ -211,7 +211,7 @@ body.no-grain::after{opacity:0}
    motion / load failure) and keeps the same B&W treatment the video had. */
 .hero .hero-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;display:block;
   background:#231F20 center/cover no-repeat}
-.hero .hero-canvas.poster{background-image:url('assets/brand/balloon-glyph-1k.png');
+.hero .hero-canvas.poster{background-image:url('assets/brand/balloon-glyph-1k.webp');
   background-size:auto 78%;background-position:66% 42%;filter:grayscale(1) contrast(1.05)}
 /* legibility scrim — darker on the left where the copy sits, lighter on the right */
 .hero::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
@@ -586,8 +586,10 @@ body.no-grain::after{opacity:0}
 .mf-card{position:relative;flex:1 1 0;height:min(58vh,560px);background:#1B1818;overflow:hidden;
   transition:flex-grow .6s var(--ease)}
 /* dim only the IMAGE when inactive — the caption copy stays full-brightness */
+/* inactive cards read fully black-and-white (and dimmed); the ACTIVE card
+   restores full colour — see .mf-card.active img below */
 .mf-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 28%;
-  filter:grayscale(.15) brightness(.5);transition:filter .6s var(--ease)}
+  filter:grayscale(1) brightness(.55);transition:filter .6s var(--ease)}
 .mf-cap{position:absolute;left:0;right:0;bottom:0;padding:clamp(48px,7vw,90px) clamp(14px,2vw,26px) clamp(14px,2vw,26px);z-index:2;
   background:linear-gradient(0deg,rgba(35,31,32,.94) 30%,rgba(35,31,32,.6) 68%,transparent)}
 .mf-card h4{font-weight:900;letter-spacing:-.03em;line-height:.95;font-size:clamp(1rem,min(1.6vw,2.2vh),1.9rem)}
@@ -612,17 +614,26 @@ body.no-grain::after{opacity:0}
   grid-template-columns:1.1fr 1fr;gap:clamp(32px,5vw,88px);align-items:center}
 /* copy reveals with the chart now (choreography removed) — no special delay;
    it uses its normal .reveal.d2 stagger like the rest of the section. */
-.fb-chart{display:grid;grid-template-columns:clamp(28px,3vw,52px) 1fr;grid-template-rows:1fr clamp(28px,3vw,52px);
-  gap:clamp(10px,1.4vw,20px)}
+/* the plot fills the figure now — the axis labels live INSIDE it, next to their
+   own line, instead of in separate outer grid tracks (which left a big gap). */
+.fb-chart{display:block}
 /* right column: the position lead + the offer bullets */
 .fb-copy .fb-lead{font-weight:900;letter-spacing:-.02em;line-height:1.05;
   font-size:calc(clamp(1.5rem,min(3vw,4vh),2.8rem)*var(--fz));max-width:22ch}
 .fb-copy .fb-list{margin-top:clamp(20px,3vh,36px)}
-.fb-yaxis{grid-row:1;grid-column:1;display:flex;align-items:center;justify-content:flex-end;padding-right:.6em}
-.fb-yaxis span{writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap;
-  color:var(--cream);font-weight:700;letter-spacing:-.01em;line-height:1.08;
-  font-size:calc(clamp(.82rem,1.5vw,1.15rem)*var(--fz));opacity:.9}
-.fb-plot{grid-row:1;grid-column:2;position:relative;min-height:clamp(240px,34vh,420px);
+/* axis labels sit against their own line (vertical axis at x=10%, horizontal at
+   y=90%). Both use the SAME --lbl-gap so each is an equal distance from its line
+   — one to the left of the upright, one below the baseline. */
+.fb-yaxis,.fb-xaxis{position:absolute;z-index:2;color:var(--cream);font-weight:700;
+  letter-spacing:-.01em;line-height:1.08;white-space:nowrap;opacity:.9;
+  --lbl-gap:1.5em;
+  font-size:calc(clamp(.82rem,1.5vw,1.15rem)*var(--fz))}
+/* "Scale": vertical, --lbl-gap to the LEFT of the upright, centred on it */
+.fb-yaxis{left:calc(10% - var(--lbl-gap));top:50%;writing-mode:vertical-rl;
+  transform:translate(-100%,-50%) rotate(180deg)}
+/* "Cultural Impact": --lbl-gap BELOW the baseline, centred along it */
+.fb-xaxis{top:calc(90% + var(--lbl-gap));left:52%;transform:translateX(-50%)}
+.fb-plot{position:relative;min-height:clamp(240px,34vh,420px);
   padding:clamp(20px,3vw,40px)}
 /* faint graph-paper grid behind the chart (notebook look) */
 .fb-plot{background-image:
@@ -644,6 +655,18 @@ body.no-grain::after{opacity:0}
 .fb-alien{position:absolute;top:16%;left:75%;transform:translate(-50%,-50%);z-index:2;
   width:clamp(28px,3.8vw,52px);height:auto;opacity:0;transition:opacity .6s var(--ease)}
 .fb-chart.in .fb-alien{opacity:1}
+/* curly arrow: sits to the RIGHT of the note and curls down-left to the alien.
+   Drawn as a stroke so it can "draw itself" in with a dash animation. */
+.fb-curl{position:absolute;left:calc(75% + clamp(26px,3.4vw,54px));top:-6%;z-index:3;
+  width:clamp(52px,7vw,104px);height:auto;color:#e5018c;pointer-events:none;
+  opacity:0;transition:opacity .5s var(--ease)}
+.fb-chart.in .fb-curl{opacity:1}
+/* draw the line + head on when the chart reveals */
+.fb-curl path{stroke-dasharray:var(--len,300);stroke-dashoffset:var(--len,300);
+  transition:stroke-dashoffset 1.1s var(--ease-io) .25s}
+.fb-chart.in .fb-curl path{stroke-dashoffset:0}
+.fb-curl .fb-curl-head{--len:60;transition-delay:1.1s}
+@media(max-width:760px){.fb-curl{width:clamp(44px,10vw,72px);top:-10%}}
 /* handwritten note — sits directly ABOVE the alien, sharing its horizontal
    centre (left:75%) so the two line up vertically */
 .fb-note{position:absolute;left:75%;top:-16%;z-index:3;color:#e5018c;
@@ -652,12 +675,9 @@ body.no-grain::after{opacity:0}
 .fb-chart.in .fb-note{opacity:1}
 .fb-note p{font-family:'Caveat',cursive;font-weight:600;line-height:1.02;letter-spacing:.01em;
   font-size:calc(clamp(1.25rem,2vw,1.75rem)*var(--fz));max-width:20ch;margin:0}
-.fb-xaxis{grid-row:2;grid-column:2;padding-top:.6em;text-align:center;
-  color:var(--cream);font-weight:700;letter-spacing:-.01em;line-height:1.08;
-  font-size:calc(clamp(.82rem,1.5vw,1.15rem)*var(--fz));opacity:.9}
 @media(max-width:760px){
   .fb-cols{grid-template-columns:1fr;gap:clamp(28px,6vh,48px)}
-  .fb-chart{grid-template-columns:22px 1fr;max-width:none}
+  .fb-chart{max-width:none}
   .fb-copy .fb-lead{max-width:none}
   /* give the note room above a shorter mobile plot */
   .fb-note{top:-24%;font-size:1em}
@@ -795,15 +815,15 @@ body.no-grain::after{opacity:0}
            photo bleeds off the outer edge; sides alternate. -->
       <div class="mf-beat mf-beat-r mf-rise">
         <div class="mf-txt"><p class="mf-beat-eyebrow">Manifesto</p><h3>Where new <span class="mark mark-w" style="--hl:var(--red)">languages</span> are formed.</h3><p>Slang, sound, and syntax the mainstream hasn't caught up to yet.</p></div>
-        <figure class="mf-ph"><img src="assets/collage/blur.png" alt="" decoding="async"></figure>
+        <figure class="mf-ph"><img src="assets/collage/blur.webp" alt="" decoding="async"></figure>
       </div>
       <div class="mf-beat mf-beat-l mf-rise">
-        <figure class="mf-ph"><img src="assets/collage/arcade.png" alt="" decoding="async"></figure>
+        <figure class="mf-ph"><img src="assets/collage/arcade.webp" alt="" decoding="async"></figure>
         <div class="mf-txt"><h3>Where new <span class="mark mark-w" style="--hl:var(--red)">aesthetics</span> are tested.</h3><p>Looks and worlds tried on in public, long before they trend.</p></div>
       </div>
       <div class="mf-beat mf-beat-r mf-rise">
         <div class="mf-txt"><h3>Where new <span class="mark mark-w" style="--hl:var(--red)">truths</span> are spoken.</h3><p>The things people actually mean, said out loud without translation.</p></div>
-        <figure class="mf-ph"><img src="assets/collage/banana.png" alt="" decoding="async"></figure>
+        <figure class="mf-ph"><img src="assets/collage/banana.webp" alt="" decoding="async"></figure>
       </div>
       <div class="mf-lede mf-lede-wide mf-rise">Mainstream or niche, a space to be seen, understood, and valued.</div>
     </div>
@@ -813,10 +833,10 @@ body.no-grain::after{opacity:0}
     <div class="mf-ustage">
       <div class="mf-uhead mf-rise">Who are we <span class="mark mark-w" style="--hl:var(--red)">building for?</span></div>
       <div class="mf-reel" id="mf-reel">
-        <figure class="mf-card" data-mfcard tabindex="0" role="button"><img src="assets/traits/curious.jpg" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Curious</h4><div class="mf-q">Do you ask why and how, more than what?</div></figcaption></figure>
-        <figure class="mf-card" data-mfcard tabindex="0" role="button"><img src="assets/traits/expressive.jpg" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Expressive</h4><div class="mf-q">Do you use music, fashion and memes to introduce yourself?</div></figcaption></figure>
-        <figure class="mf-card" data-mfcard tabindex="0" role="button"><img src="assets/traits/culturally-fluid.jpg" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Culturally Fluid</h4><div class="mf-q">Do you live with contradictions — and are OK with it?</div></figcaption></figure>
-        <figure class="mf-card" data-mfcard tabindex="0" role="button"><img src="assets/traits/sameness.jpg" alt="" decoding="async"><figcaption class="mf-cap"><h4>Those Tired of Sameness</h4><div class="mf-q">Do you want stories that feel real, layered and human — not one-size-fits-all?</div></figcaption></figure>
+        <figure class="mf-card" data-mfcard tabindex="0" role="button"><img src="assets/traits/curious.webp" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Curious</h4><div class="mf-q">Do you ask why and how, more than what?</div></figcaption></figure>
+        <figure class="mf-card" data-mfcard tabindex="0" role="button"><img src="assets/traits/expressive.webp" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Expressive</h4><div class="mf-q">Do you use music, fashion and memes to introduce yourself?</div></figcaption></figure>
+        <figure class="mf-card" data-mfcard tabindex="0" role="button"><img src="assets/traits/culturally-fluid.webp" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Culturally Fluid</h4><div class="mf-q">Do you live with contradictions — and are OK with it?</div></figcaption></figure>
+        <figure class="mf-card" data-mfcard tabindex="0" role="button"><img src="assets/traits/sameness.webp" alt="" decoding="async"><figcaption class="mf-cap"><h4>The (Mis)fit</h4><div class="mf-q">For every square hole, round peg. Are you tired of one-size-fits-all narratives?</div></figcaption></figure>
       </div>
     </div>
     <div class="mf-reel-runway" aria-hidden="true"></div>
@@ -835,41 +855,41 @@ body.no-grain::after{opacity:0}
            name (.mname + alt + data-name), and number (.mno). The grid auto-fits
            and cells are ordered BY THE NUMBER, so source order doesn't matter. -->
       <div class="mwall reveal d1">
-        <figure class="mcell" data-photo="assets/brigade/1.png" data-name="Aakash Odedra" data-order="01" data-bio="British South Asian dancer and choreographer trained in Kathak and Bharatanatyam, founder of Aakash Odedra Company. Regarded as one of the leading Kathak dancers of his generation, he was awarded a British Empire Medal in 2021 for services to dance.">
-          <img src="assets/brigade/1.png" alt="Aakash Odedra" loading="lazy" decoding="async">
-          <img class="mno" src="assets/brand/alien-white.png" alt="" aria-hidden="true"><span class="mname">Aakash Odedra</span><span class="mrole">Dancer</span>
+        <figure class="mcell" data-photo="assets/brigade/1.webp" data-name="Aakash Odedra" data-order="01" data-bio="British South Asian dancer and choreographer trained in Kathak and Bharatanatyam, founder of Aakash Odedra Company. Regarded as one of the leading Kathak dancers of his generation, he was awarded a British Empire Medal in 2021 for services to dance.">
+          <img src="assets/brigade/1.webp" alt="Aakash Odedra" loading="lazy" decoding="async">
+          <img class="mno" src="assets/brand/alien-white.webp" alt="" aria-hidden="true"><span class="mname">Aakash Odedra</span><span class="mrole">Dancer</span>
         </figure>
-        <figure class="mcell" data-photo="assets/brigade/2.png" data-name="Eshna Kutty" data-order="02" data-bio="Delhi-based self-taught hoop dancer and flow artist with a postgraduate background in dance movement therapy. She gained wide recognition after a hula-hoop dance video went viral, and now teaches hoop workshops across India.">
-          <img src="assets/brigade/2.png" alt="Eshna Kutty" loading="lazy" decoding="async">
-          <img class="mno" src="assets/brand/alien-white.png" alt="" aria-hidden="true"><span class="mname">Eshna Kutty</span><span class="mrole">Hoop Artist</span>
+        <figure class="mcell" data-photo="assets/brigade/2.webp" data-name="Eshna Kutty" data-order="02" data-bio="Delhi-based self-taught hoop dancer and flow artist with a postgraduate background in dance movement therapy. She gained wide recognition after a hula-hoop dance video went viral, and now teaches hoop workshops across India.">
+          <img src="assets/brigade/2.webp" alt="Eshna Kutty" loading="lazy" decoding="async">
+          <img class="mno" src="assets/brand/alien-white.webp" alt="" aria-hidden="true"><span class="mname">Eshna Kutty</span><span class="mrole">Hoop Artist</span>
         </figure>
-        <figure class="mcell" data-photo="assets/brigade/3.png" data-name="Nicki Wells" data-order="03" data-bio="English singer, composer and songwriter known for blending Indian classical, Western classical, folk and jazz influences. She rose to prominence as featured vocalist in Nitin Sawhney&#x27;s band and released her debut album under the name TURYA before recording as Nicki Wells.">
-          <img src="assets/brigade/3.png" alt="Nicki Wells" loading="lazy" decoding="async">
-          <img class="mno" src="assets/brand/alien-white.png" alt="" aria-hidden="true"><span class="mname">Nicki Wells</span><span class="mrole">Singer</span>
+        <figure class="mcell" data-photo="assets/brigade/3.webp" data-name="Nicki Wells" data-order="03" data-bio="English singer, composer and songwriter known for blending Indian classical, Western classical, folk and jazz influences. She rose to prominence as featured vocalist in Nitin Sawhney&#x27;s band and released her debut album under the name TURYA before recording as Nicki Wells.">
+          <img src="assets/brigade/3.webp" alt="Nicki Wells" loading="lazy" decoding="async">
+          <img class="mno" src="assets/brand/alien-white.webp" alt="" aria-hidden="true"><span class="mname">Nicki Wells</span><span class="mrole">Singer</span>
         </figure>
-        <figure class="mcell" data-photo="assets/brigade/4.png" data-name="Nirvair Singh Rai" data-order="04" data-bio="Independent visual artist and filmmaker working across documentary, fashion, and commercial photography, trained at Pathshala in Dhaka, Bangladesh. He is listed as a collaborator with Aakash Odedra Company, a UK dance organisation in the same cultural circle as this roster.">
-          <img src="assets/brigade/4.png" alt="Nirvair Singh Rai" loading="lazy" decoding="async">
-          <img class="mno" src="assets/brand/alien-white.png" alt="" aria-hidden="true"><span class="mname">Nirvair Singh Rai</span><span class="mrole">Photographer</span>
+        <figure class="mcell" data-photo="assets/brigade/4.webp" data-name="Nirvair Singh Rai" data-order="04" data-bio="Independent visual artist and filmmaker working across documentary, fashion, and commercial photography, trained at Pathshala in Dhaka, Bangladesh. He is listed as a collaborator with Aakash Odedra Company, a UK dance organisation in the same cultural circle as this roster.">
+          <img src="assets/brigade/4.webp" alt="Nirvair Singh Rai" loading="lazy" decoding="async">
+          <img class="mno" src="assets/brand/alien-white.webp" alt="" aria-hidden="true"><span class="mname">Nirvair Singh Rai</span><span class="mrole">Photographer</span>
         </figure>
-        <figure class="mcell" data-photo="assets/brigade/5.png" data-name="Ravi-Ra" data-order="05" data-bio="Lyricist, singer-songwriter and screenwriter working in India&#x27;s film and music industry, credited in the music departments of films including Forensic (2022), Half CA (2023) and Anu Aur DI (2023).">
-          <img src="assets/brigade/5.png" alt="Ravi-Ra" loading="lazy" decoding="async">
-          <img class="mno" src="assets/brand/alien-white.png" alt="" aria-hidden="true"><span class="mname">Ravi-Ra</span><span class="mrole">Musician</span>
+        <figure class="mcell" data-photo="assets/brigade/5.webp" data-name="Ravi-Ra" data-order="05" data-bio="Lyricist, singer-songwriter and screenwriter working in India&#x27;s film and music industry, credited in the music departments of films including Forensic (2022), Half CA (2023) and Anu Aur DI (2023).">
+          <img src="assets/brigade/5.webp" alt="Ravi-Ra" loading="lazy" decoding="async">
+          <img class="mno" src="assets/brand/alien-white.webp" alt="" aria-hidden="true"><span class="mname">Ravi-Ra</span><span class="mrole">Musician</span>
         </figure>
-        <figure class="mcell" data-photo="assets/brigade/6.png" data-name="Rushil Ranjan" data-order="06" data-bio="British composer, arranger and producer who founded the Orchestral Qawwali Project with singer Abi Sampa, blending Sufi and orchestral classical music. He is an Associate Artist of the Royal Albert Hall and has collaborated with A. R. Rahman on major concert works.">
-          <img src="assets/brigade/6.png" alt="Rushil Ranjan" loading="lazy" decoding="async">
-          <img class="mno" src="assets/brand/alien-white.png" alt="" aria-hidden="true"><span class="mname">Rushil Ranjan</span><span class="mrole">Composer</span>
+        <figure class="mcell" data-photo="assets/brigade/6.webp" data-name="Rushil Ranjan" data-order="06" data-bio="British composer, arranger and producer who founded the Orchestral Qawwali Project with singer Abi Sampa, blending Sufi and orchestral classical music. He is an Associate Artist of the Royal Albert Hall and has collaborated with A. R. Rahman on major concert works.">
+          <img src="assets/brigade/6.webp" alt="Rushil Ranjan" loading="lazy" decoding="async">
+          <img class="mno" src="assets/brand/alien-white.webp" alt="" aria-hidden="true"><span class="mname">Rushil Ranjan</span><span class="mrole">Composer</span>
         </figure>
-        <figure class="mcell" data-photo="assets/brigade/7.png" data-name="Gopal Datt" data-order="07" data-bio="Indian actor and writer, full name Gopal Datt Tiwari, trained at the National School of Drama. Known for comedic roles in web series such as TVF Pitchers and Bachelors, and films including Tere Naam and the National Award-winning Filmistaan.">
-          <img src="assets/brigade/7.png" alt="Gopal Datt" loading="lazy" decoding="async">
-          <img class="mno" src="assets/brand/alien-white.png" alt="" aria-hidden="true"><span class="mname">Gopal Datt</span><span class="mrole">Actor</span>
+        <figure class="mcell" data-photo="assets/brigade/7.webp" data-name="Gopal Datt" data-order="07" data-bio="Indian actor and writer, full name Gopal Datt Tiwari, trained at the National School of Drama. Known for comedic roles in web series such as TVF Pitchers and Bachelors, and films including Tere Naam and the National Award-winning Filmistaan.">
+          <img src="assets/brigade/7.webp" alt="Gopal Datt" loading="lazy" decoding="async">
+          <img class="mno" src="assets/brand/alien-white.webp" alt="" aria-hidden="true"><span class="mname">Gopal Datt</span><span class="mrole">Actor</span>
         </figure>
-        <figure class="mcell" data-photo="assets/brigade/8.png" data-name="Parikshit Balochi" data-order="08" data-bio="Dubai-based radio presenter and travel blogger, host of the breakfast show on Bollywood music station City 101.6. Originally from India, he has since travelled to over 80 countries and built a career in broadcasting and travel content.">
-          <img src="assets/brigade/8.png" alt="Parikshit Balochi" loading="lazy" decoding="async">
-          <img class="mno" src="assets/brand/alien-white.png" alt="" aria-hidden="true"><span class="mname">Parikshit Balochi</span><span class="mrole">Radio Host</span>
+        <figure class="mcell" data-photo="assets/brigade/8.webp" data-name="Parikshit Balochi" data-order="08" data-bio="Dubai-based radio presenter and travel blogger, host of the breakfast show on Bollywood music station City 101.6. Originally from India, he has since travelled to over 80 countries and built a career in broadcasting and travel content.">
+          <img src="assets/brigade/8.webp" alt="Parikshit Balochi" loading="lazy" decoding="async">
+          <img class="mno" src="assets/brand/alien-white.webp" alt="" aria-hidden="true"><span class="mname">Parikshit Balochi</span><span class="mrole">Radio Host</span>
         </figure>
-        <figure class="mcell" data-photo="assets/brigade/9.png" data-name="Abi Sampa" data-order="09" data-bio="London-born Sufi and Carnatic-trained singer and veena player of Sri Lankan Tamil heritage, first Asian-tradition singer to appear on The Voice UK (2013). She co-founded the Orchestral Qawwali Project with composer Rushil Ranjan and qualified as a dentist in 2011.">
-          <img src="assets/brigade/9.png" alt="Abi Sampa" loading="lazy" decoding="async">
-          <img class="mno" src="assets/brand/alien-white.png" alt="" aria-hidden="true"><span class="mname">Abi Sampa</span><span class="mrole">Singer</span>
+        <figure class="mcell" data-photo="assets/brigade/9.webp" data-name="Abi Sampa" data-order="09" data-bio="London-born Sufi and Carnatic-trained singer and veena player of Sri Lankan Tamil heritage, first Asian-tradition singer to appear on The Voice UK (2013). She co-founded the Orchestral Qawwali Project with composer Rushil Ranjan and qualified as a dentist in 2011.">
+          <img src="assets/brigade/9.webp" alt="Abi Sampa" loading="lazy" decoding="async">
+          <img class="mno" src="assets/brand/alien-white.webp" alt="" aria-hidden="true"><span class="mname">Abi Sampa</span><span class="mrole">Singer</span>
         </figure>
       </div>
     </div>
@@ -943,7 +963,7 @@ body.no-grain::after{opacity:0}
       </div>
       <div class="witem reveal d2">
         <div class="txt" data-m><h3>Jupiter Pe Juice</h3><p>Truth wrapped in melody. Satire served fresh. A 90-minute musical satire where everyday absurdities become songs, punchlines, and cultural commentary. <b>Funny first. Truth later. Stays after.</b></p><a class="fl" href="https://www.instagram.com/jupiterpejuice/" target="_blank" rel="noopener">Follow ↗</a></div>
-        <div class="oshot" data-photos="assets/photo-jupiter.webp,assets/photo-rooftop.webp,assets/photo-manifesto.webp" style="--co:var(--cream)">
+        <div class="oshot" data-photos="assets/photo-jupiter.webp,assets/photo-jupiter-2.webp,assets/photo-jupiter-3.webp" style="--co:var(--cream)">
           <span class="idx">1/3</span>
           <span class="ticks"><i class="cur"></i><i></i><i></i></span>
         </div>
@@ -960,20 +980,33 @@ body.no-grain::after{opacity:0}
 
       <div class="fb-cols">
         <figure class="fb-chart reveal d2" data-m>
-          <div class="fb-yaxis"><span>Scale</span></div>
           <div class="fb-plot">
             <!-- red hand-drawn crayon axes: WebGL shader draws the L here; the two
                  .fb-axis spans are the no-WebGL CSS fallback (hidden when shader on) -->
             <span class="fb-axis fb-axis-y" aria-hidden="true"></span>
             <span class="fb-axis fb-axis-x" aria-hidden="true"></span>
+            <!-- axis labels sit INSIDE the plot, hugging their own line -->
+            <span class="fb-yaxis">Scale</span>
+            <span class="fb-xaxis">Cultural Impact</span>
+            <!-- hand-drawn curly arrow: loops out from the end of the note and
+                 sweeps back down-left into an arrowhead pointing at the alien -->
+            <svg class="fb-curl" viewBox="0 0 120 150" fill="none" aria-hidden="true">
+              <!-- the tail: rises from the note, spirals a loop, then dives down-left -->
+              <path class="fb-curl-line"
+                d="M96 14 C112 26 116 46 100 54 C86 61 74 48 84 38 C95 27 116 34 112 60
+                   C108 88 84 108 50 120"
+                stroke="currentColor" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/>
+              <!-- arrowhead at the end, angled along the incoming sweep -->
+              <path class="fb-curl-head" d="M64 104 L48 121 L69 127"
+                stroke="currentColor" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
             <!-- alien mark in the top-right quadrant (replaces the old 2x2 labels) -->
-            <img class="fb-alien" src="assets/brand/alien-magenta.png" alt="" aria-hidden="true">
+            <img class="fb-alien" src="assets/brand/alien-magenta.webp" alt="" aria-hidden="true">
             <!-- the handwritten note floats above the top-right quadrant -->
             <div class="fb-note" aria-hidden="true">
               <p>If your brand isn't here, is it even culturally relevant?</p>
             </div>
           </div>
-          <div class="fb-xaxis">Cultural Impact</div>
         </figure>
 
         <div class="fb-copy reveal d2" data-m>
@@ -1984,16 +2017,20 @@ if(!reduce){
     float pY=clamp(u_progress/0.5,0.0,1.0);
     float pX=clamp((u_progress-0.5)/0.5,0.0,1.0);
     float ink=0.0;
+    /* at the origin the two strokes OVERSHOOT past each other — a hand-drawn
+       corner doesn't stop dead, the pen runs on a little. The vertical carries
+       below the baseline and the horizontal starts left of the upright, so they
+       cross like the reference sketch instead of meeting in a clean join. */
     if(uv.x<x0+0.2){
       float dV=(uv.x-xw)*aspect;
       float topY=y1-pY*(y1-0.06);
-      float alongV=step(topY,uv.y)*step(uv.y,y1+0.02);
+      float alongV=step(topY,uv.y)*step(uv.y,y1+0.055);   // runs past the baseline
       if(alongV>0.5) ink=max(ink,crayon(dV,nuv,1.0));
     }
     if(uv.y>y1-0.2){
       float dH=(uv.y-yw);
       float rightX=x0+pX*(0.94-x0);
-      float alongH=step(x0-0.02,uv.x)*step(uv.x,rightX);
+      float alongH=step(x0-0.055,uv.x)*step(uv.x,rightX);  // starts left of the upright
       if(alongH>0.5) ink=max(ink,crayon(dH,nuv,5.0));
     }
     if(ink<=0.001){ fragColor=vec4(0.0); return; }
