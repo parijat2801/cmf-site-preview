@@ -1,62 +1,76 @@
-# Mobile / tablet audit — 2026-07-23
-
-Method: real 390px viewport via an iframe probe (browser zoom made window-resize
-unreliable; media queries inside an iframe resolve against the iframe width, so
-`(max-width:860px)` and `(max-width:760px)` genuinely fire).
+# Mobile / tablet pass — 2026-07-23
 
 Worktree: /Users/parijat/dev/cmf-responsive  branch feature/responsive-breakpoints
 Served: http://localhost:8060
 
-## What is already good (do not touch)
+Method: a real 390px viewport via an iframe probe. Window resizing alone was not
+trustworthy here (the page reported ~1589 CSS px in a 430px window), so media
+queries never fired; inside an iframe they resolve against the iframe width.
 
-- **No horizontal overflow at 390px.** `scrollWidth` 375 vs viewport 390, zero
-  elements escaping the viewport. The most common mobile bug class is absent.
-- **Nav collapses correctly** (`max-width:760px` hides the link list, keeps logo +
-  IG + Contact).
-- **Brigade grid** reads well 2-up: names legible, yellow role tags clear.
-- **Pin architecture is already mobile-aware**: `gsap.matchMedia()` at 860px,
-  dwell scaled `k=0.6` on phones, `fitPass()` shrinks `--fz` to fit the viewport,
-  and `talls[]` bottom-pins any card taller than the screen so nothing is clipped.
-  All four lower cards are `.nopin` already, so there is no card-stacking on mobile.
+## Done
 
-## Findings, by severity
+1. **Filmstrip goes vertical on phones.** The horizontal accordion left three
+   panels as ~55px slivers with labels clipped mid-word ("The Expr…", "The Cultu
+   Fluid"). Below 760px the four panels stack as full-width 16/10 banners, all in
+   colour. The GSAP scrub still runs but is visually neutralised — no JS change.
+   Desktop/tablet untouched.
 
-### 1. 13 live WebGL canvases on a phone  (perf — highest impact)
-`document.querySelectorAll('canvas').length === 13` at 390px. All appear to run
-their own rAF loop regardless of whether they are on screen.
-Fix order (from research, highest impact first):
-  a. IntersectionObserver pause/resume on every canvas + `document.hidden` gate.
-  b. Cap DPR: 1.5 for the 2D fragment shaders (axes, highlighters), 2 for the
-     hero balloon. Currently uncapped against `devicePixelRatio` 2-3.
-  c. `prefers-reduced-motion` hard override.
-  d. `precision mediump float` + fewer noise octaves in the fragment shaders.
-  e. Optional 30fps cap for decorative shaders (halves GPU work, imperceptible).
-Keep it CONFIGURABLE per the user's instruction — a quality tier, not a kill switch.
+2. **Artist wall 3-up on phones** (was 2-up). At ~105px per cell the overlay
+   caption had to shrink to ~11px name / ~7px tag to avoid overflowing, which was
+   unreadable. So the caption moved OUT from over the photo to beneath it, where it
+   has the full cell width. Tag size then tuned down on request.
 
-### 2. Filmstrip accordion is unusable at 390px  (layout — needs redesign)
-"Who are we building for?" keeps the desktop horizontal accordion: one open panel
-plus three ~55px slivers. Inactive labels are clipped mid-word — "The Expr…",
-"The Cultu Fluid", "The (Mis)f…". A horizontal accordion cannot work at this width.
-Needs a genuine mobile layout (stacked cards / vertical accordion / swipe), not a tweak.
+3. **Type scale.** Every heading sizes off `clamp(floor, min(Nvw,Mvh), ceiling)`.
+   On a phone `min(vw,vh)` always takes the vw side, which lands under the floor —
+   so `.head`, the manifesto h3 and the reel head ALL rendered at an identical
+   38.4px. Three levels reading as one. Restated in vw only with real intervals:
+   head 47 / manifesto 42 / lead 21 / body 17 / label 13.
 
-### 3. Chart loses its meaning on mobile  (layout — needs redesign)
-The `for-brands` graph renders its crayon axes, but the four quadrant labels that
-carry the argument are missing at 390px; only the "Scale" / "Cultural Impact" axis
-labels survive. The alien logo floats with nothing to read it against, and the
-handwritten question above is clipped at the top edge.
+   The hero was worse: `.mega` had NO lower bound, so 4.5vw put the opening
+   statement at 17.6px — body-copy size. Floored to ~29px at 390px.
 
-### 4. `100vh` + resize-triggered ScrollTrigger.refresh()  (jank risk)
-`.card{min-height:100vh}`, `.mf-ustage{height:100vh}` and `const vh=()=>window.innerHeight`.
-On mobile the collapsing URL bar changes `innerHeight`, fires `resize`, and the
-debounced `ScrollTrigger.refresh()` recalculates every pin MID-SCROLL. This is the
-classic cause of pins jumping on phones. Use `dvh`/`svh` and ignore height-only
-resizes on touch devices.
+4. **Hero overflow.** The floor trades against the `.ph` "shrink, never break a
+   phrase" contract, which assumed the type could always get smaller. Long phrases
+   then ran off-screen, so `.ph` may wrap below 1024px. (Scoping this to 760px
+   first left a gap: at 768px the beat rendered 814px wide in a 768px viewport.)
 
-### 5. Type + tap targets  (polish)
-- 28 elements below 12px. Role tags (`.mrole`) at 9.3px, nav/labels at 11.2px.
-- Several tap targets under 40px (the IG icon is 20x20).
+5. **Hero background stretch** (`vendor/hero-balloon.js`). `fitBg()` scaled the
+   plane to the viewport aspect while the texture kept the photo's own aspect, so
+   the crew shot distorted on resize — and since the glass glyph refracts that
+   plane, the glyph looked squished too. Now crops cover-style via texture
+   repeat/offset, recomputed on resize and on texture load.
 
-## Not yet verified
-- Tablet 768 / 1024.
-- Real touch scrolling through the pinned deck (Lenis + pin interaction).
-- iOS Safari specifically (only Chrome available here).
+6. **URL-bar scroll jump.** dvh on `.card` plus a width-vs-height guard on the
+   resize listener were NOT enough: a height-only change still fired one refresh,
+   because ScrollTrigger auto-refreshes on resize by itself. Dropped `resize` from
+   its `autoRefreshEvents`. Measured height-only refreshes 1 -> 0; a real width
+   change still refreshes, so rotation still works.
+
+7. **Shader budget.** 13 always-on WebGL canvases on a phone. Added
+   IntersectionObserver + Page Visibility pausing, a 30fps gate for the decorative
+   shaders, and a DPR ceiling — via ShaderMount's `maxPixelCount`, because its
+   `minPixelRatio` is a FLOOR, not a cap. All tunable via `window.GFX`, not
+   hard-disabled, per the brief ("keep it configurable").
+
+## Verified
+
+- 0 horizontal overflow at 320 / 390 / 430 / 600 / 768 / 834 / 1024 / 1280 / 1440.
+- 0 clipped text nodes at 390px; nothing under 12px except `.mrole` (deliberate).
+- Full-page scroll sweep at 390px: 31 samples, 0 blank frames.
+- Desktop + tablet unchanged: reel stays `row`, artist wall 3/4/5-up, hero scales
+  42 -> 65px.
+
+## Deliberately NOT changed
+
+- **The chart's missing quadrant labels.** I first read this as broken, but the
+  markup says the alien mark "replaces the old 2x2 labels" — that was an earlier
+  deliberate decision, not a mobile regression.
+- **Culturist Network image rotation.** Out of scope by instruction. The "1/3 with
+  2 ticks" reading was just lazy-loading mid-flight, not a defect.
+- The parked curly arrow (`.fb-curl{display:none}`).
+
+## Still unverified
+
+- **Real iOS Safari.** Everything here was measured in Chrome on macOS. The
+  URL-bar fix in particular is the kind that deserves a real-device check.
+- Real touch scrolling / momentum through the deck (Lenis + pin interaction).
