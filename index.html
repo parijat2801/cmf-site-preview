@@ -618,40 +618,35 @@ body.no-grain::after{opacity:0}
 .fb-copy .fb-lead{font-weight:900;letter-spacing:-.02em;line-height:1.05;
   font-size:calc(clamp(1.5rem,min(3vw,4vh),2.8rem)*var(--fz));max-width:22ch}
 .fb-copy .fb-list{margin-top:clamp(20px,3vh,36px)}
-.fb-yaxis{grid-row:1;grid-column:1;display:flex;align-items:center;justify-content:center}
+.fb-yaxis{grid-row:1;grid-column:1;display:flex;align-items:center;justify-content:flex-end;padding-right:.6em}
 .fb-yaxis span{writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap;
   color:var(--cream);font-weight:700;letter-spacing:-.01em;line-height:1.08;
   font-size:calc(clamp(.82rem,1.5vw,1.15rem)*var(--fz));opacity:.9}
 .fb-plot{grid-row:1;grid-column:2;position:relative;min-height:clamp(240px,34vh,420px);
   padding:clamp(20px,3vw,40px)}
-/* faint quadrant midlines so it reads as a 2x2, not just a corner bracket */
-.fb-plot::before,.fb-plot::after{content:"";position:absolute;background:rgba(231,225,212,.14);
-  opacity:0;transition:opacity .6s var(--ease)}
-.fb-plot::before{left:0;right:0;top:50%;height:var(--hair)}
-.fb-plot::after{top:0;bottom:0;left:50%;width:var(--hair)}
-/* The chart used to DRAW in as a staged sequence (axes scale up, arrows, alien,
-   note, one after another). That choreography is removed: every part just fades
-   in together when the section scrolls into view — a plain reveal like the rest
-   of the site. Axes/gridlines are drawn at full size; only opacity animates. */
-.fb-axis{position:absolute;background:rgba(231,225,212,.32);z-index:0;opacity:0;transition:opacity .6s var(--ease)}
-.fb-axis-y{left:0;bottom:0;width:var(--hair);height:100%}
-.fb-axis-x{left:0;bottom:0;height:var(--hair);width:100%}
-.fb-arrow{position:absolute;width:0;height:0;z-index:1;opacity:0;transition:opacity .6s var(--ease)}
-.fb-arrow-y{top:-9px;left:calc(var(--hair)/2);transform:translateX(-50%);
-  border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:9px solid rgba(231,225,212,.55)}
-.fb-arrow-x{bottom:calc(var(--hair)/2);right:-9px;transform:translateY(50%);
-  border-top:6px solid transparent;border-bottom:6px solid transparent;border-left:9px solid rgba(231,225,212,.55)}
-/* everything fades in together on scroll-in — no stagger, no draw */
-.fb-chart.in .fb-axis{opacity:1}
-.fb-chart.in .fb-arrow{opacity:1}
-.fb-chart.in .fb-plot::before,.fb-chart.in .fb-plot::after{opacity:1}
+/* faint graph-paper grid behind the chart (notebook look) */
+.fb-plot{background-image:
+    linear-gradient(rgba(231,225,212,.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(231,225,212,.055) 1px, transparent 1px);
+  background-size:28px 28px}
+/* the two AXES are drawn as a red hand-drawn "crayon" stroke by a WebGL shader
+   (see initCrayonAxes). The canvas fills the plot and draws the L on scroll-in.
+   If WebGL is unavailable, a plain CSS fallback axis (below) shows instead. */
+.fb-crayon{position:absolute;inset:0;z-index:1;pointer-events:none}
+/* CSS fallback axes (no WebGL): simple thin red L, faded in with the chart */
+.fb-axis{position:absolute;background:var(--red);z-index:0;opacity:0;transition:opacity .6s var(--ease)}
+.fb-axis-y{left:10%;bottom:10%;width:var(--hair);height:80%}
+.fb-axis-x{left:10%;bottom:10%;height:var(--hair);width:84%}
+.fb-chart.in .fb-axis{opacity:.9}
+/* when the shader is active it hides the CSS fallback axes */
+.fb-plot.has-crayon .fb-axis{display:none}
 /* alien mark in the top-right quadrant — fades in with everything else */
 .fb-alien{position:absolute;top:16%;left:75%;transform:translate(-50%,-50%);z-index:2;
   width:clamp(28px,3.8vw,52px);height:auto;opacity:0;transition:opacity .6s var(--ease)}
 .fb-chart.in .fb-alien{opacity:1}
 /* handwritten note — sits directly ABOVE the alien, sharing its horizontal
    centre (left:75%) so the two line up vertically */
-.fb-note{position:absolute;left:75%;top:-16%;z-index:3;color:var(--red);
+.fb-note{position:absolute;left:75%;top:-16%;z-index:3;color:#e5018c;
   width:max-content;max-width:22ch;text-align:center;pointer-events:none;transform-origin:center bottom;
   opacity:0;transform:translateX(-50%) rotate(-3deg);transition:opacity .6s var(--ease)}
 .fb-chart.in .fb-note{opacity:1}
@@ -670,7 +665,7 @@ body.no-grain::after{opacity:0}
 .fb-list{margin-top:.6em;list-style:none;max-width:44ch}
 .fb-list li{font-weight:400;font-size:var(--t-body);line-height:1.3;opacity:.9;
   padding:.6em 0}
-.fb-list li::before{content:"#";color:var(--red);margin-right:.6em;font-weight:700}
+.fb-list li::before{content:"#";color:#e5018c;margin-right:.6em;font-weight:700}
 /* same scale as .fb-lead; the email carries a .mark highlight (no underline) */
 .fb-write{margin-top:calc(clamp(28px,4.5vh,56px)*var(--fz));font-weight:900;letter-spacing:-.02em;
   line-height:1.05;font-size:calc(clamp(1.5rem,min(3vw,4vh),2.8rem)*var(--fz));max-width:none}
@@ -961,18 +956,18 @@ body.no-grain::after{opacity:0}
        language: hairline rules, heavy display type, one accent (red). -->
   <section class="card dark for-brands tall nopin" id="for-brands" data-nav="dark" data-navbg="#231F20">
     <div class="wrap">
-      <h2 class="head reveal d1" data-m>Cultural Relevance <span class="mark mark-w" style="--hl:var(--red)">Made Real</span></h2>
+      <h2 class="head reveal d1" data-m>Cultural Relevance <span class="mark mark-w" style="--hl:#e5018c">Made Real</span></h2>
 
       <div class="fb-cols">
         <figure class="fb-chart reveal d2" data-m>
           <div class="fb-yaxis"><span>Scale</span></div>
           <div class="fb-plot">
+            <!-- red hand-drawn crayon axes: WebGL shader draws the L here; the two
+                 .fb-axis spans are the no-WebGL CSS fallback (hidden when shader on) -->
             <span class="fb-axis fb-axis-y" aria-hidden="true"></span>
             <span class="fb-axis fb-axis-x" aria-hidden="true"></span>
-            <span class="fb-arrow fb-arrow-y" aria-hidden="true"></span>
-            <span class="fb-arrow fb-arrow-x" aria-hidden="true"></span>
             <!-- alien mark in the top-right quadrant (replaces the old 2x2 labels) -->
-            <img class="fb-alien" src="assets/brand/alien-red.png" alt="" aria-hidden="true">
+            <img class="fb-alien" src="assets/brand/alien-magenta.png" alt="" aria-hidden="true">
             <!-- the handwritten note floats above the top-right quadrant -->
             <div class="fb-note" aria-hidden="true">
               <p>If your brand isn't here, is it even culturally relevant?</p>
@@ -990,7 +985,7 @@ body.no-grain::after{opacity:0}
         </div>
       </div>
 
-      <p class="fb-write reveal d3" data-m>Write to us at <a href="mailto:hello@culturalmisfits.com"><span class="mark mark-w" style="--hl:var(--red)">hello@culturalmisfits.com</span></a></p>
+      <p class="fb-write reveal d3" data-m>Write to us at <a href="mailto:hello@culturalmisfits.com"><span class="mark mark-w" style="--hl:#e5018c">hello@culturalmisfits.com</span></a></p>
     </div>
   </section>
 
@@ -1935,6 +1930,100 @@ if(!reduce){
   });
   addEventListener('resize',resync);
   if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>{ resync(); requestAnimationFrame(resync); setTimeout(resync,150); });
+})();
+</script>
+
+<!-- CRAYON AXES: draws the For Brands chart's two axes as a red hand-drawn
+     "crayon" stroke via a WebGL shader (adapted from the highlighter). Draws the
+     L on scroll-in, replays when the section re-enters. No WebGL / reduced-motion
+     → the CSS fallback axes (.fb-axis) show instead. -->
+<script type="module">
+(async () => {
+  const plot=document.querySelector('.fb-plot');
+  const chart=document.querySelector('.fb-chart');
+  if(!plot||!chart) return;
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches) return;   // CSS fallback
+  try{ if(!document.createElement('canvas').getContext('webgl2')) return; }catch(_){ return; }
+
+  let ShaderMount, simplexNoise;
+  try{
+    ({ ShaderMount } = await import('./vendor/paper-shaders/index.js'));
+    ({ simplexNoise } = await import('./vendor/paper-shaders/shader-utils.js'));
+  }catch(_){ return; }
+
+  // recipe from the crayon-axes lab
+  const R={draw:1.2,thick:0.028,rough:0.56,grain:0.78,gscale:40,streak:0.2,alpha:0.96,waver:0.004};
+  const COLOR=[0.898,0.004,0.549];   // #e5018c magenta
+
+  const frag = `#version 300 es
+  precision mediump float;
+  uniform float u_time;
+  uniform vec2  u_res;
+  uniform float u_progress;
+  uniform vec3  u_color;
+  uniform float u_alpha,u_thick,u_rough,u_grain,u_gscale,u_streak,u_waver;
+  out vec4 fragColor;
+  ${simplexNoise}
+  float crayon(float d, vec2 nuv, float seed){
+    float edge=u_thick*0.5*(1.0+u_rough*0.6*snoise(nuv*7.0+seed));
+    float body=1.0-smoothstep(edge*0.6,edge,abs(d));
+    if(body<=0.0) return 0.0;
+    float dens=1.0-u_streak*(0.5+0.5*snoise(nuv*vec2(3.0,22.0)+seed));
+    float g=0.5+0.5*snoise(nuv*u_gscale+seed*2.7);
+    float thr=mix(1.02,0.15,u_grain);
+    float grain=smoothstep(thr-0.18,thr+0.05,g);
+    return clamp(body*dens*grain,0.0,1.0);
+  }
+  void main(){
+    vec2 uv=gl_FragCoord.xy/u_res.xy; uv.y=1.0-uv.y;
+    float aspect=u_res.x/u_res.y;
+    vec2 nuv=vec2(uv.x*aspect,uv.y);
+    float x0=0.10, y1=0.90;
+    float xw=x0+u_waver*snoise(vec2(uv.y*6.0,2.3));
+    float yw=y1+u_waver*snoise(vec2(uv.x*6.0,8.1));
+    float pY=clamp(u_progress/0.5,0.0,1.0);
+    float pX=clamp((u_progress-0.5)/0.5,0.0,1.0);
+    float ink=0.0;
+    if(uv.x<x0+0.2){
+      float dV=(uv.x-xw)*aspect;
+      float topY=y1-pY*(y1-0.06);
+      float alongV=step(topY,uv.y)*step(uv.y,y1+0.02);
+      if(alongV>0.5) ink=max(ink,crayon(dV,nuv,1.0));
+    }
+    if(uv.y>y1-0.2){
+      float dH=(uv.y-yw);
+      float rightX=x0+pX*(0.94-x0);
+      float alongH=step(x0-0.02,uv.x)*step(uv.x,rightX);
+      if(alongH>0.5) ink=max(ink,crayon(dH,nuv,5.0));
+    }
+    if(ink<=0.001){ fragColor=vec4(0.0); return; }
+    fragColor=vec4(u_color,ink*u_alpha);
+  }`;
+
+  const u=(p,cv)=>({u_res:[cv?cv.width:600,cv?cv.height:480],u_progress:p,u_color:COLOR,
+    u_alpha:R.alpha,u_thick:R.thick,u_rough:R.rough,u_grain:R.grain,u_gscale:R.gscale,u_streak:R.streak,u_waver:R.waver});
+
+  let mount,cv;
+  try{ mount=new ShaderMount(plot, frag, u(0,null), undefined, 0.0); cv=plot.querySelector('canvas'); }
+  catch(_){ return; }                                   // fall back to CSS axes
+  if(!cv) return;
+  cv.classList.add('fb-crayon'); plot.classList.add('has-crayon');   // hide CSS axes
+
+  let raf=0,start=0,armed=false;
+  function step(now){ if(!start)start=now; const p=Math.min(1,(now-start)/(R.draw*1000));
+    mount.setUniforms(u(p,cv)); if(p<1) raf=requestAnimationFrame(step); }
+  function play(){ cancelAnimationFrame(raf); start=0; raf=requestAnimationFrame(step); }
+  function reset(){ cancelAnimationFrame(raf); mount.setUniforms(u(0,cv)); }
+
+  // draw when .fb-chart gains .in; reset on leave so it replays on re-enter
+  const check=()=>{ const on=chart.classList.contains('in');
+    if(on&&!armed){ armed=true; play(); } else if(!on&&armed){ armed=false; reset(); } };
+  new MutationObserver(check).observe(chart,{attributes:true,attributeFilter:['class']});
+  check();
+  // keep the draw sized correctly after fonts/layout settle
+  const resync=()=>{ try{ mount.handleResize&&mount.handleResize(); }catch(_){}; mount.setUniforms(u(armed?1:0,cv)); };
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>{ resync(); setTimeout(resync,150); });
+  addEventListener('resize',resync);
 })();
 </script>
 </body>
