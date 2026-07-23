@@ -822,8 +822,18 @@ body.no-grain::after{opacity:0}
   .fb-cols{grid-template-columns:1fr;gap:clamp(28px,6vh,48px)}
   .fb-chart{max-width:none}
   .fb-copy .fb-lead{max-width:none}
-  /* give the note room above a shorter mobile plot */
-  .fb-note{top:-24%;font-size:1em}
+  /* The note is anchored to the plot at left:75%, top:-24% — on desktop that floats
+     it clear to the right of the plot. On a 390px phone the plot is full-width, so
+     that position lands the note ON TOP of the "Made Real" highlight in the heading
+     above. Drop it DOWN into the plot's empty top-right quadrant (near the alien),
+     right-aligned so it can't collide with the left-anchored heading, and let it
+     read a touch smaller so it fits beside the alien. */
+  /* note + alien are a PAIR (the note asks "isn't your brand here?", the alien
+     sits "here"). On phone stack them in the top-right: note up top-right, alien
+     centred below it — so the note clears both the heading highlight AND the alien. */
+  .fb-note{top:2%;left:auto;right:3%;transform:translateX(0) rotate(-3deg);
+    max-width:15ch;text-align:right;font-size:.86em}
+  .fb-alien{top:40%;left:72%;width:clamp(30px,7vw,44px)}
 }
 .fb-list{margin-top:.6em;list-style:none;max-width:44ch}
 .fb-list li{font-weight:400;font-size:var(--t-body);line-height:1.3;opacity:.9;
