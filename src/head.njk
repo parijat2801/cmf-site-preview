@@ -24,7 +24,25 @@
 <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon/favicon-16x16.png">
 <link rel="apple-touch-icon" href="assets/favicon/apple-touch-icon.png">
-<link rel="preload" as="image" href="assets/quote-bg.webp">
+<!-- HERO WARM-UP: the balloon is loaded via a dynamic import() deep in the body,
+     so its module graph (hero-balloon → three + GLTFLoader → BufferGeometryUtils
+     + RoomEnvironment) would otherwise only start fetching once that script runs,
+     one dependency at a time. modulepreload primes the whole graph in parallel up
+     front so the WebGL hero renders sooner. -->
+<link rel="modulepreload" href="vendor/hero-balloon.js">
+<link rel="modulepreload" href="vendor/three.module.min.js">
+<link rel="modulepreload" href="vendor/GLTFLoader.js">
+<link rel="modulepreload" href="vendor/BufferGeometryUtils.js">
+<link rel="modulepreload" href="vendor/RoomEnvironment.js">
+<!-- the photo the glass glyph refracts (BG_IMAGE in hero-balloon.js) -->
+<link rel="preload" as="image" href="assets/crew.webp">
+<!-- GLB is the balloon's heaviest fetch. Preload the SAME LOD the module will
+     pick, so we never double-fetch the wrong one. hero-balloon.js chooses
+     LOW_TIER = (GFX.tier==='low') || saveData; GFX isn't defined yet in <head>
+     (its .tier stays 'auto' in production — 'low' is a console-only test path),
+     so the only term that can flip LOW_TIER here is saveData. Preload lod25 only
+     when saveData is off; a save-data visitor gets lod15 fetched by the module. -->
+<script>if(!(navigator.connection&&navigator.connection.saveData)){var l=document.createElement('link');l.rel='preload';l.as='fetch';l.crossOrigin='anonymous';l.href='assets/brand/balloon-lod25.glb';document.head.appendChild(l);}</script>
 <style>
 @font-face{font-family:'NHG';src:url('fonts/NeueHaasDisplayLight.ttf') format('truetype');font-weight:300;font-style:normal;font-display:swap}
 @font-face{font-family:'NHG';src:url('fonts/NeueHaasDisplayRoman.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
@@ -176,25 +194,22 @@ body.no-grain::after{opacity:0}
 .mark-shader > canvas{position:absolute;z-index:-1;pointer-events:none}
 
 /* ============ NAV — themed per card, auto-hides on scroll down ============ */
-/* LIQUID GLASS nav: a translucent frosted panel that refracts the content
-   scrolling behind it (was a solid per-section color bar). Neutral dark tint so
-   the white nav text stays legible over every section. The url(#navGlass) term
-   adds the SVG lens refraction in Chromium; the @supports block below gives
-   Safari/Firefox a plain frosted fallback. */
+/* SMOKED GLASS nav: a translucent frosted panel over the content scrolling
+   behind it (was a solid per-section color bar). Neutral dark tint so the white
+   nav text stays legible over every section. (The Chromium-only SVG lens
+   refraction was removed 2026-07-24 — design call: the smoked look is the
+   canonical one, and the displacement filter cost mid-range Androids per-frame
+   resampling for an effect Safari users never saw.) */
 .nav{position:fixed;top:0;left:0;right:0;z-index:900;display:flex;align-items:center;justify-content:space-between;
   padding:clamp(18px,2vw,30px) var(--gutter);color:var(--white);
   background:rgba(24,20,21,.42);                 /* neutral dark translucent glass */
-  -webkit-backdrop-filter:blur(16px) saturate(160%);
-  backdrop-filter:url(#navGlass) blur(16px) saturate(160%);
+  -webkit-backdrop-filter:blur(18px) saturate(160%);
+  backdrop-filter:blur(18px) saturate(160%);
   border-bottom:1px solid rgba(255,255,255,.12);
   transition:color .5s var(--ease),transform .5s var(--ease),background-color .5s var(--ease)}
 /* top sheen — a soft highlight along the upper edge, like light catching glass */
 .nav::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:-1;
   background:linear-gradient(180deg,rgba(255,255,255,.14),transparent 60%)}
-/* browsers without SVG-filter-in-backdrop (Safari/FF): plain frosted glass */
-@supports not (backdrop-filter: url(#navGlass)){
-  .nav{backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%)}
-}
 .nav.thm-light{color:var(--ink)}
 /* hero: let the glass go fully clear so the video reads edge-to-edge, but keep
    the blur so the bar still reads as glass */
@@ -931,19 +946,4 @@ body.no-grain::after{opacity:0}
 </head>
 <body>
 
-<!-- LIQUID GLASS refraction filter for the nav. feDisplacementMap warps the
-     backdrop using a gradient "lens" map so the content behind the bar bends at
-     the edges (Apple-style). Only Chromium supports an SVG filter INSIDE
-     backdrop-filter; Safari/Firefox fall back to plain frosted blur (see the
-     @supports rule in the .nav CSS). The map: R channel ramps L→R and G ramps
-     T→B, so pixels displace outward toward the bar's edges. -->
-<svg class="glass-defs" width="0" height="0" aria-hidden="true" style="position:absolute">
-  <defs>
-    <filter id="navGlass" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
-      <feImage x="0" y="0" width="100%" height="100%" preserveAspectRatio="none" result="dmap"
-        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='60'%3E%3Cdefs%3E%3ClinearGradient id='x' x1='0' y1='0' x2='1' y2='0'%3E%3Cstop offset='0' stop-color='%23000'/%3E%3Cstop offset='0.5' stop-color='%23808080'/%3E%3Cstop offset='1' stop-color='%23fff'/%3E%3C/linearGradient%3E%3ClinearGradient id='y' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23000'/%3E%3Cstop offset='0.5' stop-color='%23008000'/%3E%3Cstop offset='1' stop-color='%2300ff00'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='60' fill='url(%23x)'/%3E%3Crect width='100' height='60' fill='url(%23y)' style='mix-blend-mode:screen'/%3E%3C/svg%3E"/>
-      <feDisplacementMap in="SourceGraphic" in2="dmap" scale="14" xChannelSelector="R" yChannelSelector="G"/>
-    </filter>
-  </defs>
-</svg>
 

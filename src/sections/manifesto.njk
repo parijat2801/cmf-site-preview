@@ -17,11 +17,11 @@
 {%- for beat in manifesto.beats %}
       <div class="mf-beat mf-beat-{{ beat.side }} mf-rise">
 {%- if beat.side == "l" %}
-        <figure class="mf-ph"><img src="{{ beat.photo }}" alt="{{ beat.alt }}" decoding="async"></figure>
+        <figure class="mf-ph"><img src="{{ beat.photo }}" alt="{{ beat.alt }}" loading="lazy" decoding="async"></figure>
         <div class="mf-txt">{% if beat.eyebrow %}<p class="mf-beat-eyebrow">{{ beat.eyebrow }}</p>{% endif %}<h3>{{ beat.headline | safe }}</h3><p>{{ beat.body }}</p></div>
 {%- else %}
         <div class="mf-txt">{% if beat.eyebrow %}<p class="mf-beat-eyebrow">{{ beat.eyebrow }}</p>{% endif %}<h3>{{ beat.headline | safe }}</h3><p>{{ beat.body }}</p></div>
-        <figure class="mf-ph"><img src="{{ beat.photo }}" alt="{{ beat.alt }}" decoding="async"></figure>
+        <figure class="mf-ph"><img src="{{ beat.photo }}" alt="{{ beat.alt }}" loading="lazy" decoding="async"></figure>
 {%- endif %}
       </div>
 {%- endfor %}
