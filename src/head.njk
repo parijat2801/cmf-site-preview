@@ -38,11 +38,17 @@
 <link rel="preload" as="image" href="assets/crew.webp">
 <!-- GLB is the balloon's heaviest fetch. Preload the SAME LOD the module will
      pick, so we never double-fetch the wrong one. hero-balloon.js chooses
-     LOW_TIER = (GFX.tier==='low') || saveData; GFX isn't defined yet in <head>
-     (its .tier stays 'auto' in production — 'low' is a console-only test path),
-     so the only term that can flip LOW_TIER here is saveData. Preload lod25 only
-     when saveData is off; a save-data visitor gets lod15 fetched by the module. -->
-<script>if(!(navigator.connection&&navigator.connection.saveData)){var l=document.createElement('link');l.rel='preload';l.as='fetch';l.crossOrigin='anonymous';l.href='assets/brand/balloon-lod25.glb';document.head.appendChild(l);}</script>
+     LOW_TIER = (GFX.tier==='low') || saveData. GFX isn't defined yet in <head>,
+     so we mirror the tier auto-resolution done in foot.njk: LOW_TIER is true on
+     save-data OR phone-width (max-width:860px) OR reduced-motion, and the
+     ?tier=low|high URL override wins over all of them. Preload lod25 only when
+     the module will actually fetch lod25 (high tier); low-tier visitors get
+     lod15 preloaded to match. Keep this in sync with foot.njk's tier block. -->
+<script>(function(){var c=navigator.connection,q=new URLSearchParams(location.search),t=q.get('tier'),low;
+if(t==='low')low=true;else if(t==='high')low=false;
+else low=(c&&c.saveData)||matchMedia('(max-width:860px)').matches||matchMedia('(prefers-reduced-motion:reduce)').matches;
+var l=document.createElement('link');l.rel='preload';l.as='fetch';l.crossOrigin='anonymous';
+l.href=low?'assets/brand/balloon-lod15.glb':'assets/brand/balloon-lod25.glb';document.head.appendChild(l);})();</script>
 <style>
 @font-face{font-family:'NHG';src:url('fonts/NeueHaasDisplayLight.ttf') format('truetype');font-weight:300;font-style:normal;font-display:swap}
 @font-face{font-family:'NHG';src:url('fonts/NeueHaasDisplayRoman.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}

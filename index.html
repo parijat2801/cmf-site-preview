@@ -38,11 +38,17 @@
 <link rel="preload" as="image" href="assets/crew.webp">
 <!-- GLB is the balloon's heaviest fetch. Preload the SAME LOD the module will
      pick, so we never double-fetch the wrong one. hero-balloon.js chooses
-     LOW_TIER = (GFX.tier==='low') || saveData; GFX isn't defined yet in <head>
-     (its .tier stays 'auto' in production — 'low' is a console-only test path),
-     so the only term that can flip LOW_TIER here is saveData. Preload lod25 only
-     when saveData is off; a save-data visitor gets lod15 fetched by the module. -->
-<script>if(!(navigator.connection&&navigator.connection.saveData)){var l=document.createElement('link');l.rel='preload';l.as='fetch';l.crossOrigin='anonymous';l.href='assets/brand/balloon-lod25.glb';document.head.appendChild(l);}</script>
+     LOW_TIER = (GFX.tier==='low') || saveData. GFX isn't defined yet in <head>,
+     so we mirror the tier auto-resolution done in foot.njk: LOW_TIER is true on
+     save-data OR phone-width (max-width:860px) OR reduced-motion, and the
+     ?tier=low|high URL override wins over all of them. Preload lod25 only when
+     the module will actually fetch lod25 (high tier); low-tier visitors get
+     lod15 preloaded to match. Keep this in sync with foot.njk's tier block. -->
+<script>(function(){var c=navigator.connection,q=new URLSearchParams(location.search),t=q.get('tier'),low;
+if(t==='low')low=true;else if(t==='high')low=false;
+else low=(c&&c.saveData)||matchMedia('(max-width:860px)').matches||matchMedia('(prefers-reduced-motion:reduce)').matches;
+var l=document.createElement('link');l.rel='preload';l.as='fetch';l.crossOrigin='anonymous';
+l.href=low?'assets/brand/balloon-lod15.glb':'assets/brand/balloon-lod25.glb';document.head.appendChild(l);})();</script>
 <style>
 @font-face{font-family:'NHG';src:url('fonts/NeueHaasDisplayLight.ttf') format('truetype');font-weight:300;font-style:normal;font-display:swap}
 @font-face{font-family:'NHG';src:url('fonts/NeueHaasDisplayRoman.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
@@ -1350,15 +1356,18 @@ body.no-grain::after{opacity:0}
      pauseOffscreen — declared intent only; NOT read anywhere. Every rAF loop
        already pauses off-screen unconditionally via its own IntersectionObserver,
        so the flag is a description of that behaviour, not a switch that toggles it.
-     tier — only the explicit value 'low' does anything: the hero balloon reads
-       (GFX.tier === 'low') || navigator.connection.saveData to serve the smaller
-       LOD; 'auto' (the default) and 'high' both fall through to full quality —
-       there is no matchMedia/device-class signal behind 'auto'. Set 'low' from the
-       console (GFX.tier='low') to test the low path without spoofing a device.
-       Kept coarse deliberately: deviceMemory is Chrome-only, hardwareConcurrency
-       is clamped to 2 on all iOS (unreliable on iPhone), and
-       WEBGL_debug_renderer_info strings are being sanitised — none are robust tier
-       signals, so we don't gate on them. */
+     tier — controls which balloon LOD the hero fetches. The default 'auto' is
+       resolved HERE (below) to a concrete 'low' or 'high' before any consumer
+       reads it: 'low' when the viewport is phone-width (max-width:860px) OR the
+       reader prefers reduced motion, else 'high'. hero-balloon.js then serves the
+       smaller LOD-15 when (GFX.tier === 'low') || navigator.connection.saveData,
+       so 'auto' on a phone and saveData compose (either forces LOD-15). Explicit
+       'low'/'high' set here or from the console skip the auto-resolution. Override
+       for A/B with ?tier=low|high (see the URL block below), which wins over auto.
+       Kept coarse deliberately (viewport width + reduced-motion only): deviceMemory
+       is Chrome-only, hardwareConcurrency is clamped to 2 on all iOS (unreliable on
+       iPhone), and WEBGL_debug_renderer_info strings are being sanitised — none are
+       robust tier signals, so we don't gate on them. */
 // touch = phones + tablets (no hovering pointer). These carry the hero at a
 // lower DPR ceiling (see maxDPR_hero note above); pointer devices keep 2.
 const _touch = matchMedia('(hover:none) and (pointer:coarse)').matches;
@@ -1369,14 +1378,26 @@ window.GFX = {
   pauseOffscreen: true,
   tier: 'auto',
 };
+// Resolve tier:'auto' to a concrete 'low'/'high' NOW, before hero-balloon.js
+// reads it — phone-width (max-width:860px) or reduced-motion → 'low' (LOD-15),
+// else 'high'. Explicit 'low'/'high' (set above or from the console) is left as
+// is. This runs before the URL override below, which can still force either.
+if (window.GFX.tier === 'auto') {
+  const _low = matchMedia('(max-width:860px)').matches
+            || matchMedia('(prefers-reduced-motion:reduce)').matches;
+  window.GFX.tier = _low ? 'low' : 'high';
+}
 // URL overrides for on-device A/B testing (win over the auto-resolved values
-// above). ?heroDPR=<number> forces the hero DPR ceiling. NOTE: hero-balloon.js
-// reads GFX.maxDPR_hero once at module load, so changing the param needs a full
-// page reload to take effect (it is not live).
+// above). ?heroDPR=<number> forces the hero DPR ceiling; ?tier=low|high forces
+// the LOD tier. NOTE: hero-balloon.js reads GFX.maxDPR_hero AND GFX.tier once at
+// module load, so changing either param needs a full page reload to apply (they
+// are not live).
 {
   const _q = new URLSearchParams(location.search);
   const _heroDPR = parseFloat(_q.get('heroDPR'));
   if (Number.isFinite(_heroDPR) && _heroDPR > 0) window.GFX.maxDPR_hero = _heroDPR;
+  const _tier = _q.get('tier');
+  if (_tier === 'low' || _tier === 'high') window.GFX.tier = _tier;
 }
 try {
   const { initHeroBalloon } = await import('./vendor/hero-balloon.js');
