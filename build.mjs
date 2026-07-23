@@ -22,6 +22,43 @@ for (const f of fs.readdirSync('content')) {
   data[path.basename(f, '.json')] = JSON.parse(fs.readFileSync(path.join('content', f), 'utf8'));
 }
 
+// ---- content validation: fail the build (Vercel then keeps the previous
+// deploy live) instead of shipping a page with holes. Keys listed in MAY_BE_EMPTY
+// are designed-optional and guarded in the templates; everything else must have
+// real text, lists must meet their minimums, and referenced images must exist.
+const MAY_BE_EMPTY = new Set(['eyebrow', 'partnerLede', 'alt', 'alienAlt', 'bio', 'paragraphs', 'partnerList']);
+const MIN_ITEMS = {  // path -> minimum entries
+  'settings.sections': 1, 'hero.lines': 1, 'offerings.items': 1,
+  'offerings.items[].slides': 1, 'work.items': 1, 'work.items[].photos': 1,
+  'misfits.items': 1, 'audience.types': 1, 'manifesto.beats': 1, 'calling.items': 1,
+};
+const errors = [];
+const walk = (val, path, generic) => {
+  if (typeof val === 'string') {
+    const key = path.replace(/.*\./, '').replace(/\[\d+\]$/, '');
+    if (!val.trim() && !MAY_BE_EMPTY.has(key)) errors.push(`${path}: empty — add text or delete the item`);
+    if (val.startsWith('assets/') && !fs.existsSync(val)) errors.push(`${path}: image "${val}" not found in assets/`);
+  } else if (Array.isArray(val)) {
+    if ((MIN_ITEMS[generic] ?? 0) > val.length) errors.push(`${generic}: needs at least ${MIN_ITEMS[generic]} item(s), has ${val.length}`);
+    val.forEach((v, i) => walk(v, `${path}[${i}]`, `${generic}[]`));
+  } else if (val && typeof val === 'object') {
+    for (const [k, v] of Object.entries(val)) walk(v, `${path}.${k}`, `${generic}.${k}`);
+  }
+};
+for (const [name, val] of Object.entries(data)) walk(val, name, name);
+const sectionSlugs = new Set(fs.readdirSync('src/sections').map(f => path.basename(f, '.njk')));
+const seen = new Set();
+for (const s of data.settings.sections) {
+  if (!sectionSlugs.has(s.section)) errors.push(`settings.sections: unknown section "${s.section}"`);
+  if (seen.has(s.section)) errors.push(`settings.sections: "${s.section}" appears more than once`);
+  seen.add(s.section);
+}
+if (errors.length) {
+  console.error('CONTENT ERRORS — build refused, the live site keeps its previous version:');
+  for (const e of errors) console.error('  · ' + e);
+  process.exit(1);
+}
+
 const html = env.render('page.njk', data);
 fs.mkdirSync('dist', { recursive: true });
 fs.writeFileSync('dist/index.html', html);
