@@ -718,10 +718,28 @@ body.no-grain::after{opacity:0}
      so the black-and-white/colour split has no reference point left — keeping
      it would just make 3 of 4 panels look permanently disabled/unclickable. */
   .mf-card img{filter:none!important}
-  .mf-card h4{font-size:clamp(1.1rem,5.5vw,1.4rem)}
+  /* The desktop scrub still toggles .active on scroll (harmless for layout now),
+     but .mf-card.active h4 is a LARGER size — so as the active card changed on
+     scroll, headings pulsed 21<->26px. Pin BOTH the base and active heading to one
+     size so nothing resizes on scroll. */
+  .mf-card h4,.mf-card.active h4{font-size:clamp(1.1rem,5.5vw,1.4rem)}
   /* body copy is always shown (not just on .active) and never clamped/clipped */
   .mf-card .mf-q,.mf-card.active .mf-q{opacity:.85!important;max-height:none!important;overflow:visible;margin-top:.4em}
   .mf-cap{padding:clamp(24px,7vw,40px) clamp(14px,3vw,20px) clamp(14px,3vw,20px)}
+  /* SCROLL-IN REVEAL (phone only). Desktop cards are a live accordion and must
+     never start hidden, so this lives inside the media query and the JS only adds
+     .mf-card to the observer set below 760px. Each card fades + rises when it gets
+     .in; a per-card delay staggers them so the four don't pop in as one block. */
+  .mf-card{opacity:0;transform:translateY(28px);
+    transition:opacity .7s var(--ease),transform .7s var(--ease)}
+  .mf-card.in{opacity:1;transform:none}
+  .mf-card:nth-child(2){transition-delay:.08s}
+  .mf-card:nth-child(3){transition-delay:.16s}
+  .mf-card:nth-child(4){transition-delay:.24s}
+}
+/* phones: the filmstrip cards join the reveal system, so honour reduced-motion too */
+@media(max-width:760px) and (prefers-reduced-motion:reduce){
+  .mf-card{opacity:1;transform:none;transition:none}
 }
 @media(prefers-reduced-motion:reduce){.mf-rise{opacity:1;transform:none;transition:none}}
 
@@ -1296,7 +1314,13 @@ try{ pretext=await import('./vendor/pretext.esm.js'); }catch(_){ }
 /* For Brands is a plain reveal section (the staged chart choreography + replay
    were removed) — its reveals and the .fb-chart go through the same once-only
    observer as the rest of the site, fading in together on scroll-in. */
-const pendingReveals=new Set(document.querySelectorAll('.reveal, .mf-rise, .fb-chart'));
+/* The four filmstrip cards join the reveal set ONLY on phones. On desktop they're
+   a live scroll-scrubbed accordion (they must never start hidden); on phones they're
+   a static vertical stack with no motion, so they get the same scroll-in reveal as
+   the rest of the mobile page — staggered via .mf-card:nth-child in CSS. */
+const revealSel='.reveal, .mf-rise, .fb-chart'+
+  (matchMedia('(max-width:760px)').matches?', .mf-card':'');
+const pendingReveals=new Set(document.querySelectorAll(revealSel));
 function fireReveal(el){ el.classList.add('in'); pendingReveals.delete(el); io.unobserve(el); }
 const io=new IntersectionObserver((es)=>{
   es.forEach(e=>{ if(e.isIntersecting)fireReveal(e.target); });
