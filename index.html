@@ -162,17 +162,15 @@ body.no-grain::after{opacity:0}
    updated per-frame by JS): the word colors in left→right AS the tip passes it,
    matching the shader progress. Ahead of the tip it sits at a dimmer resting tone. */
 .mark-shader::before{display:none}
-/* Text colors in left→right AS the stroke tip passes (a hard split at --rv). The
-   resting tone ahead of the tip was rgba(cream,.62) — a faded CREAM, so the word
-   read as basically-cream the whole way and the sweep was near-invisible until it
-   crossed a contrast threshold, looking like it "turned all at once" mid-word.
-   Make the resting tone genuinely DIMMER (a muted grey-cream) so every position of
-   the sweep is legible — a real dim→bright transition that tracks the stroke. */
-.mark-shader{--rv:0;
-  background:linear-gradient(90deg,
-    var(--mark-lit,var(--cream)) 0 calc(var(--rv)*100% - 0.35em),
-    var(--mark-dim,rgba(231,225,212,.34)) calc(var(--rv)*100% + 0.35em) 100%);
-  -webkit-background-clip:text;background-clip:text;color:transparent}
+/* TEXT-ON-TOP model: the text sits SOLID over the highlight; the per-letter reveal
+   is the marker STROKE (WebGL) sweeping up from behind. So the text just needs to be
+   its final colour, always — no gradient-through-text (background-clip:text was
+   fragile here and rendered the ink words blank). --mark-lit is set per mark by the
+   JS: cream for .mark-w (reads on the dark card AND the red stroke), ink for plain
+   marks (reads on their yellow stroke). */
+.mark-shader{color:var(--mark-lit,var(--cream));background:none;
+  -webkit-text-fill-color:currentColor;
+  -webkit-background-clip:border-box;background-clip:border-box}
 /* the shader's own canvas, mounted behind the text */
 .mark-shader > canvas{position:absolute;z-index:-1;pointer-events:none}
 
