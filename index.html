@@ -2358,57 +2358,5 @@ if(!reduce){
 })();
 </script>
 
-<!-- ===== TEMPORARY DEBUG OVERLAY (remove after diagnosing hero zoom) =====
-     Phone-only. RECORDS the range of each value while you scroll (you can't
-     screenshot mid-scroll), then shows min..max. Scroll the hero a few times so
-     the URL bar collapses, then read the panel — a value whose min≠max is what
-     moves during scroll. TAP the panel to copy the full log to paste back. -->
-<script>
-(function(){
-  if(!matchMedia('(hover:none) and (pointer:coarse)').matches) return;   // phones only
-  const box=document.createElement('div');
-  box.style.cssText='position:fixed;left:6px;bottom:6px;right:6px;z-index:2147483647;'+
-    'font:11px/1.4 ui-monospace,monospace;color:#0f0;background:rgba(0,0,0,.86);'+
-    'padding:8px 10px;border-radius:6px;white-space:pre-wrap';
-  document.body.appendChild(box);
-  const hero=document.querySelector('.hero');
-  const cv=document.querySelector('.hero-canvas');
-  // track min/max of each metric across the whole scroll session
-  const R={};                      // name -> {min,max}
-  const track=(k,v)=>{ if(typeof v!=='number'||isNaN(v))return; const r=R[k]||(R[k]={min:v,max:v}); if(v<r.min)r.min=v; if(v>r.max)r.max=v; };
-  const fmt=(k,d=0)=>{ const r=R[k]; if(!r)return k+' -'; const a=r.min.toFixed(d),b=r.max.toFixed(d); return k+' '+(a===b?a:a+'..'+b+'  <—MOVES'); };
-  function upd(){
-    const hr=hero?hero.getBoundingClientRect():null;
-    const cr=cv?cv.getBoundingClientRect():null;
-    const vv=window.visualViewport;
-    const hs=hero?getComputedStyle(hero):null;
-    track('vvH', vv?vv.height:NaN);
-    track('vvScale', vv?vv.scale:NaN);
-    track('innerH', innerHeight);
-    if(hr){ track('heroH', hr.height); track('heroTop', hr.top); }
-    if(cr){ track('cssBoxH', cr.height); track('bufH', cv.height); track('buf/box', cv.height/(cr.height||1)); }
-    const pinPos = hs?hs.position:'-';
-    box.textContent =
-      'SCROLL THE HERO A FEW TIMES, then read below. TAP to copy.\n'+
-      'pinPos '+pinPos+'   scrollY '+Math.round(scrollY)+'\n'+
-      fmt('vvH')+'   '+fmt('vvScale',3)+'\n'+
-      fmt('innerH')+'\n'+
-      fmt('heroH')+'   '+fmt('heroTop')+'\n'+
-      fmt('cssBoxH')+'   '+fmt('bufH')+'\n'+
-      fmt('buf/box',3);
-    requestAnimationFrame(upd);
-  }
-  requestAnimationFrame(upd);
-  box.addEventListener('click',()=>{
-    const t=box.textContent;
-    (navigator.clipboard?.writeText(t)||Promise.reject()).then(
-      ()=>{ box.style.color='#ff0'; setTimeout(()=>box.style.color='#0f0',500); },
-      ()=>{ /* clipboard blocked: select the text so a long-press → copy works */
-        const rg=document.createRange(); rg.selectNodeContents(box);
-        const sel=getSelection(); sel.removeAllRanges(); sel.addRange(rg); }
-    );
-  });
-})();
-</script>
 </body>
 </html>
