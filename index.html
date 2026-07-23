@@ -133,19 +133,28 @@ body.no-grain::after{opacity:0}
    Text keeps its inherited (legible) color until the fill passes,
    THEN flips to ink — never black-on-dark before the sweep.
    ============================================================ */
-.mark{position:relative;display:inline-block;color:inherit;z-index:0;
-  transition:color .35s var(--ease-io) .5s}
+.mark{position:relative;display:inline-block;color:inherit;z-index:0}
 .mark::before{content:"";position:absolute;left:-.12em;right:-.12em;top:12%;bottom:8%;z-index:-1;
   background:var(--hl,var(--yellow));transform:scaleX(0);transform-origin:left;border-radius:2px;
   transition:transform .7s var(--ease-io) .25s;
   clip-path:polygon(0 6%,100% 0,100% 94%,0 100%)}
 .reveal.in .mark::before{transform:scaleX(1)}
-.reveal.in .mark{color:var(--ink)}
+/* TWO independent highlighter systems that MUST NOT touch the same properties:
+   - .mark (no-WebGL FALLBACK): a whole-word color flip synced to the ::before swipe.
+   - .mark-shader (WebGL): a per-letter gradient reveal driven by --rv (see below),
+     which needs color:transparent so the gradient shows through background-clip:text.
+   Historically the base color rules below applied to ALL marks, so on a shader mark
+   `.reveal.in .mark{color:ink}` (specificity 0,2,1) OVERRODE `.mark-shader{color:
+   transparent}` (0,1,0) — the text went solid, the gradient never rendered, and the
+   whole word flipped color mid-stroke via the CSS transition. Fix: the base color
+   system is now scoped to :not(.mark-shader) so the two systems never collide. */
+.mark:not(.mark-shader){transition:color .35s var(--ease-io) .5s}
+.reveal.in .mark:not(.mark-shader){color:var(--ink)}
 /* .mark-w keeps the highlighted TEXT light (over a red highlight) instead of the
    default dark ink. Uses --cream to MATCH the surrounding heading (which is cream
    on dark cards), so the highlighted word isn't a different, cooler white. */
-.reveal.in .mark.mark-w,.mark.mark-w{color:var(--cream)}
-@media(prefers-reduced-motion:reduce){.mark::before{transform:scaleX(1)}.mark{color:var(--ink)}.mark.mark-w{color:var(--cream)}}
+.mark.mark-w:not(.mark-shader),.reveal.in .mark.mark-w:not(.mark-shader){color:var(--cream)}
+@media(prefers-reduced-motion:reduce){.mark::before{transform:scaleX(1)}.mark:not(.mark-shader){color:var(--ink)}.mark.mark-w:not(.mark-shader){color:var(--cream)}}
 /* SHADER HIGHLIGHTER: when JS confirms WebGL, it adds .mark-shader to each .mark
    and mounts a canvas behind the word (the shader draws the marker stroke). The
    CSS swipe below is then the FALLBACK for no-WebGL — suppress it here so the two
@@ -153,11 +162,15 @@ body.no-grain::after{opacity:0}
    updated per-frame by JS): the word colors in left→right AS the tip passes it,
    matching the shader progress. Ahead of the tip it sits at a dimmer resting tone. */
 .mark-shader::before{display:none}
-.mark-shader{--rv:0;
-  background:linear-gradient(90deg,
-    var(--mark-lit,var(--cream)) 0 calc(var(--rv)*100%),
-    var(--mark-dim,rgba(231,225,212,.62)) calc(var(--rv)*100%) 100%);
-  -webkit-background-clip:text;background-clip:text;color:transparent}
+/* TEXT-ON-TOP model: the text sits SOLID over the highlight; the per-letter reveal
+   is the marker STROKE (WebGL) sweeping up from behind. So the text just needs to be
+   its final colour, always — no gradient-through-text (background-clip:text was
+   fragile here and rendered the ink words blank). --mark-lit is set per mark by the
+   JS: cream for .mark-w (reads on the dark card AND the red stroke), ink for plain
+   marks (reads on their yellow stroke). */
+.mark-shader{color:var(--mark-lit,var(--cream));background:none;
+  -webkit-text-fill-color:currentColor;
+  -webkit-background-clip:border-box;background-clip:border-box}
 /* the shader's own canvas, mounted behind the text */
 .mark-shader > canvas{position:absolute;z-index:-1;pointer-events:none}
 
@@ -202,6 +215,13 @@ body.no-grain::after{opacity:0}
 /* over a solid red section, also recolor the red "(Mis)" group to the nav's text
    color so it doesn't sit red-on-red (even the halo can't separate red-on-red) */
 .nav.over-red .brandlogo .mk-red{fill:currentColor}
+/* PHONE: drop the black outline halo — keep ONLY the over-red colour change. The
+   halo is a desktop safeguard against the logo sitting on busy photo backdrops; on
+   phones the client prefers the clean logo with no dark edge, relying on the
+   over-red recolour above for the one place it'd otherwise sit red-on-red. */
+@media(max-width:760px){
+  .nav .mk .brandlogo{filter:none}
+}
 .nav .lk{display:flex;gap:2em;align-items:center}
 .nav a{color:inherit;text-decoration:none;font-size:var(--t-label);font-weight:500;letter-spacing:.18em;text-transform:uppercase;opacity:1;transition:opacity .35s var(--ease)}
 .nav a:hover{opacity:.65}
@@ -213,7 +233,49 @@ body.no-grain::after{opacity:0}
 .nav .ig{display:flex;align-items:center;opacity:1;line-height:0;padding:0;margin-right:-.4em;transition:opacity .35s var(--ease)}
 .nav .ig:hover{opacity:.65}
 .nav .ig svg{display:block;width:clamp(20px,1.5vw,24px);height:auto}
-@media(max-width:760px){.nav .lk a:not(.contact):not(.ig){display:none}}
+/* ---- desktop: the more-menu button + dropdown don't exist ---- */
+.navmore{display:none}
+.navmenu{display:none}
+/* ---- COMPACT nav (phones AND tablets, up to 1024px): two controls only — a small
+        Instagram + a "more" menu holding the verticals + mail. The inline link bar
+        needs ~1024px to fit all four verticals + Contact without colliding with the
+        logo (at 768–900px it wrapped/overlapped), so tablets use the menu too. ---- */
+@media(max-width:1024px){
+  .nav .lk a:not(.ig){display:none}          /* verticals + Contact button off the bar */
+  /* IG lives inside .lk and .navmore is a separate nav child; with the nav's
+     space-between that stranded IG in the CENTRE. Push .lk hard to the right so it
+     sits flush against the more button — logo left, [IG][more] grouped right. */
+  .nav .lk{gap:0;margin-left:auto}
+  /* fat-finger spacing: both controls get a ~44px tap area and a real gap between
+     them, so the two targets don't overlap and a thumb can't miss-hit. */
+  .nav .ig{width:44px;height:44px;justify-content:center;margin-right:0}
+  /* match the more button's visual weight: bump the IG glyph up and thicken its
+     stroke a touch so the two controls read as equal-sized siblings, not a small
+     icon beside a heavy menu button. */
+  .nav .ig svg{width:27px;stroke-width:2}
+  .navmore{margin-left:14px}
+  /* the more button: two short bars (a compact menu glyph), same currentColor as the nav */
+  .navmore{display:inline-flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;
+    width:44px;height:44px;padding:0;margin-right:-10px;background:none;border:0;cursor:pointer;color:inherit}
+  /* bars: 27px wide (matches the IG glyph) so the two controls read equal weight */
+  .navmore-bar{display:block;height:2px;width:27px;background:currentColor;border-radius:2px;
+    transition:transform .3s var(--ease),opacity .3s var(--ease)}
+  /* open state: bars cross into an X */
+  .navmore[aria-expanded="true"] .navmore-bar:nth-child(1){transform:translateY(3.5px) rotate(45deg)}
+  .navmore[aria-expanded="true"] .navmore-bar:nth-child(2){transform:translateY(-3.5px) rotate(-45deg)}
+  /* dropdown panel: sits under the bar, right-aligned, same glass field as the nav */
+  .navmenu{display:block;position:absolute;top:100%;right:var(--gutter);margin-top:8px;
+    min-width:200px;padding:8px;border-radius:10px;
+    background:rgba(24,20,21,.92);backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%);
+    box-shadow:0 12px 40px rgba(0,0,0,.5);
+    display:flex;flex-direction:column;gap:2px;
+    opacity:0;transform:translateY(-6px);transition:opacity .28s var(--ease),transform .28s var(--ease)}
+  .navmenu[hidden]{display:none}
+  .navmenu.open{opacity:1;transform:none}
+  .navmenu a{display:block;color:var(--cream);padding:.7em .8em;border-radius:6px;
+    font-size:var(--t-label);letter-spacing:.14em;opacity:.9}
+  .navmenu a:hover,.navmenu a:active{opacity:1;background:rgba(255,255,255,.08)}
+}
 
 /* ---------- PHONE TYPE SCALE ----------
    Every heading on the page is sized `clamp(floor, min(Nvw, Mvh), ceiling)`. The
@@ -419,14 +481,33 @@ body.no-grain::after{opacity:0}
 .oshot.flip img.on{animation:settle .9s var(--ease)}
 @keyframes settle{0%{transform:scale(1.03)}100%{transform:none}}
 /* segmented index: the active tick is a 900ms progress bar while cycling */
-.oshot .ticks{position:absolute;left:14px;bottom:14px;z-index:4;display:flex;gap:6px}
-.oshot .ticks i{position:relative;width:22px;height:2px;background:rgba(255,255,255,.28)}
-.oshot .ticks i.on{background:rgba(255,255,255,.55)}
-.oshot .ticks i.cur{background:rgba(255,255,255,.55)}
-.oshot .ticks i.cur::after{content:"";position:absolute;inset:0;background:var(--co);transform:scaleX(1);transform-origin:left}
-.oshot.cycling .ticks i.cur::after{animation:tickfill .9s linear forwards}
-@keyframes tickfill{0%{transform:scaleX(0)}100%{transform:scaleX(1)}}
-.oshot .idx{position:absolute;right:14px;bottom:12px;z-index:4;font-weight:900;font-style:italic;font-size:1.05rem;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.6)}
+/* the dash markers are gone — the number counter IS the progress indicator now
+   (they showed the same thing twice). Keep .ticks out of the layout entirely. */
+.oshot .ticks{display:none}
+@media(hover:none) and (pointer:coarse){.oshot{--tickdur:2.2s}}   /* match the touch auto-cycle cadence */
+/* the counter (e.g. "2/3") sits white by default; while cycling, the section accent
+   sweeps left→right through it over the cycle duration — same role the filling dash
+   had, but on the number itself. Done with a two-stop gradient painted into the text
+   via background-clip, its split driven by an animated custom property. */
+@property --idxfill{syntax:'<percentage>';inherits:false;initial-value:0%}
+.oshot .idx{position:absolute;right:14px;bottom:12px;z-index:4;font-weight:900;font-style:italic;font-size:1.05rem;
+  color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.6)}
+/* the counter fills with --idxaccent (defaults to the section accent --co). Where
+   --co is a LIGHT tone the fill would vanish on the white number — the Acts (.witem)
+   photos set --co:cream, so their counter filled cream-on-white (invisible). Give
+   those a red fill instead so the sweep actually shows. */
+.oshot{--idxaccent:var(--co,var(--red))}
+.witem .oshot{--idxaccent:var(--red)}
+.oshot.cycling .idx{color:transparent;-webkit-text-fill-color:transparent;text-shadow:none;
+  background:linear-gradient(90deg,var(--idxaccent) 0 var(--idxfill),#fff var(--idxfill) 100%);
+  -webkit-background-clip:text;background-clip:text;
+  animation:idxfill var(--tickdur,.9s) linear forwards}
+@keyframes idxfill{0%{--idxfill:0%}100%{--idxfill:100%}}
+/* @property fallback (Safari <16.4 / Firefox): no animatable %, so just tint the
+   whole number the accent while cycling rather than a broken/empty sweep. */
+@supports not (background:linear-gradient(90deg,red 0 var(--idxfill),#fff 0)){
+  .oshot.cycling .idx{background:none;color:var(--idxaccent);-webkit-text-fill-color:var(--idxaccent);animation:none}
+}
 .offer .otext h3{margin-top:.2em;font-weight:900;font-size:clamp(2rem,4.4vw,4.6rem);letter-spacing:-.03em;line-height:.92;color:var(--co)}
 .offer .otext p{margin-top:.9em;font-weight:300;font-size:var(--t-lead);opacity:.86;line-height:1.35;max-width:34ch}
 /* the lead's name at full Black weight (like the headers) — same size, more thickness */
@@ -924,6 +1005,7 @@ body.no-grain::after{opacity:0}
     </svg>
   </a>
   <div class="lk">
+    <a href="#misfits">Misfit Brigade</a>
     <a href="#culturist-network">Culturist Network</a>
     <a href="#irl-live">IRL &amp; Live</a>
     <a href="#film-studio">Film Studio</a>
@@ -935,6 +1017,18 @@ body.no-grain::after{opacity:0}
       </svg>
     </a>
     <a class="contact" href="mailto:hello@culturalmisfits.com"><span>Contact</span></a>
+  </div>
+  <!-- PHONE-ONLY: a "more" menu button (hidden on desktop) that opens a dropdown
+       with the links the desktop bar shows inline (the three verticals + mail). -->
+  <button class="navmore" id="navMore" aria-label="Menu" aria-expanded="false" aria-controls="navMenu">
+    <span class="navmore-bar"></span><span class="navmore-bar"></span>
+  </button>
+  <div class="navmenu" id="navMenu" hidden>
+    <a href="#misfits">Misfit Brigade</a>
+    <a href="#culturist-network">Culturist Network</a>
+    <a href="#irl-live">IRL &amp; Live</a>
+    <a href="#film-studio">Film Studio</a>
+    <a href="mailto:hello@culturalmisfits.com">Contact</a>
   </div>
 </nav>
 
@@ -1404,13 +1498,7 @@ function buildShot(shot){
     ? VERTICALS[vid].slides.map(s=>s.image)
     : (shot.dataset.photos||'').split(',').filter(Boolean);
   if(!srcs.length||shot.dataset.built)return; shot.dataset.built='1';
-  // Rebuild the tick row to match the actual image count (may differ from the
-  // hardcoded markup once the linked list changes length).
-  const ticksEl=shot.querySelector('.ticks');
-  if(ticksEl&&ticksEl.children.length!==srcs.length){
-    ticksEl.innerHTML=srcs.map((_,i)=>i===0?'<i class="cur"></i>':'<i></i>').join('');
-  }
-  const ticks=[...shot.querySelectorAll('.ticks i')];
+  // (dash ticks removed — the number counter is the sole progress indicator now)
   const idx=shot.querySelector('.idx');
   const imgs=srcs.map((s,i)=>{const im=new Image();im.src=s;im.alt='';im.decoding='async';
     im.className=i===0?'on':'';shot.insertBefore(im,shot.firstChild);return im;});
@@ -1418,24 +1506,44 @@ function buildShot(shot){
   function show(n){
     cur=(n+srcs.length)%srcs.length;
     imgs.forEach((im,i)=>im.classList.toggle('on',i===cur));
-    ticks.forEach((t,i)=>{t.classList.toggle('on',i<cur);t.classList.remove('cur');});
-    const tc=ticks[cur];tc.classList.remove('cur');void tc.offsetWidth;tc.classList.add('cur');
-    if(idx)idx.textContent=(cur+1)+'/'+srcs.length;
+    if(idx){
+      idx.textContent=(cur+1)+'/'+srcs.length;
+      /* restart the accent sweep on the counter for the new image (the .cycling
+         class stays on, so the animation must be re-triggered by reflow) */
+      idx.style.animation='none';void idx.offsetWidth;idx.style.animation='';
+    }
     shot.classList.remove('flip');void shot.offsetWidth;shot.classList.add('flip');
   }
   const next=()=>show(cur+1);
   const reduceMotion=matchMedia('(prefers-reduced-motion:reduce)').matches;
-  shot.addEventListener('pointerenter',e=>{
-    if(e.pointerType==='touch')return;
-    if(reduceMotion)return;   // keep the first image static; no hover auto-cycle
-    next(); shot.classList.add('cycling');
-    timer=setInterval(next,900);
-  });
-  shot.addEventListener('pointerleave',()=>{
-    if(timer){clearInterval(timer);timer=null;}
-    shot.classList.remove('cycling');
-  });
-  shot.addEventListener('click',e=>{ if(!timer)next(); });   // touch (and keyboard-ish) advance
+  const isTouch=matchMedia('(hover:none) and (pointer:coarse)').matches;
+  const startCycle=()=>{ if(timer||reduceMotion||srcs.length<2)return;
+    shot.classList.add('cycling'); timer=setInterval(next,2200); };
+  const stopCycle=()=>{ if(timer){clearInterval(timer);timer=null;} shot.classList.remove('cycling'); };
+
+  if(isTouch){
+    /* PHONE: no hover, so the photos auto-cycle on their own — but ONLY while the
+       shot is on screen (and the tab is visible), so it doesn't run unseen or drain
+       battery. A slower 2.2s cadence suits passive viewing (vs the 0.9s hover cycle).
+       A tap still advances immediately. */
+    const cyIO=new IntersectionObserver(es=>es.forEach(e=>{
+      (e.isIntersecting && !document.hidden) ? startCycle() : stopCycle();
+    }),{threshold:0.35});
+    cyIO.observe(shot);
+    document.addEventListener('visibilitychange',()=>{ if(document.hidden)stopCycle();
+      else if(shot.getBoundingClientRect().top<innerHeight&&shot.getBoundingClientRect().bottom>0)startCycle(); });
+    shot.addEventListener('click',()=>{ next(); });   // tap = manual advance, cycle continues
+  }else{
+    /* DESKTOP: hover cycles fast; leaving stops and rests on the current image. */
+    shot.addEventListener('pointerenter',e=>{
+      if(e.pointerType==='touch')return;
+      if(reduceMotion)return;   // keep the first image static; no hover auto-cycle
+      next(); shot.classList.add('cycling');
+      timer=setInterval(next,900);
+    });
+    shot.addEventListener('pointerleave',stopCycle);
+    shot.addEventListener('click',e=>{ if(!timer)next(); });   // keyboard-ish advance
+  }
 }
 /* lazy-build the layered <img>s only when the row first nears the viewport */
 const oio=new IntersectionObserver((es)=>{
@@ -1662,6 +1770,27 @@ if(!reduce){
     else if(scroll<lastY-4)nav.classList.remove('hid');
     lastY=scroll;
   });
+
+  /* PHONE nav "more" menu: toggle a dropdown of the links not shown on the bar.
+     hidden attr gates display; a rAF flip to .open drives the fade so the very
+     first open animates. Closes on: a link tap, an outside tap, or Escape. */
+  const moreBtn=document.getElementById('navMore');
+  const moreMenu=document.getElementById('navMenu');
+  if(moreBtn && moreMenu){
+    const closeMenu=()=>{ if(moreMenu.hidden) return;
+      moreMenu.classList.remove('open'); moreBtn.setAttribute('aria-expanded','false');
+      setTimeout(()=>{ if(!moreMenu.classList.contains('open')) moreMenu.hidden=true; },300); };
+    const openMenu=()=>{ moreMenu.hidden=false; moreBtn.setAttribute('aria-expanded','true');
+      requestAnimationFrame(()=>moreMenu.classList.add('open')); };
+    moreBtn.addEventListener('click',e=>{ e.stopPropagation();
+      moreMenu.hidden ? openMenu() : closeMenu(); });
+    moreMenu.addEventListener('click',e=>{ if(e.target.closest('a')) closeMenu(); });
+    document.addEventListener('click',e=>{ if(!moreMenu.hidden && !nav.contains(e.target)) closeMenu(); });
+    addEventListener('keydown',e=>{ if(e.key==='Escape') closeMenu(); });
+    /* the nav hides itself on scroll-down — close the menu with it so it can't
+       float detached */
+    lenis.on('scroll',()=>closeMenu());
+  }
 
   const cards=gsap.utils.toArray('.deck > .card');
   cards.forEach((c,i)=>c.style.zIndex=10+i);
@@ -2146,8 +2275,18 @@ if(!reduce){
     // resolve the accent color from the element's own --hl (falls back to red)
     const hl = getComputedStyle(el).getPropertyValue('--hl');
     const color = parseColor(hl || '#DB1A21');
-    // text-flip colors: lit = the mark's resting text color; dim = a muted version
-    const litText = getComputedStyle(el).color;
+    // text-flip colors: lit = the color the text should END at once the stroke has
+    // passed. That's the mark's REVEALED color, not its resting one — and the two
+    // differ: a .mark-w word ends cream (light, over a red stroke), a plain .mark
+    // ends ink (dark, over a yellow stroke, so it reads on the highlight).
+    // getComputedStyle(el).color at init returns the RESTING cream for both, so
+    // using it made plain marks light to cream then the CSS flip slammed the whole
+    // word to ink at once — the "cream, then all black mid-word" you saw. Pick the
+    // destination explicitly by mark type instead.
+    const cs0 = getComputedStyle(el);
+    const litText = el.classList.contains('mark-w')
+      ? cs0.getPropertyValue('--cream').trim() || '#E7E1D4'
+      : cs0.getPropertyValue('--ink').trim()   || '#231F20';
     el.style.setProperty('--mark-lit', litText);
     // random per-mark tilt (stable) so no two highlights match
     const jr = Math.sin(i*127.1+3.7)*43758.5453; const jitter=(jr-Math.floor(jr))*2-1;
