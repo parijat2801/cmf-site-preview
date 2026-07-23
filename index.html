@@ -481,15 +481,27 @@ body.no-grain::after{opacity:0}
 .oshot.flip img.on{animation:settle .9s var(--ease)}
 @keyframes settle{0%{transform:scale(1.03)}100%{transform:none}}
 /* segmented index: the active tick is a 900ms progress bar while cycling */
-.oshot .ticks{position:absolute;left:14px;bottom:14px;z-index:4;display:flex;gap:6px}
-.oshot .ticks i{position:relative;width:22px;height:2px;background:rgba(255,255,255,.28)}
-.oshot .ticks i.on{background:rgba(255,255,255,.55)}
-.oshot .ticks i.cur{background:rgba(255,255,255,.55)}
-.oshot .ticks i.cur::after{content:"";position:absolute;inset:0;background:var(--co);transform:scaleX(1);transform-origin:left}
-.oshot.cycling .ticks i.cur::after{animation:tickfill var(--tickdur,.9s) linear forwards}
+/* the dash markers are gone — the number counter IS the progress indicator now
+   (they showed the same thing twice). Keep .ticks out of the layout entirely. */
+.oshot .ticks{display:none}
 @media(hover:none) and (pointer:coarse){.oshot{--tickdur:2.2s}}   /* match the touch auto-cycle cadence */
-@keyframes tickfill{0%{transform:scaleX(0)}100%{transform:scaleX(1)}}
-.oshot .idx{position:absolute;right:14px;bottom:12px;z-index:4;font-weight:900;font-style:italic;font-size:1.05rem;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.6)}
+/* the counter (e.g. "2/3") sits white by default; while cycling, the section accent
+   sweeps left→right through it over the cycle duration — same role the filling dash
+   had, but on the number itself. Done with a two-stop gradient painted into the text
+   via background-clip, its split driven by an animated custom property. */
+@property --idxfill{syntax:'<percentage>';inherits:false;initial-value:0%}
+.oshot .idx{position:absolute;right:14px;bottom:12px;z-index:4;font-weight:900;font-style:italic;font-size:1.05rem;
+  color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.6)}
+.oshot.cycling .idx{color:transparent;-webkit-text-fill-color:transparent;text-shadow:none;
+  background:linear-gradient(90deg,var(--co) 0 var(--idxfill),#fff var(--idxfill) 100%);
+  -webkit-background-clip:text;background-clip:text;
+  animation:idxfill var(--tickdur,.9s) linear forwards}
+@keyframes idxfill{0%{--idxfill:0%}100%{--idxfill:100%}}
+/* @property fallback (Safari <16.4 / Firefox): no animatable %, so just tint the
+   whole number the accent while cycling rather than a broken/empty sweep. */
+@supports not (background:linear-gradient(90deg,red 0 var(--idxfill),#fff 0)){
+  .oshot.cycling .idx{background:none;color:var(--co);-webkit-text-fill-color:var(--co);animation:none}
+}
 .offer .otext h3{margin-top:.2em;font-weight:900;font-size:clamp(2rem,4.4vw,4.6rem);letter-spacing:-.03em;line-height:.92;color:var(--co)}
 .offer .otext p{margin-top:.9em;font-weight:300;font-size:var(--t-lead);opacity:.86;line-height:1.35;max-width:34ch}
 /* the lead's name at full Black weight (like the headers) — same size, more thickness */
@@ -1480,13 +1492,7 @@ function buildShot(shot){
     ? VERTICALS[vid].slides.map(s=>s.image)
     : (shot.dataset.photos||'').split(',').filter(Boolean);
   if(!srcs.length||shot.dataset.built)return; shot.dataset.built='1';
-  // Rebuild the tick row to match the actual image count (may differ from the
-  // hardcoded markup once the linked list changes length).
-  const ticksEl=shot.querySelector('.ticks');
-  if(ticksEl&&ticksEl.children.length!==srcs.length){
-    ticksEl.innerHTML=srcs.map((_,i)=>i===0?'<i class="cur"></i>':'<i></i>').join('');
-  }
-  const ticks=[...shot.querySelectorAll('.ticks i')];
+  // (dash ticks removed — the number counter is the sole progress indicator now)
   const idx=shot.querySelector('.idx');
   const imgs=srcs.map((s,i)=>{const im=new Image();im.src=s;im.alt='';im.decoding='async';
     im.className=i===0?'on':'';shot.insertBefore(im,shot.firstChild);return im;});
@@ -1494,9 +1500,12 @@ function buildShot(shot){
   function show(n){
     cur=(n+srcs.length)%srcs.length;
     imgs.forEach((im,i)=>im.classList.toggle('on',i===cur));
-    ticks.forEach((t,i)=>{t.classList.toggle('on',i<cur);t.classList.remove('cur');});
-    const tc=ticks[cur];tc.classList.remove('cur');void tc.offsetWidth;tc.classList.add('cur');
-    if(idx)idx.textContent=(cur+1)+'/'+srcs.length;
+    if(idx){
+      idx.textContent=(cur+1)+'/'+srcs.length;
+      /* restart the accent sweep on the counter for the new image (the .cycling
+         class stays on, so the animation must be re-triggered by reflow) */
+      idx.style.animation='none';void idx.offsetWidth;idx.style.animation='';
+    }
     shot.classList.remove('flip');void shot.offsetWidth;shot.classList.add('flip');
   }
   const next=()=>show(cur+1);
