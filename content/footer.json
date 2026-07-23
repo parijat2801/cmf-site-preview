@@ -1,0 +1,19 @@
+{
+  "aboutHeading": "About Us",
+  "aboutBlurb": "Built with the outliers, Cultural (Mis)fits is a next-generation culture platform that exists to deliver extraordinary, authentic commentary on topics that shape today’s cultural movements.",
+  "homeLinks": [
+    { "label": "Home", "href": "#top" }
+  ],
+  "navLinks": [
+    { "label": "Culturist Network", "href": "#culturist-network" },
+    { "label": "IRL &amp; Live Experiences", "href": "#irl-live" },
+    { "label": "Film Studio", "href": "#film-studio" }
+  ],
+  "socialLinks": [
+    { "label": "Instagram", "href": "https://www.instagram.com/culturalmisfits.live/" },
+    { "label": "Facebook", "href": "https://facebook.com/culturalmisfits" },
+    { "label": "Youtube", "href": "https://youtube.com/@culturalmisfits" }
+  ],
+  "copyright": "© 2023–2026 Cultural (Mis)fits / All Rights Reserved.",
+  "tagline": "Made in the margins."
+}

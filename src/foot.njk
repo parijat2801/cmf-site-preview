@@ -2,25 +2,27 @@
   <footer class="card foot" data-nav="dark" data-navbg="#1B1818">
     <div class="wrap">
       <div class="about">
-        <h3 class="fh">About Us</h3>
-        <p>Built with the outliers, Cultural (Mis)fits is a next-generation culture platform that exists to deliver extraordinary, authentic commentary on topics that shape today’s cultural movements.</p>
+        <h3 class="fh">{{ footer.aboutHeading }}</h3>
+        <p>{{ footer.aboutBlurb | safe }}</p>
       </div>
       <nav class="frow frow-home">
-        <a href="#top">Home</a>
+{%- for l in footer.homeLinks %}
+        <a href="{{ l.href }}">{{ l.label | safe }}</a>
+{%- endfor %}
       </nav>
       <nav class="frow">
-        <a href="#culturist-network">Culturist Network</a>
-        <a href="#irl-live">IRL &amp; Live Experiences</a>
-        <a href="#film-studio">Film Studio</a>
+{%- for l in footer.navLinks %}
+        <a href="{{ l.href }}">{{ l.label | safe }}</a>
+{%- endfor %}
       </nav>
       <nav class="frow">
-        <a href="https://www.instagram.com/culturalmisfits.live/" target="_blank" rel="noopener">Instagram</a>
-        <a href="https://facebook.com/culturalmisfits" target="_blank" rel="noopener">Facebook</a>
-        <a href="https://youtube.com/@culturalmisfits" target="_blank" rel="noopener">Youtube</a>
+{%- for l in footer.socialLinks %}
+        <a href="{{ l.href }}" target="_blank" rel="noopener">{{ l.label | safe }}</a>
+{%- endfor %}
       </nav>
       <div class="base">
-        <span>© 2023–2026 Cultural (Mis)fits / All Rights Reserved.</span>
-        <span>Made in the margins.</span>
+        <span>{{ footer.copyright | safe }}</span>
+        <span>{{ footer.tagline | safe }}</span>
       </div>
     </div>
   </footer>
@@ -253,34 +255,7 @@ document.querySelectorAll('.offer,.witem').forEach(o=>oio.observe(o));
    The ‹ › arrows step through slides (image + its paragraphs advance together).
    TO EXTEND: add another {image, paragraphs:[...]} object to a vertical's array;
    add more paragraph strings to any slide's `paragraphs`. That's the whole API. */
-const VERTICALS={
-  'culturist-network':{accent:'var(--red)',slides:[
-    {image:'assets/offer/net-1.webp',paragraphs:[
-      'A media publication for the ones the algorithm skips — culture-led stories from emerging worlds and unheard voices.',
-      'Long-form profiles, scene reports, and photo essays that treat the margins as the main stage. First dispatch: late 2026.']},
-    {image:'assets/photo-manifesto.webp',paragraphs:[
-      'We document evolving cultures, identities, and truths — bringing lived context to every story.',
-      'Writers, anthropologists, designers, thinkers, and community-builders shape how narratives are told and co-created.']},
-  ]},
-  'irl-live':{accent:'var(--yellow)',slides:[
-    {image:'assets/offer/live-1.webp',paragraphs:[
-      'Temporary worlds you can stand inside. Experiences that feel less like events and more like places.',
-      'Built around subcultures, shared identities, and creative rituals — where (mis)fit communities come together to express, exchange, and belong.']},
-    {image:'assets/photo-ruhbaru.webp',paragraphs:[
-      'Ruhbaru — the sound of home, scaled into a cinematic live experience. India tour 2026.',
-      'Jupiter Pe Juice — a 90-minute musical satire where everyday absurdities become songs, punchlines, and cultural commentary.']},
-  ]},
-  'film-studio':{accent:'var(--green)',slides:[
-    {image:'assets/offer/nirvair-1.webp',paragraphs:[
-      'Films and brand work that carry cultural consequence. Led by Nirvair Rai.']},
-    {image:'assets/offer/nirvair-2.webp',paragraphs:[
-      'His body of work spans documentary projects such as Landless Kings, which followed the lives of Rohingya refugees along the Myanmar–Bangladesh border, and Memory of Land, a reflection on 100 years of the Jallianwala Bagh massacre and the afterlives of colonial trauma, exhibited internationally.']},
-    {image:'assets/offer/nirvair-3.webp',paragraphs:[
-      'Alongside this, Nirvair has built an extensive commercial and fashion portfolio, collaborating with brands and designers including Nike, Netflix, Sabyasachi, Tarun Tahiliani, Satya Paul, Vivo, Lenskart, Elle, and Vogue.']},
-    {image:'assets/offer/nirvair-4.webp',paragraphs:[
-      'We help brands participate in culture without flattening it — documentary instincts, cinematic craft, and access to scenes no agency deck can fake.']},
-  ]},
-};
+const VERTICALS=Object.fromEntries({{ verticals | dump | safe }}.map(v=>[v.id,v]));
 const vmodal=document.getElementById('vmodal');
 const vImg=document.getElementById('vimg'), vBody=document.getElementById('vbody');
 const vTitle=document.getElementById('vtitle');
