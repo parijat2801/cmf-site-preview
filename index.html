@@ -486,7 +486,8 @@ body.no-grain::after{opacity:0}
 .oshot .ticks i.on{background:rgba(255,255,255,.55)}
 .oshot .ticks i.cur{background:rgba(255,255,255,.55)}
 .oshot .ticks i.cur::after{content:"";position:absolute;inset:0;background:var(--co);transform:scaleX(1);transform-origin:left}
-.oshot.cycling .ticks i.cur::after{animation:tickfill .9s linear forwards}
+.oshot.cycling .ticks i.cur::after{animation:tickfill var(--tickdur,.9s) linear forwards}
+@media(hover:none) and (pointer:coarse){.oshot{--tickdur:2.2s}}   /* match the touch auto-cycle cadence */
 @keyframes tickfill{0%{transform:scaleX(0)}100%{transform:scaleX(1)}}
 .oshot .idx{position:absolute;right:14px;bottom:12px;z-index:4;font-weight:900;font-style:italic;font-size:1.05rem;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.6)}
 .offer .otext h3{margin-top:.2em;font-weight:900;font-size:clamp(2rem,4.4vw,4.6rem);letter-spacing:-.03em;line-height:.92;color:var(--co)}
@@ -1500,17 +1501,34 @@ function buildShot(shot){
   }
   const next=()=>show(cur+1);
   const reduceMotion=matchMedia('(prefers-reduced-motion:reduce)').matches;
-  shot.addEventListener('pointerenter',e=>{
-    if(e.pointerType==='touch')return;
-    if(reduceMotion)return;   // keep the first image static; no hover auto-cycle
-    next(); shot.classList.add('cycling');
-    timer=setInterval(next,900);
-  });
-  shot.addEventListener('pointerleave',()=>{
-    if(timer){clearInterval(timer);timer=null;}
-    shot.classList.remove('cycling');
-  });
-  shot.addEventListener('click',e=>{ if(!timer)next(); });   // touch (and keyboard-ish) advance
+  const isTouch=matchMedia('(hover:none) and (pointer:coarse)').matches;
+  const startCycle=()=>{ if(timer||reduceMotion||srcs.length<2)return;
+    shot.classList.add('cycling'); timer=setInterval(next,2200); };
+  const stopCycle=()=>{ if(timer){clearInterval(timer);timer=null;} shot.classList.remove('cycling'); };
+
+  if(isTouch){
+    /* PHONE: no hover, so the photos auto-cycle on their own — but ONLY while the
+       shot is on screen (and the tab is visible), so it doesn't run unseen or drain
+       battery. A slower 2.2s cadence suits passive viewing (vs the 0.9s hover cycle).
+       A tap still advances immediately. */
+    const cyIO=new IntersectionObserver(es=>es.forEach(e=>{
+      (e.isIntersecting && !document.hidden) ? startCycle() : stopCycle();
+    }),{threshold:0.35});
+    cyIO.observe(shot);
+    document.addEventListener('visibilitychange',()=>{ if(document.hidden)stopCycle();
+      else if(shot.getBoundingClientRect().top<innerHeight&&shot.getBoundingClientRect().bottom>0)startCycle(); });
+    shot.addEventListener('click',()=>{ next(); });   // tap = manual advance, cycle continues
+  }else{
+    /* DESKTOP: hover cycles fast; leaving stops and rests on the current image. */
+    shot.addEventListener('pointerenter',e=>{
+      if(e.pointerType==='touch')return;
+      if(reduceMotion)return;   // keep the first image static; no hover auto-cycle
+      next(); shot.classList.add('cycling');
+      timer=setInterval(next,900);
+    });
+    shot.addEventListener('pointerleave',stopCycle);
+    shot.addEventListener('click',e=>{ if(!timer)next(); });   // keyboard-ish advance
+  }
 }
 /* lazy-build the layered <img>s only when the row first nears the viewport */
 const oio=new IntersectionObserver((es)=>{
