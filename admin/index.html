@@ -6,6 +6,11 @@
     <title>CMF — Content</title>
   </head>
   <body>
-    <script src="https://unpkg.com/@sveltia/cms/dist/sveltia-cms.js" type="module"></script>
+    <!-- Self-hosted, PINNED copy of Sveltia CMS (v0.172.4, from the @sveltia/cms
+         npm devDependency — see package.json). Never load floating "latest" from
+         a CDN here: an upstream beta regression would break the client's panel
+         overnight. To upgrade deliberately: npm update @sveltia/cms, re-copy
+         node_modules/@sveltia/cms/dist/sveltia-cms.js into admin/, test, commit. -->
+    <script src="./sveltia-cms.js" type="module"></script>
   </body>
 </html>

@@ -21,6 +21,9 @@
     "nunjucks": "^3.2.4"
   },
   "devDependencies": {
-    "@gltf-transform/cli": "^4.4.1"
+    "@sveltia/cms": "^0.172.4"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

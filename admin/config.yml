@@ -10,6 +10,24 @@ backend:
 media_folder: "assets"
 public_folder: "assets"
 
+# Upload hygiene: phone photos arrive as multi-MB JPEG/HEIC — convert to WebP,
+# cap dimensions (nothing on the page renders wider than ~1600px), cap file
+# size, and slugify filenames (spaces/commas in names would break the
+# comma-joined data-photos attribute and URLs).
+media_libraries:
+  default:
+    config:
+      max_file_size: 5242880
+      slugify_filename: true
+      transformations:
+        raster_image:
+          format: webp
+          quality: 85
+          width: 1800
+          height: 1800
+        svg:
+          optimize: true
+
 collections:
   - name: "content"
     label: "Site content"

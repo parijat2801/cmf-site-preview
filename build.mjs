@@ -12,9 +12,11 @@ const env = new nunjucks.Environment(new nunjucks.FileSystemLoader('src'), {
 });
 // slides -> comma-joined image list for the .oshot data-photos attribute
 env.addFilter('imgs', slides => slides.map(s => s.image).join(','));
-// slides -> the modal's VERTICALS data (accent rides on the offering row)
+// slides -> the modal's VERTICALS data (accent rides on the offering row).
+// <-escape so no content string can ever terminate the <script> block.
 env.addFilter('modaldata', items =>
-  JSON.stringify(items.map(o => ({ id: o.id, accent: o.accentColor, slides: o.slides }))));
+  JSON.stringify(items.map(o => ({ id: o.id, accent: o.accentColor, slides: o.slides })))
+    .replace(/</g, '\\u003c'));
 
 const data = {};
 for (const f of fs.readdirSync('content')) {
@@ -37,7 +39,12 @@ const walk = (val, path, generic) => {
   if (typeof val === 'string') {
     const key = path.replace(/.*\./, '').replace(/\[\d+\]$/, '');
     if (!val.trim() && !MAY_BE_EMPTY.has(key)) errors.push(`${path}: empty — add text or delete the item`);
-    if (val.startsWith('assets/') && !fs.existsSync(val)) errors.push(`${path}: image "${val}" not found in assets/`);
+    if (/<\s*script/i.test(val)) errors.push(`${path}: contains a <script> tag — not allowed in content`);
+    if (val.startsWith('assets/')) {
+      if (/[,"']/.test(val)) errors.push(`${path}: image path "${val}" contains a comma or quote — rename the file`);
+      if (!fs.existsSync(val)) errors.push(`${path}: image "${val}" not found in assets/`);
+      else if (fs.statSync(val).size > 1_500_000) errors.push(`${path}: image "${val}" is over 1.5MB — resize/compress it (the CMS converts uploads automatically; this one likely bypassed it)`);
+    }
   } else if (Array.isArray(val)) {
     if ((MIN_ITEMS[generic] ?? 0) > val.length) errors.push(`${generic}: needs at least ${MIN_ITEMS[generic]} item(s), has ${val.length}`);
     val.forEach((v, i) => walk(v, `${path}[${i}]`, `${generic}[]`));
@@ -60,6 +67,21 @@ if (errors.length) {
 }
 
 const html = env.render('page.njk', data);
+
+// site-critical asset check: the page + hero script reference assets the content
+// JSON never mentions (balloon GLB, poster, matcaps, grain...). If an operator
+// deletes/renames one in the media library, catch it here instead of shipping.
+const referenced = new Set();
+for (const src of [html, fs.readFileSync('vendor/hero-balloon.js', 'utf8')]) {
+  for (const m of src.matchAll(/assets\/[A-Za-z0-9._/-]+\.[a-z0-9]{2,5}/g)) referenced.add(m[0]);
+}
+const missing = [...referenced].filter(p => !fs.existsSync(p));
+if (missing.length) {
+  console.error('MISSING ASSETS — build refused, the live site keeps its previous version:');
+  for (const p of missing) console.error(`  · ${p} is referenced by the site but does not exist (deleted or renamed in the media library?)`);
+  process.exit(1);
+}
+
 fs.mkdirSync('dist', { recursive: true });
 fs.writeFileSync('dist/index.html', html);
 // keep the repo-root page in sync: it's what the local dev server (and any

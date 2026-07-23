@@ -101,3 +101,39 @@ Remaining to launch (needs client/contractor accounts, not code):
 4. Invite operators as repo collaborators.
 5. On-device verification: hero balloon (quantized GLB), collage images
    (recompressed), single-statement hero typing, one full scroll on phone.
+
+## Hardening pass — 2026-07-24 (so the client doesn't call)
+
+Implemented, with failing-case proofs where possible:
+- CMS bundle SELF-HOSTED + PINNED (admin/sveltia-cms.js, v0.172.4 via npm devDep).
+  No floating CDN "latest" — upstream beta regressions can't brick the panel.
+- Upload pipeline (config media_libraries): auto-WebP q85, max 1800px, 5MB cap,
+  slugified filenames (spaces/commas would break data-photos + URLs).
+- Build validation wall (every CMS save; failed build = previous deploy stays
+  live on Vercel): empty required fields, list minimums, unknown/duplicate
+  section slugs, <script> in content, comma/quote in asset paths, referenced
+  image missing, referenced image >1.5MB, and a whole-page scan that protects
+  site-critical assets content JSON never mentions (balloon GLB, poster,
+  matcaps, grain) from media-library deletion. Proofs: emptied hero line,
+  broken image ref, deleted GLB — all refused with readable errors.
+- VERTICALS JSON serialization <-escaped: no content string can terminate the
+  script block.
+- engines.node >=20; @gltf-transform/cli removed from devDeps (one-time tool).
+
+Known unknowns — resolve at/after deploy, in order:
+1. OAuth round-trip: only provable on the real domain (OAuth app + env vars).
+   Test on a Vercel preview deploy BEFORE DNS.
+2. Branch protection: if the client org requires PRs on main, CMS commits are
+   blocked. Either exempt the operators' pushes or point the CMS at a content
+   branch with auto-merge. Ask the client's GitHub admin.
+3. Failed-build visibility: Vercel emails the project owner, not the operator
+   who saved. Decide who watches (owner email alias? Slack integration?).
+4. Repo transfer to client org: OAuth app callback URL, config.yml repo:,
+   collaborator invites all change together. Do in one sitting.
+5. Quantized GLB + recompressed collage images: verified in code, needs one
+   on-device eyeball.
+6. Sveltia media_libraries transformations: config follows current docs;
+   verify the first real upload converts to webp as expected.
+7. Concurrent editors: git-backed saves are last-write-wins per file. With 2+
+   simultaneous operators editing the SAME panel, later save wins. Small team
+   + section-per-file layout makes this rare; mention in operator onboarding.
