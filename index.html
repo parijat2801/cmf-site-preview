@@ -153,10 +153,16 @@ body.no-grain::after{opacity:0}
    updated per-frame by JS): the word colors in left→right AS the tip passes it,
    matching the shader progress. Ahead of the tip it sits at a dimmer resting tone. */
 .mark-shader::before{display:none}
+/* Text colors in left→right AS the stroke tip passes (a hard split at --rv). The
+   resting tone ahead of the tip was rgba(cream,.62) — a faded CREAM, so the word
+   read as basically-cream the whole way and the sweep was near-invisible until it
+   crossed a contrast threshold, looking like it "turned all at once" mid-word.
+   Make the resting tone genuinely DIMMER (a muted grey-cream) so every position of
+   the sweep is legible — a real dim→bright transition that tracks the stroke. */
 .mark-shader{--rv:0;
   background:linear-gradient(90deg,
-    var(--mark-lit,var(--cream)) 0 calc(var(--rv)*100%),
-    var(--mark-dim,rgba(231,225,212,.62)) calc(var(--rv)*100%) 100%);
+    var(--mark-lit,var(--cream)) 0 calc(var(--rv)*100% - 0.35em),
+    var(--mark-dim,rgba(231,225,212,.34)) calc(var(--rv)*100% + 0.35em) 100%);
   -webkit-background-clip:text;background-clip:text;color:transparent}
 /* the shader's own canvas, mounted behind the text */
 .mark-shader > canvas{position:absolute;z-index:-1;pointer-events:none}
@@ -2146,8 +2152,18 @@ if(!reduce){
     // resolve the accent color from the element's own --hl (falls back to red)
     const hl = getComputedStyle(el).getPropertyValue('--hl');
     const color = parseColor(hl || '#DB1A21');
-    // text-flip colors: lit = the mark's resting text color; dim = a muted version
-    const litText = getComputedStyle(el).color;
+    // text-flip colors: lit = the color the text should END at once the stroke has
+    // passed. That's the mark's REVEALED color, not its resting one — and the two
+    // differ: a .mark-w word ends cream (light, over a red stroke), a plain .mark
+    // ends ink (dark, over a yellow stroke, so it reads on the highlight).
+    // getComputedStyle(el).color at init returns the RESTING cream for both, so
+    // using it made plain marks light to cream then the CSS flip slammed the whole
+    // word to ink at once — the "cream, then all black mid-word" you saw. Pick the
+    // destination explicitly by mark type instead.
+    const cs0 = getComputedStyle(el);
+    const litText = el.classList.contains('mark-w')
+      ? cs0.getPropertyValue('--cream').trim() || '#E7E1D4'
+      : cs0.getPropertyValue('--ink').trim()   || '#231F20';
     el.style.setProperty('--mark-lit', litText);
     // random per-mark tilt (stable) so no two highlights match
     const jr = Math.sin(i*127.1+3.7)*43758.5453; const jitter=(jr-Math.floor(jr))*2-1;
