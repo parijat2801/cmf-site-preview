@@ -342,13 +342,24 @@ export function initHeroBalloon(canvas) {
     fitBgUV();                                     // keep the bg PHOTO itself un-stretched (cover-crop)
   }
   fit();
-  // On a phone the ONLY "resize" during use is the URL bar collapsing on scroll
-  // (~60px height change) — and fit() recomputes baseScale from height, so the
-  // glyph visibly grew/shrank on every scroll (the "hiccup"). The size never
-  // changes meaningfully on a phone, so on touch we fit once and never re-fit.
-  // Desktop keeps live resize (real window resizing there is meaningful).
   const isTouch = matchMedia('(hover:none) and (pointer:coarse)').matches;
-  if (!isTouch) addEventListener('resize', fit, { passive: true });
+  if (isTouch) {
+    // On a phone the frequent "resize" is the URL bar collapsing on scroll (~60px
+    // height change), and fit() recomputes baseScale from height — that grew/shrank
+    // the glyph on every scroll (the "hiccup"). But a genuine ROTATION does change
+    // width meaningfully and SHOULD re-fit. So on touch, re-fit only when the width
+    // actually changes (orientation flip), never on a height-only URL-bar nudge.
+    let lastW = canvas.clientWidth;
+    addEventListener('resize', () => {
+      const w = canvas.clientWidth;
+      if (w === lastW) return;          // height-only (URL bar) — ignore
+      lastW = w;
+      fit();                            // real orientation change — re-fit
+    }, { passive: true });
+  } else {
+    // desktop: live resize is meaningful
+    addEventListener('resize', fit, { passive: true });
+  }
 
   // ---- pointer parallax (no scroll term: the hero pins, glyph holds still) ----
   let px = 0, py = 0, tpx = 0, tpy = 0;
