@@ -492,15 +492,21 @@ body.no-grain::after{opacity:0}
 @property --idxfill{syntax:'<percentage>';inherits:false;initial-value:0%}
 .oshot .idx{position:absolute;right:14px;bottom:12px;z-index:4;font-weight:900;font-style:italic;font-size:1.05rem;
   color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.6)}
+/* the counter fills with --idxaccent (defaults to the section accent --co). Where
+   --co is a LIGHT tone the fill would vanish on the white number — the Acts (.witem)
+   photos set --co:cream, so their counter filled cream-on-white (invisible). Give
+   those a red fill instead so the sweep actually shows. */
+.oshot{--idxaccent:var(--co,var(--red))}
+.witem .oshot{--idxaccent:var(--red)}
 .oshot.cycling .idx{color:transparent;-webkit-text-fill-color:transparent;text-shadow:none;
-  background:linear-gradient(90deg,var(--co) 0 var(--idxfill),#fff var(--idxfill) 100%);
+  background:linear-gradient(90deg,var(--idxaccent) 0 var(--idxfill),#fff var(--idxfill) 100%);
   -webkit-background-clip:text;background-clip:text;
   animation:idxfill var(--tickdur,.9s) linear forwards}
 @keyframes idxfill{0%{--idxfill:0%}100%{--idxfill:100%}}
 /* @property fallback (Safari <16.4 / Firefox): no animatable %, so just tint the
    whole number the accent while cycling rather than a broken/empty sweep. */
 @supports not (background:linear-gradient(90deg,red 0 var(--idxfill),#fff 0)){
-  .oshot.cycling .idx{background:none;color:var(--co);-webkit-text-fill-color:var(--co);animation:none}
+  .oshot.cycling .idx{background:none;color:var(--idxaccent);-webkit-text-fill-color:var(--idxaccent);animation:none}
 }
 .offer .otext h3{margin-top:.2em;font-weight:900;font-size:clamp(2rem,4.4vw,4.6rem);letter-spacing:-.03em;line-height:.92;color:var(--co)}
 .offer .otext p{margin-top:.9em;font-weight:300;font-size:var(--t-lead);opacity:.86;line-height:1.35;max-width:34ch}
