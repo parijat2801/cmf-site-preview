@@ -490,10 +490,13 @@ body.no-grain::after{opacity:0}
 @media(max-width:560px){
   .mcell{aspect-ratio:auto;overflow:visible;background:none}
   .mcell img{aspect-ratio:4/5;height:auto;background:#1B1818}   /* photo keeps the portrait crop */
-  .mcell .mname{position:static;margin-top:6px;font-size:.82rem;letter-spacing:-.02em;line-height:1.12;text-shadow:none}
-  /* the tag is a secondary label under the name — readable, but clearly subordinate
-     to it, so it sits a step below .mname rather than competing with it */
-  .mcell .mrole{position:static;display:inline-block;margin-top:4px;font-size:.58rem;letter-spacing:.05em;padding:.26em .4em;
+  .mcell .mname{position:static;display:block;margin-top:6px;font-size:.82rem;letter-spacing:-.02em;line-height:1.12;text-shadow:none}
+  /* the tag is a secondary label UNDER the name. It must always start its own row:
+     as inline-block it rode up beside any short name ("Nicki Wells" SINGER,
+     "Ravi-Ra" MUSICIAN) and overlapped it. `display:table` gives it a shrink-to-fit
+     block box — it hugs its text like the old inline-block pill, but as a block it
+     can never share the name's line. */
+  .mcell .mrole{position:static;display:table;margin-top:5px;font-size:.58rem;letter-spacing:.05em;padding:.26em .4em;
     white-space:normal}   /* PHOTOGRAPHER must still fit 105px — wrap rather than clip */
   .mcell .mno{top:5px;left:5px;width:12px}
 }
