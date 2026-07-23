@@ -4,19 +4,12 @@
       <h2 class="head reveal d1" data-m style="margin-bottom:clamp(30px,4vw,64px)">{{ offerings.heading | safe }}</h2>
 {% for item in offerings.items %}
       <article class="offer reveal" id="{{ item.id }}" style="--co:{{ item.accentColor }}">
-{%- if item.photos %}
-        <div class="oshot" data-photos="{{ item.photos | join(',') }}">
-          <span class="idx">1/{{ item.photoCount }}</span>
-          <span class="ticks">{% for p in item.photos %}<i{% if loop.index0 == 0 %} class="cur"{% endif %}></i>{% endfor %}</span>
+        <!-- one list drives everything: the row cycles these images and the
+             Read-more modal pages are built from the same slides -->
+        <div class="oshot" data-photos="{{ item.slides | imgs }}">
+          <span class="idx">1/{{ item.slides | length }}</span>
+          <span class="ticks">{% for s in item.slides %}<i{% if loop.index0 == 0 %} class="cur"{% endif %}></i>{% endfor %}</span>
         </div>
-{%- else %}
-        <!-- images come from VERTICALS['{{ item.id }}'].slides (same as the modal);
-             buildShot() rebuilds the ticks/idx to match the real count. -->
-        <div class="oshot">
-          <span class="idx">1/{{ item.photoCount }}</span>
-          <span class="ticks">{% for n in range(0, item.photoCount) %}<i{% if n == 0 %} class="cur"{% endif %}></i>{% endfor %}</span>
-        </div>
-{%- endif %}
         <div class="otext" data-m>
           <h3>{{ item.title | safe }}</h3>
           <p>{{ item.copy | safe }}</p>

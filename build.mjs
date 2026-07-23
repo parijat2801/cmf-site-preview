@@ -10,6 +10,11 @@ const env = new nunjucks.Environment(new nunjucks.FileSystemLoader('src'), {
   autoescape: false,          // copy may legitimately contain entities/markup
   throwOnUndefined: true,     // a missing content field must fail the build
 });
+// slides -> comma-joined image list for the .oshot data-photos attribute
+env.addFilter('imgs', slides => slides.map(s => s.image).join(','));
+// slides -> the modal's VERTICALS data (accent rides on the offering row)
+env.addFilter('modaldata', items =>
+  JSON.stringify(items.map(o => ({ id: o.id, accent: o.accentColor, slides: o.slides }))));
 
 const data = {};
 for (const f of fs.readdirSync('content')) {

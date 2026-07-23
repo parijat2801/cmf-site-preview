@@ -132,13 +132,17 @@ collections:
             fields:
               - { label: "Section ID", name: "id", widget: string, hint: "Must match the page anchor used elsewhere, e.g. \"culturist-network\". Don't change unless you know what links to it." }
               - { label: "Accent color", name: "accentColor", widget: string, hint: "A CSS color value, e.g. var(--red) or a hex code. Not a color picker — type the exact value." }
-              - label: "Photos"
-                name: "photos"
+              - label: "Images & modal pages"
+                name: "slides"
                 widget: list
-                required: false
-                hint: "Fallback photos only. If this offering has a matching entry under \"Vertical detail pages\" (same ID), the card ALWAYS shows that entry's slide images instead — edit photos there, not here."
-                field: { label: "Photo", name: "photo", widget: image }
-              - { label: "Photo count", name: "photoCount", widget: number, hint: "How many photo slots the card layout reserves, independent of how many photos are actually set." }
+                hint: "The offering's images. The card cycles through all of them, and each one becomes a page of the Read-more pop-up — add paragraphs to an image to give its pop-up page copy (leave empty for an image-only page)."
+                fields:
+                  - { label: "Image", name: "image", widget: image }
+                  - label: "Pop-up paragraphs"
+                    name: "paragraphs"
+                    widget: list
+                    required: false
+                    field: { label: "Paragraph", name: "paragraph", widget: text }
               - { label: "Title", name: "title", widget: string, hint: "May contain &amp; — keep it as-is." }
               - { label: "Copy", name: "copy", widget: text, hint: "Contains <b> tags for emphasis — edit the words, keep the tags intact." }
               - { label: "Partner lede", name: "partnerLede", widget: string, required: false, hint: "Short intro line before the partner list, e.g. \"Partner with us to create:\". Leave blank if this offering has no partner list." }
@@ -150,7 +154,7 @@ collections:
                 field: { label: "Item", name: "item", widget: string, hint: "May contain &amp; — keep it as-is." }
               - { label: "Link label", name: "linkLabel", widget: string, hint: "e.g. \"Read more ↗\" or \"Explore ↗\"." }
               - { label: "Link target", name: "linkHref", widget: string, hint: "A page anchor like #work, or \"#\" if the link isn't wired up yet." }
-              - { label: "Link scrolls the page", name: "linkScroll", widget: boolean, hint: "On = clicking smooth-scrolls to an anchor on this page. Off = treated as a normal link." }
+              - { label: "Link scrolls the page", name: "linkScroll", widget: boolean, hint: "On = clicking smooth-scrolls to the anchor above. Off = clicking opens this offering's Read-more pop-up." }
 
       - name: "work"
         label: "Misfits Acts"
@@ -259,26 +263,4 @@ collections:
           - { label: "Copyright line", name: "copyright", widget: string }
           - { label: "Tagline", name: "tagline", widget: string }
 
-      - name: "verticals"
-        label: "Vertical detail pages (Read more modals)"
-        file: "content/verticals.json"
-        format: json
-        fields:
-          - label: "Verticals"
-            name: "items"
-            widget: list
-            hint: "One entry per vertical. The ID must match the section row it belongs to — don't change IDs unless the site section changes too."
-            fields:
-              - { label: "ID", name: "id", widget: string, hint: "e.g. culturist-network, irl-live, film-studio — must match the offering row's ID." }
-              - { label: "Accent color", name: "accent", widget: string, hint: "CSS value like var(--red) or a hex code — leave as-is unless you know CSS." }
-              - label: "Slides"
-                name: "slides"
-                widget: list
-                hint: "Each slide is one image with its paragraphs of copy."
-                fields:
-                  - { label: "Image", name: "image", widget: image }
-                  - label: "Paragraphs"
-                    name: "paragraphs"
-                    widget: list
-                    field: { label: "Paragraph", name: "paragraph", widget: text }
 

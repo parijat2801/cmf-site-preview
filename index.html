@@ -1244,9 +1244,11 @@ body.no-grain::after{opacity:0}
       <h2 class="head reveal d1" data-m style="margin-bottom:clamp(30px,4vw,64px)">How we bring these <span class="mark mark-w" style="--hl:var(--red)">narratives</span> to you.</h2>
 
       <article class="offer reveal" id="culturist-network" style="--co:var(--red)">
-        <div class="oshot" data-photos="assets/offer/net-1.webp,assets/offer/net-2.webp,assets/offer/net-3.webp">
-          <span class="idx">1/3</span>
-          <span class="ticks"><i class="cur"></i><i></i><i></i></span>
+        <!-- one list drives everything: the row cycles these images and the
+             Read-more modal pages are built from the same slides -->
+        <div class="oshot" data-photos="assets/offer/net-1.webp,assets/photo-manifesto.webp">
+          <span class="idx">1/2</span>
+          <span class="ticks"><i class="cur"></i><i></i></span>
         </div>
         <div class="otext" data-m>
           <h3>Culturist Network</h3>
@@ -1256,9 +1258,11 @@ body.no-grain::after{opacity:0}
       </article>
 
       <article class="offer reveal" id="irl-live" style="--co:var(--yellow)">
-        <div class="oshot" data-photos="assets/offer/live-1.webp,assets/offer/live-2.webp,assets/offer/live-3.webp">
-          <span class="idx">1/3</span>
-          <span class="ticks"><i class="cur"></i><i></i><i></i></span>
+        <!-- one list drives everything: the row cycles these images and the
+             Read-more modal pages are built from the same slides -->
+        <div class="oshot" data-photos="assets/offer/live-1.webp,assets/photo-ruhbaru.webp">
+          <span class="idx">1/2</span>
+          <span class="ticks"><i class="cur"></i><i></i></span>
         </div>
         <div class="otext" data-m>
           <h3>IRL &amp; Live Experiences</h3>
@@ -1268,9 +1272,9 @@ body.no-grain::after{opacity:0}
       </article>
 
       <article class="offer reveal" id="film-studio" style="--co:var(--green)">
-        <!-- images come from VERTICALS['film-studio'].slides (same as the modal);
-             buildShot() rebuilds the ticks/idx to match the real count. -->
-        <div class="oshot">
+        <!-- one list drives everything: the row cycles these images and the
+             Read-more modal pages are built from the same slides -->
+        <div class="oshot" data-photos="assets/offer/nirvair-1.webp,assets/offer/nirvair-2.webp,assets/offer/nirvair-3.webp,assets/offer/nirvair-4.webp">
           <span class="idx">1/4</span>
           <span class="ticks"><i class="cur"></i><i></i><i></i><i></i></span>
         </div>
@@ -1486,14 +1490,10 @@ document.querySelector('.hero .content')
 
 /* ---------- offerings: hover auto-cycles; touch taps advance ---------- */
 function buildShot(shot){
-  // Single source of truth: if this .oshot belongs to a modal-linked .offer,
-  // use the SAME images the modal shows (VERTICALS[id].slides) so the section's
-  // cycle and the pop-up never drift apart. Otherwise fall back to data-photos.
-  const vid=shot.closest('.offer')?.id;
-  const linked=vid&&VERTICALS[vid]&&VERTICALS[vid].slides;
-  const srcs=linked
-    ? VERTICALS[vid].slides.map(s=>s.image)
-    : (shot.dataset.photos||'').split(',').filter(Boolean);
+  // data-photos is the single source of truth: for offerings it's generated
+  // from the row's slides (the same list the modal renders), so the section's
+  // cycle and the pop-up can never drift apart.
+  const srcs=(shot.dataset.photos||'').split(',').filter(Boolean);
   if(!srcs.length||shot.dataset.built)return; shot.dataset.built='1';
   // (dash ticks removed — the number counter is the sole progress indicator now)
   const idx=shot.querySelector('.idx');
@@ -1611,7 +1611,7 @@ function vTrapKeydown(e){
   else if(!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); }
 }
 function openVertical(id,trigger){
-  const v=VERTICALS[id]; if(!v)return;
+  const v=VERTICALS[id]; if(!v||!(v.slides&&v.slides.length))return;
   vTrigger=trigger||document.activeElement;
   vmodal.style.setProperty('--vc',v.accent);
   vSlides=v.slides||[]; renderSlide(0);
