@@ -2345,5 +2345,36 @@ if(!reduce){
   addEventListener('resize',resync);
 })();
 </script>
+
+<!-- ===== TEMPORARY DEBUG OVERLAY (remove after diagnosing hero zoom) =====
+     Phone-only readout of the live values that explain the hero zoom-on-scroll:
+     the hero's position/transform while pinned, the canvas CSS box vs its WebGL
+     drawing buffer (a mismatch = the buffer is being stretched = zoom), and the
+     visual viewport height (tracks the URL bar). Screenshot while scrolling. -->
+<script>
+(function(){
+  if(!matchMedia('(hover:none) and (pointer:coarse)').matches) return;   // phones only
+  const box=document.createElement('div');
+  box.style.cssText='position:fixed;left:6px;bottom:6px;z-index:2147483647;'+
+    'font:11px/1.35 ui-monospace,monospace;color:#0f0;background:rgba(0,0,0,.82);'+
+    'padding:7px 9px;border-radius:6px;white-space:pre;pointer-events:none;max-width:92vw';
+  document.body.appendChild(box);
+  const hero=document.querySelector('.hero');
+  const cv=document.querySelector('.hero-canvas');
+  function upd(){
+    const hs=hero?getComputedStyle(hero):null;
+    const hr=hero?hero.getBoundingClientRect():null;
+    const cr=cv?cv.getBoundingClientRect():null;
+    const vv=window.visualViewport;
+    box.textContent=
+      'scrollY '+Math.round(scrollY)+'\n'+
+      'innerH '+innerHeight+'  vvH '+(vv?Math.round(vv.height):'-')+'  vvScale '+(vv?vv.scale.toFixed(3):'-')+'\n'+
+      (hero?('hero pos '+hs.position+'\nhero transform '+hs.transform.replace('matrix','m').slice(0,34)+'\nhero box '+Math.round(hr.width)+'x'+Math.round(hr.height)+' @top '+Math.round(hr.top)+'\n'):'no .hero\n')+
+      (cv?('canvas CSSbox '+Math.round(cr.width)+'x'+Math.round(cr.height)+'\ncanvas buffer '+cv.width+'x'+cv.height+'\nbuffer/box ratio '+(cr.height?(cv.height/cr.height).toFixed(3):'-')):'no canvas');
+    requestAnimationFrame(upd);
+  }
+  requestAnimationFrame(upd);
+})();
+</script>
 </body>
 </html>
