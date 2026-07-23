@@ -133,19 +133,28 @@ body.no-grain::after{opacity:0}
    Text keeps its inherited (legible) color until the fill passes,
    THEN flips to ink — never black-on-dark before the sweep.
    ============================================================ */
-.mark{position:relative;display:inline-block;color:inherit;z-index:0;
-  transition:color .35s var(--ease-io) .5s}
+.mark{position:relative;display:inline-block;color:inherit;z-index:0}
 .mark::before{content:"";position:absolute;left:-.12em;right:-.12em;top:12%;bottom:8%;z-index:-1;
   background:var(--hl,var(--yellow));transform:scaleX(0);transform-origin:left;border-radius:2px;
   transition:transform .7s var(--ease-io) .25s;
   clip-path:polygon(0 6%,100% 0,100% 94%,0 100%)}
 .reveal.in .mark::before{transform:scaleX(1)}
-.reveal.in .mark{color:var(--ink)}
+/* TWO independent highlighter systems that MUST NOT touch the same properties:
+   - .mark (no-WebGL FALLBACK): a whole-word color flip synced to the ::before swipe.
+   - .mark-shader (WebGL): a per-letter gradient reveal driven by --rv (see below),
+     which needs color:transparent so the gradient shows through background-clip:text.
+   Historically the base color rules below applied to ALL marks, so on a shader mark
+   `.reveal.in .mark{color:ink}` (specificity 0,2,1) OVERRODE `.mark-shader{color:
+   transparent}` (0,1,0) — the text went solid, the gradient never rendered, and the
+   whole word flipped color mid-stroke via the CSS transition. Fix: the base color
+   system is now scoped to :not(.mark-shader) so the two systems never collide. */
+.mark:not(.mark-shader){transition:color .35s var(--ease-io) .5s}
+.reveal.in .mark:not(.mark-shader){color:var(--ink)}
 /* .mark-w keeps the highlighted TEXT light (over a red highlight) instead of the
    default dark ink. Uses --cream to MATCH the surrounding heading (which is cream
    on dark cards), so the highlighted word isn't a different, cooler white. */
-.reveal.in .mark.mark-w,.mark.mark-w{color:var(--cream)}
-@media(prefers-reduced-motion:reduce){.mark::before{transform:scaleX(1)}.mark{color:var(--ink)}.mark.mark-w{color:var(--cream)}}
+.mark.mark-w:not(.mark-shader),.reveal.in .mark.mark-w:not(.mark-shader){color:var(--cream)}
+@media(prefers-reduced-motion:reduce){.mark::before{transform:scaleX(1)}.mark:not(.mark-shader){color:var(--ink)}.mark.mark-w:not(.mark-shader){color:var(--cream)}}
 /* SHADER HIGHLIGHTER: when JS confirms WebGL, it adds .mark-shader to each .mark
    and mounts a canvas behind the word (the shader draws the marker stroke). The
    CSS swipe below is then the FALLBACK for no-WebGL — suppress it here so the two
