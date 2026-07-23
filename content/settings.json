@@ -5,15 +5,15 @@
       "visible": true
     },
     {
-      "section": "audience",
-      "visible": true
-    },
-    {
       "section": "misfits",
       "visible": true
     },
     {
       "section": "work",
+      "visible": true
+    },
+    {
+      "section": "audience",
       "visible": true
     },
     {

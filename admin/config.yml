@@ -136,7 +136,7 @@ collections:
                 name: "photos"
                 widget: list
                 required: false
-                hint: "Set of photos for this offering's card. Leave empty/remove if this offering has no photo grid (photoCount still controls the layout)."
+                hint: "Fallback photos only. If this offering has a matching entry under \"Vertical detail pages\" (same ID), the card ALWAYS shows that entry's slide images instead — edit photos there, not here."
                 field: { label: "Photo", name: "photo", widget: image }
               - { label: "Photo count", name: "photoCount", widget: number, hint: "How many photo slots the card layout reserves, independent of how many photos are actually set." }
               - { label: "Title", name: "title", widget: string, hint: "May contain &amp; — keep it as-is." }
