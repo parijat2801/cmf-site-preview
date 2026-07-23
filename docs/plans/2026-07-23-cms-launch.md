@@ -137,3 +137,19 @@ Known unknowns — resolve at/after deploy, in order:
 7. Concurrent editors: git-backed saves are last-write-wins per file. With 2+
    simultaneous operators editing the SAME panel, later save wins. Small team
    + section-per-file layout makes this rare; mention in operator onboarding.
+
+## Security review — 2026-07-24
+
+Fixed: OAuth callback posted the GitHub token via postMessage('*') — any site
+opening our popup could have captured a returning operator's token (GitHub
+re-approves known apps silently). Now pinned both ways to OAUTH_ALLOWED_ORIGIN
+(NEW REQUIRED Vercel env var = the site origin, e.g. https://cmf-site.vercel.app;
+callback 500s without it). OAuth scope reduced to public_repo,user (least
+privilege while the repo is public; set GITHUB_OAUTH_SCOPE=repo,user if it goes
+private). Headers: X-Frame-Options DENY on /admin (clickjacking), nosniff global.
+
+Accepted residual risk (trusted-operator model): content fields are HTML-capable
+by design (highlight spans), so anyone with repo Write can inject markup — same
+privilege git already grants them; the <script> validator block prevents
+accidents, not insiders. Operator GitHub tokens live in their browser storage
+(standard for this CMS class); revoke by removing repo access.
