@@ -8,7 +8,6 @@
              Read-more modal pages are built from the same slides -->
         <div class="oshot" data-photos="{{ item.slides | imgs }}">
           <span class="idx">1/{{ item.slides | length }}</span>
-          <span class="ticks">{% for s in item.slides %}<i{% if loop.index0 == 0 %} class="cur"{% endif %}></i>{% endfor %}</span>
         </div>
         <div class="otext" data-m>
           <h3>{{ item.title | safe }}</h3>

@@ -10,7 +10,6 @@
         <div class="txt" data-m><h3>{{ item.title | safe }}</h3><p>{{ item.copy | safe }}</p><a class="fl" href="{{ item.linkHref }}" target="_blank" rel="noopener">{{ item.linkLabel }}</a></div>
         <div class="oshot" data-photos="{{ item.photos | join(',') }}" style="--co:{{ item.accentColor }}">
           <span class="idx">1/{{ item.photos | length }}</span>
-          <span class="ticks">{% for p in item.photos %}<i{% if loop.index0 == 0 %} class="cur"{% endif %}></i>{% endfor %}</span>
         </div>
       </div>
 {% endfor %}    </div>

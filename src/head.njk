@@ -58,9 +58,9 @@ img{display:block;max-width:100%}
 .wrap{padding-inline:var(--gutter);width:100%}
 /* ONE shared keyboard focus ring — :focus-visible only, so mouse/touch clicks
    never show it. Brand-red outline with offset reads on dark/red/cream alike.
-   Covers nav links, .more/.fl "read more" links, .biglink CTA, footer links,
+   Covers nav links, .more/.fl "read more" links, footer links,
    and the modal's prev/next/close controls. */
-.nav a:focus-visible,.more:focus-visible,.fl:focus-visible,.biglink:focus-visible,
+.nav a:focus-visible,.more:focus-visible,.fl:focus-visible,
 .foot .frow a:focus-visible,
 .varrows button:focus-visible,.vclose:focus-visible,
 [data-mfcard]:focus-visible{
@@ -116,8 +116,6 @@ body.no-grain::after{opacity:0}
 
 .head{font-weight:900;letter-spacing:-.03em;line-height:.94;font-size:calc(var(--t-head)*var(--fz));max-width:18ch}
 .head .it{font-style:italic}
-/* .klabel — small uppercase eyebrow under/near a .head (e.g. "Our Artists"). */
-.klabel{margin-top:.4em;font-weight:500;letter-spacing:.2em;text-transform:uppercase;font-size:var(--t-label);opacity:.6}
 .lede{margin-top:calc(clamp(18px,2.6vh,34px)*var(--fz));font-weight:300;font-size:calc(var(--t-lead)*var(--fz));line-height:1.15;max-width:26ch}
 .lede b{font-weight:900;font-style:italic}
 /* .lede-wide: opt a lede OUT of the narrow 26ch measure so the sentence flows
@@ -335,15 +333,6 @@ body.no-grain::after{opacity:0}
   opacity:0;transform:translateY(10px);transition:opacity .35s var(--ease),transform .35s var(--ease);
   will-change:opacity}
 .hero .hbeat.on{opacity:1;transform:none}
-/* PHOSPHOR PERSISTENCE: when a beat is replaced it doesn't cut or slide — it
-   stays PUT (transform:none overrides the base 10px drop), glyphs stay lit, and
-   its opacity + brightness are driven frame-by-frame BY JS (render()), not a CSS
-   animation. A JS-owned fade can't leak state the way a fire-and-forget CSS
-   animation + animationend could (that was the stacking bug). CSS only sets the
-   resting look; the render loop owns the fade. z-index keeps the ghost above the
-   incoming beat as it cools. transition:none so JS opacity writes are immediate. */
-.hero .hbeat.decay{transform:none;transition:none;z-index:2;
-  text-shadow:0 0 18px rgba(255,255,255,.55)}   /* soft phosphor glow while cooling */
 /* line breaks come from the copy's meaning (.bp), NOT from the column running
    out of room — so each phrase stays whole. .ph never wraps mid-phrase; if a
    phrase is wider than the viewport (phones), the fit-scale (--fz) shrinks the
@@ -398,11 +387,8 @@ body.no-grain::after{opacity:0}
   100%{color:var(--red);text-shadow:none}
 }
 /* reduced-motion / fallback: no typewriter, no strike — glyphs just appear white */
-.hero .hstage.flowed .g,.hero .hbeat.notype .g{visibility:visible;animation:none;color:#fff}
-.hero .hstage.flowed .mis .g,.hero .hbeat.notype .mis .g{color:var(--red)}
-/* fallback layout (tall phones): beats flow vertically instead of stacking */
-.hero .hstage.flowed{display:block}
-.hero .hstage.flowed .hbeat{margin-bottom:.6em;max-width:26ch}
+.hero .hbeat.notype .g{visibility:visible;animation:none;color:#fff}
+.hero .hbeat.notype .mis .g{color:var(--red)}
 /* .mega type treatment kept: heavy display type, CRT chroma-split shadow.
    Size is WIDTH-AWARE: the longest phrase ("The connected and culturally fluid
    generation", ~45ch) must fit ONE line inside the gutters at every width, so no
@@ -436,15 +422,11 @@ body.no-grain::after{opacity:0}
 }
 .hero .scroll{position:absolute;bottom:clamp(24px,3vw,44px);left:var(--gutter);color:var(--white);font-size:var(--t-label);letter-spacing:.2em;text-transform:uppercase;opacity:.7;display:flex;align-items:center;gap:.8em;z-index:12;
   transition:opacity .4s var(--ease)}
-/* the idle meter: a 46px rail that fills red 0→100% over the dwell, telling the
-   reader when the next beat will auto-type. --mp is set per-frame by JS. Once
-   the reader scrolls, .scroll gets .took and the whole cue fades out. */
-.hero .scroll .meter{position:relative;width:46px;height:1px;background:rgba(255,255,255,.35);--mp:0}
-.hero .scroll .meter::after{content:"";position:absolute;inset:0;transform-origin:left;
-  transform:scaleX(var(--mp));background:var(--red)}
-/* before the meter is armed (or on the last beat) fall back to the pull hint */
+/* the scroll cue's 46px rail. Once the statement has typed, .scroll gets .hint
+   and the rail pulses (pull) to invite scrolling; once the reader scrolls,
+   .scroll gets .took and the whole cue fades out. */
+.hero .scroll .meter{position:relative;width:46px;height:1px;background:rgba(255,255,255,.35)}
 .hero .scroll.hint .meter{background:currentColor;animation:pull 1.8s ease-in-out infinite}
-.hero .scroll.hint .meter::after{display:none}
 .hero .scroll.took{opacity:0;pointer-events:none}
 @keyframes pull{0%,100%{transform:scaleX(.35);transform-origin:left;opacity:.4}50%{transform:scaleX(1);opacity:1}}
 /* CRT overlays — hero only. "Late-night broadcast", not video-game glitch. */
@@ -483,10 +465,8 @@ body.no-grain::after{opacity:0}
 .oshot img.on{opacity:1}
 .oshot.flip img.on{animation:settle .9s var(--ease)}
 @keyframes settle{0%{transform:scale(1.03)}100%{transform:none}}
-/* segmented index: the active tick is a 900ms progress bar while cycling */
-/* the dash markers are gone — the number counter IS the progress indicator now
-   (they showed the same thing twice). Keep .ticks out of the layout entirely. */
-.oshot .ticks{display:none}
+/* the number counter (e.g. "2/3") is the sole progress indicator; while cycling
+   the section accent sweeps through it over --tickdur (below). */
 @media(hover:none) and (pointer:coarse){.oshot{--tickdur:2.2s}}   /* match the touch auto-cycle cadence */
 /* the counter (e.g. "2/3") sits white by default; while cycling, the section accent
    sweeps left→right through it over the cycle duration — same role the filling dash
@@ -585,8 +565,6 @@ body.no-grain::after{opacity:0}
 .mcell .mrole{position:absolute;left:12px;bottom:8px;display:inline-block;background:var(--yellow);color:var(--ink);
   font-weight:700;font-size:clamp(.58rem,.72vw,.75rem);letter-spacing:.12em;text-transform:uppercase;
   padding:.32em .6em;border-radius:3px;line-height:1}
-.mproof{margin-top:calc(clamp(18px,3vh,40px)*var(--fz));font-weight:300;font-size:calc(var(--t-lead)*var(--fz))}
-.mproof b{font-weight:900;font-style:italic;color:var(--yellow)}
 /* phones stay 3-up (2-up made the roster read as a short list, not a wall), but a
    3-up cell is only ~105px wide. Shrinking the OVERLAY type to fit inside the photo
    drove the name to ~11px and the role pill to ~7px — technically non-overflowing,
@@ -657,15 +635,6 @@ body.no-grain::after{opacity:0}
   .vtextcol{grid-column:1;min-height:0}
 }
 
-/* ============ PARTNER CTA — the page finally asks its audience to act ============ */
-.cta{text-align:left}
-.cta .head{max-width:16ch}
-.cta .biglink{display:inline-block;margin-top:calc(clamp(30px,6vh,72px)*var(--fz));font-weight:900;font-style:italic;letter-spacing:-.02em;
-  font-size:calc(clamp(1.7rem,min(4.2vw,5.5vh),4.4rem)*var(--fz));line-height:1;color:var(--cream);text-decoration:none;
-  border-bottom:3px solid var(--red);padding-bottom:.12em;transition:color .5s var(--ease)}
-.cta .biglink:hover{color:var(--red)}
-.cta .biglink .arr{font-style:normal;color:var(--red)}
-
 /* ============ FOOTER — slim strip; the memo lives here now ============ */
 /* FOOTER — a big closing block: About Us heading + blurb, then stacked rows of
    pipe-separated links (Home / site nav / socials), then the © base line. */
@@ -714,9 +683,6 @@ body.no-grain::after{opacity:0}
 @media(max-width:760px){.mf-collage{z-index:11}}
 .mf-panel{position:relative;background:var(--ink);overflow:visible;
   margin:0 clamp(30px,8vw,120px);padding:clamp(30px,4vw,56px) clamp(28px,4vw,60px) clamp(28px,4vw,52px)}
-/* small uppercase section label above the opening line */
-.mf-eyebrow{font-weight:500;letter-spacing:.22em;text-transform:uppercase;font-size:var(--t-label);
-  color:var(--cream);opacity:.6;margin-bottom:clamp(14px,2.2vh,26px)}
 /* HEADING for the chant section — the manifesto opens on this. Full headline
    scale (near the "Where…" beats), cream. */
 .mf-lede{font-weight:900;letter-spacing:-.03em;line-height:.94;color:var(--cream);

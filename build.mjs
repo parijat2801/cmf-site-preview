@@ -88,8 +88,15 @@ fs.writeFileSync('dist/index.html', html);
 // root-serving static host) serves
 fs.writeFileSync('index.html', html);
 
-// static payload for deploys (Vercel outputDirectory = dist)
+// static payload for deploys (Vercel outputDirectory = dist). vendor ships only
+// the runtime .js/.glb/etc — the TypeScript build's *.map and *.d.ts files (~556KB
+// under paper-shaders) are never fetched by the page, so filter them out.
+const shipFilter = src => !/\.(map|d\.ts)$/.test(src);
 for (const dir of ['assets', 'vendor', 'admin']) {
-  if (fs.existsSync(dir)) fs.cpSync(dir, path.join('dist', dir), { recursive: true });
+  if (!fs.existsSync(dir)) continue;
+  // clear the target first so a filtered-out file left over from a previous
+  // build (Vercel builds clean, but local `npm run dev` reuses dist) can't linger
+  fs.rmSync(path.join('dist', dir), { recursive: true, force: true });
+  fs.cpSync(dir, path.join('dist', dir), { recursive: true, filter: shipFilter });
 }
 console.log(`built dist/index.html (${html.length}b) — sections: ${data.settings.sections.map(s => s.visible ? s.section : `(${s.section} hidden)`).join(' → ')}`);

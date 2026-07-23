@@ -81,7 +81,7 @@ collections:
               - label: "Link target"
                 name: "href"
                 widget: select
-                options:
+                options: &link_targets
                   - { label: "Top of the page", value: "#top" }
                   - { label: "Misfits Brigade section", value: "#misfits" }
                   - { label: "Who are we building for? section", value: "#audience" }
@@ -102,18 +102,7 @@ collections:
               - label: "Link target"
                 name: "href"
                 widget: select
-                options:
-                  - { label: "Top of the page", value: "#top" }
-                  - { label: "Misfits Brigade section", value: "#misfits" }
-                  - { label: "Who are we building for? section", value: "#audience" }
-                  - { label: "Offerings section", value: "#offerings" }
-                  - { label: "Culturist Network row", value: "#culturist-network" }
-                  - { label: "IRL & Live row", value: "#irl-live" }
-                  - { label: "Film Studio row", value: "#film-studio" }
-                  - { label: "Misfits Acts section", value: "#work" }
-                  - { label: "For Brands section", value: "#for-brands" }
-                  - { label: "We work with section", value: "#calling" }
-                  - { label: "Email (opens the mail app)", value: "mailto:hello@culturalmisfits.com" }
+                options: *link_targets
 
       - name: "hero"
         label: "Hero statement"
@@ -180,7 +169,7 @@ collections:
               - label: "Accent color"
                 name: "accentColor"
                 widget: select
-                options:
+                options: &accent_palette
                   - { label: "Brand red", value: "var(--red)" }
                   - { label: "Yellow", value: "var(--yellow)" }
                   - { label: "Green", value: "var(--green)" }
@@ -249,14 +238,7 @@ collections:
               - label: "Accent color"
                 name: "accentColor"
                 widget: select
-                options:
-                  - { label: "Brand red", value: "var(--red)" }
-                  - { label: "Yellow", value: "var(--yellow)" }
-                  - { label: "Green", value: "var(--green)" }
-                  - { label: "Blue", value: "var(--blue)" }
-                  - { label: "Cream", value: "var(--cream)" }
-                  - { label: "Ink (near-black)", value: "var(--ink)" }
-                  - { label: "White", value: "var(--white)" }
+                options: *accent_palette
 
       - name: "for_brands"
         label: "For Brands"
@@ -331,18 +313,7 @@ collections:
               - label: "Link target"
                 name: "href"
                 widget: select
-                options:
-                  - { label: "Top of the page", value: "#top" }
-                  - { label: "Misfits Brigade section", value: "#misfits" }
-                  - { label: "Who are we building for? section", value: "#audience" }
-                  - { label: "Offerings section", value: "#offerings" }
-                  - { label: "Culturist Network row", value: "#culturist-network" }
-                  - { label: "IRL & Live row", value: "#irl-live" }
-                  - { label: "Film Studio row", value: "#film-studio" }
-                  - { label: "Misfits Acts section", value: "#work" }
-                  - { label: "For Brands section", value: "#for-brands" }
-                  - { label: "We work with section", value: "#calling" }
-                  - { label: "Email (opens the mail app)", value: "mailto:hello@culturalmisfits.com" }
+                options: *link_targets
           - label: "Nav links"
             name: "navLinks"
             widget: list
@@ -351,18 +322,7 @@ collections:
               - label: "Link target"
                 name: "href"
                 widget: select
-                options:
-                  - { label: "Top of the page", value: "#top" }
-                  - { label: "Misfits Brigade section", value: "#misfits" }
-                  - { label: "Who are we building for? section", value: "#audience" }
-                  - { label: "Offerings section", value: "#offerings" }
-                  - { label: "Culturist Network row", value: "#culturist-network" }
-                  - { label: "IRL & Live row", value: "#irl-live" }
-                  - { label: "Film Studio row", value: "#film-studio" }
-                  - { label: "Misfits Acts section", value: "#work" }
-                  - { label: "For Brands section", value: "#for-brands" }
-                  - { label: "We work with section", value: "#calling" }
-                  - { label: "Email (opens the mail app)", value: "mailto:hello@culturalmisfits.com" }
+                options: *link_targets
           - label: "Social links"
             name: "socialLinks"
             widget: list

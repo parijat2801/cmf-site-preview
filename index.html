@@ -58,9 +58,9 @@ img{display:block;max-width:100%}
 .wrap{padding-inline:var(--gutter);width:100%}
 /* ONE shared keyboard focus ring — :focus-visible only, so mouse/touch clicks
    never show it. Brand-red outline with offset reads on dark/red/cream alike.
-   Covers nav links, .more/.fl "read more" links, .biglink CTA, footer links,
+   Covers nav links, .more/.fl "read more" links, footer links,
    and the modal's prev/next/close controls. */
-.nav a:focus-visible,.more:focus-visible,.fl:focus-visible,.biglink:focus-visible,
+.nav a:focus-visible,.more:focus-visible,.fl:focus-visible,
 .foot .frow a:focus-visible,
 .varrows button:focus-visible,.vclose:focus-visible,
 [data-mfcard]:focus-visible{
@@ -116,8 +116,6 @@ body.no-grain::after{opacity:0}
 
 .head{font-weight:900;letter-spacing:-.03em;line-height:.94;font-size:calc(var(--t-head)*var(--fz));max-width:18ch}
 .head .it{font-style:italic}
-/* .klabel — small uppercase eyebrow under/near a .head (e.g. "Our Artists"). */
-.klabel{margin-top:.4em;font-weight:500;letter-spacing:.2em;text-transform:uppercase;font-size:var(--t-label);opacity:.6}
 .lede{margin-top:calc(clamp(18px,2.6vh,34px)*var(--fz));font-weight:300;font-size:calc(var(--t-lead)*var(--fz));line-height:1.15;max-width:26ch}
 .lede b{font-weight:900;font-style:italic}
 /* .lede-wide: opt a lede OUT of the narrow 26ch measure so the sentence flows
@@ -335,15 +333,6 @@ body.no-grain::after{opacity:0}
   opacity:0;transform:translateY(10px);transition:opacity .35s var(--ease),transform .35s var(--ease);
   will-change:opacity}
 .hero .hbeat.on{opacity:1;transform:none}
-/* PHOSPHOR PERSISTENCE: when a beat is replaced it doesn't cut or slide — it
-   stays PUT (transform:none overrides the base 10px drop), glyphs stay lit, and
-   its opacity + brightness are driven frame-by-frame BY JS (render()), not a CSS
-   animation. A JS-owned fade can't leak state the way a fire-and-forget CSS
-   animation + animationend could (that was the stacking bug). CSS only sets the
-   resting look; the render loop owns the fade. z-index keeps the ghost above the
-   incoming beat as it cools. transition:none so JS opacity writes are immediate. */
-.hero .hbeat.decay{transform:none;transition:none;z-index:2;
-  text-shadow:0 0 18px rgba(255,255,255,.55)}   /* soft phosphor glow while cooling */
 /* line breaks come from the copy's meaning (.bp), NOT from the column running
    out of room — so each phrase stays whole. .ph never wraps mid-phrase; if a
    phrase is wider than the viewport (phones), the fit-scale (--fz) shrinks the
@@ -398,11 +387,8 @@ body.no-grain::after{opacity:0}
   100%{color:var(--red);text-shadow:none}
 }
 /* reduced-motion / fallback: no typewriter, no strike — glyphs just appear white */
-.hero .hstage.flowed .g,.hero .hbeat.notype .g{visibility:visible;animation:none;color:#fff}
-.hero .hstage.flowed .mis .g,.hero .hbeat.notype .mis .g{color:var(--red)}
-/* fallback layout (tall phones): beats flow vertically instead of stacking */
-.hero .hstage.flowed{display:block}
-.hero .hstage.flowed .hbeat{margin-bottom:.6em;max-width:26ch}
+.hero .hbeat.notype .g{visibility:visible;animation:none;color:#fff}
+.hero .hbeat.notype .mis .g{color:var(--red)}
 /* .mega type treatment kept: heavy display type, CRT chroma-split shadow.
    Size is WIDTH-AWARE: the longest phrase ("The connected and culturally fluid
    generation", ~45ch) must fit ONE line inside the gutters at every width, so no
@@ -436,15 +422,11 @@ body.no-grain::after{opacity:0}
 }
 .hero .scroll{position:absolute;bottom:clamp(24px,3vw,44px);left:var(--gutter);color:var(--white);font-size:var(--t-label);letter-spacing:.2em;text-transform:uppercase;opacity:.7;display:flex;align-items:center;gap:.8em;z-index:12;
   transition:opacity .4s var(--ease)}
-/* the idle meter: a 46px rail that fills red 0→100% over the dwell, telling the
-   reader when the next beat will auto-type. --mp is set per-frame by JS. Once
-   the reader scrolls, .scroll gets .took and the whole cue fades out. */
-.hero .scroll .meter{position:relative;width:46px;height:1px;background:rgba(255,255,255,.35);--mp:0}
-.hero .scroll .meter::after{content:"";position:absolute;inset:0;transform-origin:left;
-  transform:scaleX(var(--mp));background:var(--red)}
-/* before the meter is armed (or on the last beat) fall back to the pull hint */
+/* the scroll cue's 46px rail. Once the statement has typed, .scroll gets .hint
+   and the rail pulses (pull) to invite scrolling; once the reader scrolls,
+   .scroll gets .took and the whole cue fades out. */
+.hero .scroll .meter{position:relative;width:46px;height:1px;background:rgba(255,255,255,.35)}
 .hero .scroll.hint .meter{background:currentColor;animation:pull 1.8s ease-in-out infinite}
-.hero .scroll.hint .meter::after{display:none}
 .hero .scroll.took{opacity:0;pointer-events:none}
 @keyframes pull{0%,100%{transform:scaleX(.35);transform-origin:left;opacity:.4}50%{transform:scaleX(1);opacity:1}}
 /* CRT overlays — hero only. "Late-night broadcast", not video-game glitch. */
@@ -483,10 +465,8 @@ body.no-grain::after{opacity:0}
 .oshot img.on{opacity:1}
 .oshot.flip img.on{animation:settle .9s var(--ease)}
 @keyframes settle{0%{transform:scale(1.03)}100%{transform:none}}
-/* segmented index: the active tick is a 900ms progress bar while cycling */
-/* the dash markers are gone — the number counter IS the progress indicator now
-   (they showed the same thing twice). Keep .ticks out of the layout entirely. */
-.oshot .ticks{display:none}
+/* the number counter (e.g. "2/3") is the sole progress indicator; while cycling
+   the section accent sweeps through it over --tickdur (below). */
 @media(hover:none) and (pointer:coarse){.oshot{--tickdur:2.2s}}   /* match the touch auto-cycle cadence */
 /* the counter (e.g. "2/3") sits white by default; while cycling, the section accent
    sweeps left→right through it over the cycle duration — same role the filling dash
@@ -585,8 +565,6 @@ body.no-grain::after{opacity:0}
 .mcell .mrole{position:absolute;left:12px;bottom:8px;display:inline-block;background:var(--yellow);color:var(--ink);
   font-weight:700;font-size:clamp(.58rem,.72vw,.75rem);letter-spacing:.12em;text-transform:uppercase;
   padding:.32em .6em;border-radius:3px;line-height:1}
-.mproof{margin-top:calc(clamp(18px,3vh,40px)*var(--fz));font-weight:300;font-size:calc(var(--t-lead)*var(--fz))}
-.mproof b{font-weight:900;font-style:italic;color:var(--yellow)}
 /* phones stay 3-up (2-up made the roster read as a short list, not a wall), but a
    3-up cell is only ~105px wide. Shrinking the OVERLAY type to fit inside the photo
    drove the name to ~11px and the role pill to ~7px — technically non-overflowing,
@@ -657,15 +635,6 @@ body.no-grain::after{opacity:0}
   .vtextcol{grid-column:1;min-height:0}
 }
 
-/* ============ PARTNER CTA — the page finally asks its audience to act ============ */
-.cta{text-align:left}
-.cta .head{max-width:16ch}
-.cta .biglink{display:inline-block;margin-top:calc(clamp(30px,6vh,72px)*var(--fz));font-weight:900;font-style:italic;letter-spacing:-.02em;
-  font-size:calc(clamp(1.7rem,min(4.2vw,5.5vh),4.4rem)*var(--fz));line-height:1;color:var(--cream);text-decoration:none;
-  border-bottom:3px solid var(--red);padding-bottom:.12em;transition:color .5s var(--ease)}
-.cta .biglink:hover{color:var(--red)}
-.cta .biglink .arr{font-style:normal;color:var(--red)}
-
 /* ============ FOOTER — slim strip; the memo lives here now ============ */
 /* FOOTER — a big closing block: About Us heading + blurb, then stacked rows of
    pipe-separated links (Home / site nav / socials), then the © base line. */
@@ -714,9 +683,6 @@ body.no-grain::after{opacity:0}
 @media(max-width:760px){.mf-collage{z-index:11}}
 .mf-panel{position:relative;background:var(--ink);overflow:visible;
   margin:0 clamp(30px,8vw,120px);padding:clamp(30px,4vw,56px) clamp(28px,4vw,60px) clamp(28px,4vw,52px)}
-/* small uppercase section label above the opening line */
-.mf-eyebrow{font-weight:500;letter-spacing:.22em;text-transform:uppercase;font-size:var(--t-label);
-  color:var(--cream);opacity:.6;margin-bottom:clamp(14px,2.2vh,26px)}
 /* HEADING for the chant section — the manifesto opens on this. Full headline
    scale (near the "Where…" beats), cream. */
 .mf-lede{font-weight:900;letter-spacing:-.03em;line-height:.94;color:var(--cream);
@@ -1156,14 +1122,12 @@ body.no-grain::after{opacity:0}
         <div class="txt" data-m><h3>Ruhbaru</h3><p>The sound of home, scaled into a cinematic live experience. From Sufi to cinematic pop, ghazal to qawwali — an intimate world of longing, devotion, memory, and renewal. <b>Come face to face · India tour 2026.</b></p><a class="fl" href="https://www.instagram.com/ruhbaru.in/" target="_blank" rel="noopener">Follow ↗</a></div>
         <div class="oshot" data-photos="assets/photo-ruhbaru.webp,assets/photo-concert.webp,assets/photo-hands.webp" style="--co:var(--cream)">
           <span class="idx">1/3</span>
-          <span class="ticks"><i class="cur"></i><i></i><i></i></span>
         </div>
       </div>
       <div class="witem reveal d2">
         <div class="txt" data-m><h3>Jupiter Pe Juice</h3><p>Truth wrapped in melody. Satire served fresh. A 90-minute musical satire where everyday absurdities become songs, punchlines, and cultural commentary. <b>Funny first. Truth later. Stays after.</b></p><a class="fl" href="https://www.instagram.com/jupiterpejuice/" target="_blank" rel="noopener">Follow ↗</a></div>
         <div class="oshot" data-photos="assets/photo-jupiter.webp,assets/photo-jupiter-2.webp,assets/photo-jupiter-3.webp" style="--co:var(--cream)">
           <span class="idx">1/3</span>
-          <span class="ticks"><i class="cur"></i><i></i><i></i></span>
         </div>
       </div>
     </div>
@@ -1248,7 +1212,6 @@ body.no-grain::after{opacity:0}
              Read-more modal pages are built from the same slides -->
         <div class="oshot" data-photos="assets/offer/net-1.webp,assets/photo-manifesto.webp">
           <span class="idx">1/2</span>
-          <span class="ticks"><i class="cur"></i><i></i></span>
         </div>
         <div class="otext" data-m>
           <h3>Culturist Network</h3>
@@ -1262,7 +1225,6 @@ body.no-grain::after{opacity:0}
              Read-more modal pages are built from the same slides -->
         <div class="oshot" data-photos="assets/offer/live-1.webp,assets/photo-ruhbaru.webp">
           <span class="idx">1/2</span>
-          <span class="ticks"><i class="cur"></i><i></i></span>
         </div>
         <div class="otext" data-m>
           <h3>IRL & Live Experiences</h3>
@@ -1276,7 +1238,6 @@ body.no-grain::after{opacity:0}
              Read-more modal pages are built from the same slides -->
         <div class="oshot" data-photos="assets/offer/nirvair-1.webp,assets/offer/nirvair-2.webp,assets/offer/nirvair-3.webp,assets/offer/nirvair-4.webp">
           <span class="idx">1/4</span>
-          <span class="ticks"><i class="cur"></i><i></i><i></i><i></i></span>
         </div>
         <div class="otext" data-m>
           <h3>Film Studio</h3>
@@ -1424,11 +1385,6 @@ try {
 </script>
 
 <script type="module">
-/* pretext measures text without touching layout; if it can't load, the
-   engine falls back to a rough per-block line estimate. */
-let pretext=null;
-try{ pretext=await import('./vendor/pretext.esm.js'); }catch(_){ }
-
 /* ---------- reveals on enter ---------- */
 /* IO fires the fade when an element scrolls in — but a fast flight (anchor
    jump, flick) can cross the viewport between IO callbacks and skip it.
@@ -1685,12 +1641,10 @@ document.querySelectorAll('.mwall .mcell').forEach(cell=>{
 });
 
 /* ============================================================
-   SCROLL ENGINE — Lenis (feel) + GSAP ScrollTrigger (pinned scenes).
-   Each card pins (pinSpacing:false) for an explicit dwell, then the
-   next card slides up and covers it. Dwell comes from pretext text
-   measurement: more lines to read = more scroll room. Tall cards
-   (content > viewport) scroll through their content first and pin
-   from the bottom, so nothing ever clips.
+   SCROLL ENGINE — Lenis (feel) + GSAP ScrollTrigger.
+   Every section scrolls normally in flow (all .deck cards are .nopin);
+   ScrollTrigger drives the nav-theme flips, the manifesto mf-reel scrub,
+   and anchor-link resolution against each section's natural position.
    ============================================================ */
 const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
 if(!reduce){
@@ -1713,9 +1667,8 @@ if(!reduce){
   lenis.on('scroll',ScrollTrigger.update);
   gsap.ticker.add(t=>lenis.raf(t*1000));
   gsap.ticker.lagSmoothing(0);
-  /* the deck's spacers + pins change the page height after Lenis measures it;
-     re-measure whenever ScrollTrigger refreshes or scrollTo clamps to a stale
-     (too small) limit */
+  /* re-measure Lenis whenever ScrollTrigger refreshes (fonts/layout settling can
+     change the page height after Lenis first measured it) */
   ScrollTrigger.addEventListener('refresh',()=>lenis.resize());
 
   /* anchor links through Lenis — resolved against pin positions, because a
@@ -1762,133 +1715,19 @@ if(!reduce){
     lenis.on('scroll',()=>closeMenu());
   }
 
+  /* the deck cards stack by source order (z-index) so a section can visually sit
+     over the one before it where the layout overlaps them. */
   const cards=gsap.utils.toArray('.deck > .card');
   cards.forEach((c,i)=>c.style.zIndex=10+i);
 
-  /* .nopin cards opt OUT of the pinned-deck stacking: they scroll normally, in
-     flow, with no card-over-card overlap. A card pins only if it isn't .nopin and
-     isn't the footer (last). `pins` is the pinned subset the deck systems act on. */
-  const pinnable=(card,i)=> i<cards.length-1 && !card.classList.contains('nopin');
-
-  /* spacers give each PINNED card its dwell room. nopin cards get no spacer (they
-     reserve their own height in normal flow). */
-  const spacers=cards.map((c,i)=>{
-    if(!pinnable(c,i)) return null;
-    const sp=document.createElement('div');sp.className='spacer';
-    c.after(sp);return sp;
-  });
-
-  /* ------- pretext: measure the text a card asks you to read ------- */
-  function fontOf(el){
-    const cs=getComputedStyle(el);
-    const fam=cs.fontFamily.split(',')[0].replace(/["']/g,'');
-    return `${cs.fontStyle==='italic'?'italic ':''}${cs.fontWeight} ${cs.fontSize} ${fam}`;
-  }
-  function measureLines(card){
-    let lines=0;
-    card.querySelectorAll('[data-m]').forEach(el=>{
-      try{
-        const cs=getComputedStyle(el);
-        const lh=cs.lineHeight==='normal'?parseFloat(cs.fontSize)*1.2:parseFloat(cs.lineHeight);
-        const prep=pretext.prepare(el.textContent.replace(/\s+/g,' ').trim(),fontOf(el));
-        const res=pretext.layout(prep,el.clientWidth||el.parentElement.clientWidth,lh);
-        lines+=res.lineCount;
-      }catch(_){ lines+=4; } /* measurement must never break the page */
-    });
-    return lines;
-  }
-
   const mm=gsap.matchMedia();
   mm.add({small:'(max-width:860px)',large:'(min-width:861px)'},(ctx)=>{
-    const k=ctx.conditions.small?0.6:1;      // shorter dwell on phones
-    const vh=()=>window.innerHeight;
-    const dwells=new Array(cards.length).fill(0);
-    const talls=new Array(cards.length).fill(false);
-
-    /* fit pass: one-screen cards ([data-fit]) must FIT the window they're
-       shown in. Shrink their display scale (--fz) until the card's real
-       height fits 100vh — iterate because line wraps change non-linearly.
-       Floor at .72: below that, readability wins and the card falls back
-       to scrolling (tall mode). */
-    function fitPass(){
-      cards.forEach(card=>{
-        if(card.dataset.fit===undefined)return;
-        card.style.setProperty('--fz','1');
-        for(let n=0;n<3;n++){
-          const h=card.offsetHeight;
-          if(h<=vh()+1)break;
-          const cur=parseFloat(getComputedStyle(card).getPropertyValue('--fz'))||1;
-          const f=Math.max(.72,cur*(vh()-2)/h);
-          card.style.setProperty('--fz',f.toFixed(3));
-          if(f<=.72)break;
-        }
-      });
-    }
-
-    function computeAll(){
-      fitPass();
-      cards.forEach((card,i)=>{
-        if(!pinnable(card,i))return;                        // footer + .nopin cards never pin
-        /* ANY card still taller than the viewport is "tall": it scrolls
-           through its content first and pins from the bottom — pinning it
-           top-aligned would clip whatever hangs below the fold. */
-        talls[i]=card.offsetHeight>vh()+2;
-        let d;
-        if(card.classList.contains('hero')) d=vh()*0.5;   // short hold; scroll releases to the manifesto collage
-        else{
-          const lines=measureLines(card);
-          d=vh()*(0.45+0.055*lines);
-          d=Math.max(vh()*0.55,Math.min(vh()*2.1,d));
-        }
-        dwells[i]=Math.round(d*k);
-        /* a pinned card that reserves its OWN room (pinSpacing:true) needs a zero
-           spacer to avoid a double gap; that's the hero AND the last pinned card
-           before a .nopin region (see the pin loop). Others use their spacer. */
-        const selfSpace=card.classList.contains('hero') || !pinnable(cards[i+1],i+1);
-        if(spacers[i]) spacers[i].style.height=(selfSpace?0:dwells[i])+'px';
-      });
-    }
-    computeAll();
-    ScrollTrigger.addEventListener('refreshInit',computeAll);
-
-    /* pins: dwell solo, then one viewport of being covered */
-    cards.forEach((card,i)=>{
-      if(!pinnable(card,i))return;                    // footer + .nopin cards: no pin, normal flow
-      /* pinSpacing:false = the card stays fixed and relies on the NEXT pinned card
-         scrolling up to COVER it (the "layering" stack). That only works while the
-         following card also pins. A pinned card that is the LAST before a non-pinned
-         region — the hero (before the non-card manifesto) OR the last pinned card
-         before a .nopin section — has nothing to cover it, so it must use
-         pinSpacing:true to reserve its own room and release cleanly into flow.
-         Its spacer is then zeroed (below) to avoid a double gap. */
-      const selfSpace=card.classList.contains('hero') || !pinnable(cards[i+1],i+1);
-      const st=ScrollTrigger.create({
-        trigger:card,
-        start:()=>talls[i]?'bottom bottom':'top top',
-        /* pin until the NEXT card has fully covered: dwell + the distance its
-           top must travel. From a bottom-pin that distance is one viewport;
-           from a top-pin it is this card's own height. A self-spacing card just
-           holds for its dwell, then releases (pinSpacing:true reserves that room). */
-        end:()=>selfSpace?'+='+dwells[i]:'+='+(dwells[i]+(talls[i]?vh():card.offsetHeight)),
-        pin:true,pinSpacing:selfSpace,invalidateOnRefresh:true,
-      });
-      if(selfSpace && spacers[i]) spacers[i].style.height='0px';   // pinSpacing reserves the room
-      if(card.id)anchorTargets[card.id]=()=>talls[i]?st.start-(card.offsetHeight-vh()):st.start;
-      /* rows inside a card (the three verticals) anchor to their own offset,
-         with headroom for the nav bar */
-      card.querySelectorAll('.offer[id]').forEach(row=>{
-        anchorTargets[row.id]=()=>{
-          const flow=talls[i]?st.start-(card.offsetHeight-vh()):st.start;
-          return flow+row.offsetTop-80;
-        };
-      });
-    });
-
-    /* .nopin cards aren't pinned, so they have no ScrollTrigger start — their
-       anchor is just their natural document position (minus nav headroom). Nav
-       links to #work / #for-brands / #calling resolve here. */
-    cards.forEach((card,i)=>{
-      if(pinnable(card,i) || !card.id) return;
+    /* Every .deck card scrolls in normal flow (all are .nopin), so a section's
+       anchor is just its natural document position, minus nav headroom. Nav links
+       to #misfits / #work / #for-brands / #offerings / #calling resolve here, as
+       do the per-offering rows (.offer[id]). */
+    cards.forEach((card)=>{
+      if(!card.id) return;
       anchorTargets[card.id]=()=>card.getBoundingClientRect().top+window.scrollY-80;
       card.querySelectorAll('.offer[id]').forEach(row=>{
         anchorTargets[row.id]=()=>row.getBoundingClientRect().top+window.scrollY-80;
@@ -2035,11 +1874,9 @@ if(!reduce){
       });
     });
     theme(0);
-
-    return ()=>{ ScrollTrigger.removeEventListener('refreshInit',computeAll); };
   });
 
-  /* re-measure after fonts arrive (metrics change line counts) */
+  /* re-measure after fonts arrive (metrics can shift layout/anchor positions) */
   document.fonts.ready.then(()=>ScrollTrigger.refresh());
   /* On mobile the URL bar collapsing changes innerHeight by ~60-120px mid-scroll.
      Refreshing pins on that recomputes every trigger and visibly jumps the page,
@@ -2077,7 +1914,7 @@ if(!reduce){
 
   let ShaderMount, simplexNoise;
   try {
-    ({ ShaderMount } = await import('./vendor/paper-shaders/index.js'));
+    ({ ShaderMount } = await import('./vendor/paper-shaders/shader-mount.js'));
     ({ simplexNoise } = await import('./vendor/paper-shaders/shader-utils.js'));
   } catch(_) { return; }                               // import failed → CSS fallback
 
@@ -2271,7 +2108,7 @@ if(!reduce){
 
   let ShaderMount, simplexNoise;
   try{
-    ({ ShaderMount } = await import('./vendor/paper-shaders/index.js'));
+    ({ ShaderMount } = await import('./vendor/paper-shaders/shader-mount.js'));
     ({ simplexNoise } = await import('./vendor/paper-shaders/shader-utils.js'));
   }catch(_){ return; }
 

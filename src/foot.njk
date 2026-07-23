@@ -109,11 +109,6 @@ try {
 </script>
 
 <script type="module">
-/* pretext measures text without touching layout; if it can't load, the
-   engine falls back to a rough per-block line estimate. */
-let pretext=null;
-try{ pretext=await import('./vendor/pretext.esm.js'); }catch(_){ }
-
 /* ---------- reveals on enter ---------- */
 /* IO fires the fade when an element scrolls in — but a fast flight (anchor
    jump, flick) can cross the viewport between IO callbacks and skip it.
@@ -370,12 +365,10 @@ document.querySelectorAll('.mwall .mcell').forEach(cell=>{
 });
 
 /* ============================================================
-   SCROLL ENGINE — Lenis (feel) + GSAP ScrollTrigger (pinned scenes).
-   Each card pins (pinSpacing:false) for an explicit dwell, then the
-   next card slides up and covers it. Dwell comes from pretext text
-   measurement: more lines to read = more scroll room. Tall cards
-   (content > viewport) scroll through their content first and pin
-   from the bottom, so nothing ever clips.
+   SCROLL ENGINE — Lenis (feel) + GSAP ScrollTrigger.
+   Every section scrolls normally in flow (all .deck cards are .nopin);
+   ScrollTrigger drives the nav-theme flips, the manifesto mf-reel scrub,
+   and anchor-link resolution against each section's natural position.
    ============================================================ */
 const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
 if(!reduce){
@@ -398,9 +391,8 @@ if(!reduce){
   lenis.on('scroll',ScrollTrigger.update);
   gsap.ticker.add(t=>lenis.raf(t*1000));
   gsap.ticker.lagSmoothing(0);
-  /* the deck's spacers + pins change the page height after Lenis measures it;
-     re-measure whenever ScrollTrigger refreshes or scrollTo clamps to a stale
-     (too small) limit */
+  /* re-measure Lenis whenever ScrollTrigger refreshes (fonts/layout settling can
+     change the page height after Lenis first measured it) */
   ScrollTrigger.addEventListener('refresh',()=>lenis.resize());
 
   /* anchor links through Lenis — resolved against pin positions, because a
@@ -447,133 +439,19 @@ if(!reduce){
     lenis.on('scroll',()=>closeMenu());
   }
 
+  /* the deck cards stack by source order (z-index) so a section can visually sit
+     over the one before it where the layout overlaps them. */
   const cards=gsap.utils.toArray('.deck > .card');
   cards.forEach((c,i)=>c.style.zIndex=10+i);
 
-  /* .nopin cards opt OUT of the pinned-deck stacking: they scroll normally, in
-     flow, with no card-over-card overlap. A card pins only if it isn't .nopin and
-     isn't the footer (last). `pins` is the pinned subset the deck systems act on. */
-  const pinnable=(card,i)=> i<cards.length-1 && !card.classList.contains('nopin');
-
-  /* spacers give each PINNED card its dwell room. nopin cards get no spacer (they
-     reserve their own height in normal flow). */
-  const spacers=cards.map((c,i)=>{
-    if(!pinnable(c,i)) return null;
-    const sp=document.createElement('div');sp.className='spacer';
-    c.after(sp);return sp;
-  });
-
-  /* ------- pretext: measure the text a card asks you to read ------- */
-  function fontOf(el){
-    const cs=getComputedStyle(el);
-    const fam=cs.fontFamily.split(',')[0].replace(/["']/g,'');
-    return `${cs.fontStyle==='italic'?'italic ':''}${cs.fontWeight} ${cs.fontSize} ${fam}`;
-  }
-  function measureLines(card){
-    let lines=0;
-    card.querySelectorAll('[data-m]').forEach(el=>{
-      try{
-        const cs=getComputedStyle(el);
-        const lh=cs.lineHeight==='normal'?parseFloat(cs.fontSize)*1.2:parseFloat(cs.lineHeight);
-        const prep=pretext.prepare(el.textContent.replace(/\s+/g,' ').trim(),fontOf(el));
-        const res=pretext.layout(prep,el.clientWidth||el.parentElement.clientWidth,lh);
-        lines+=res.lineCount;
-      }catch(_){ lines+=4; } /* measurement must never break the page */
-    });
-    return lines;
-  }
-
   const mm=gsap.matchMedia();
   mm.add({small:'(max-width:860px)',large:'(min-width:861px)'},(ctx)=>{
-    const k=ctx.conditions.small?0.6:1;      // shorter dwell on phones
-    const vh=()=>window.innerHeight;
-    const dwells=new Array(cards.length).fill(0);
-    const talls=new Array(cards.length).fill(false);
-
-    /* fit pass: one-screen cards ([data-fit]) must FIT the window they're
-       shown in. Shrink their display scale (--fz) until the card's real
-       height fits 100vh — iterate because line wraps change non-linearly.
-       Floor at .72: below that, readability wins and the card falls back
-       to scrolling (tall mode). */
-    function fitPass(){
-      cards.forEach(card=>{
-        if(card.dataset.fit===undefined)return;
-        card.style.setProperty('--fz','1');
-        for(let n=0;n<3;n++){
-          const h=card.offsetHeight;
-          if(h<=vh()+1)break;
-          const cur=parseFloat(getComputedStyle(card).getPropertyValue('--fz'))||1;
-          const f=Math.max(.72,cur*(vh()-2)/h);
-          card.style.setProperty('--fz',f.toFixed(3));
-          if(f<=.72)break;
-        }
-      });
-    }
-
-    function computeAll(){
-      fitPass();
-      cards.forEach((card,i)=>{
-        if(!pinnable(card,i))return;                        // footer + .nopin cards never pin
-        /* ANY card still taller than the viewport is "tall": it scrolls
-           through its content first and pins from the bottom — pinning it
-           top-aligned would clip whatever hangs below the fold. */
-        talls[i]=card.offsetHeight>vh()+2;
-        let d;
-        if(card.classList.contains('hero')) d=vh()*0.5;   // short hold; scroll releases to the manifesto collage
-        else{
-          const lines=measureLines(card);
-          d=vh()*(0.45+0.055*lines);
-          d=Math.max(vh()*0.55,Math.min(vh()*2.1,d));
-        }
-        dwells[i]=Math.round(d*k);
-        /* a pinned card that reserves its OWN room (pinSpacing:true) needs a zero
-           spacer to avoid a double gap; that's the hero AND the last pinned card
-           before a .nopin region (see the pin loop). Others use their spacer. */
-        const selfSpace=card.classList.contains('hero') || !pinnable(cards[i+1],i+1);
-        if(spacers[i]) spacers[i].style.height=(selfSpace?0:dwells[i])+'px';
-      });
-    }
-    computeAll();
-    ScrollTrigger.addEventListener('refreshInit',computeAll);
-
-    /* pins: dwell solo, then one viewport of being covered */
-    cards.forEach((card,i)=>{
-      if(!pinnable(card,i))return;                    // footer + .nopin cards: no pin, normal flow
-      /* pinSpacing:false = the card stays fixed and relies on the NEXT pinned card
-         scrolling up to COVER it (the "layering" stack). That only works while the
-         following card also pins. A pinned card that is the LAST before a non-pinned
-         region — the hero (before the non-card manifesto) OR the last pinned card
-         before a .nopin section — has nothing to cover it, so it must use
-         pinSpacing:true to reserve its own room and release cleanly into flow.
-         Its spacer is then zeroed (below) to avoid a double gap. */
-      const selfSpace=card.classList.contains('hero') || !pinnable(cards[i+1],i+1);
-      const st=ScrollTrigger.create({
-        trigger:card,
-        start:()=>talls[i]?'bottom bottom':'top top',
-        /* pin until the NEXT card has fully covered: dwell + the distance its
-           top must travel. From a bottom-pin that distance is one viewport;
-           from a top-pin it is this card's own height. A self-spacing card just
-           holds for its dwell, then releases (pinSpacing:true reserves that room). */
-        end:()=>selfSpace?'+='+dwells[i]:'+='+(dwells[i]+(talls[i]?vh():card.offsetHeight)),
-        pin:true,pinSpacing:selfSpace,invalidateOnRefresh:true,
-      });
-      if(selfSpace && spacers[i]) spacers[i].style.height='0px';   // pinSpacing reserves the room
-      if(card.id)anchorTargets[card.id]=()=>talls[i]?st.start-(card.offsetHeight-vh()):st.start;
-      /* rows inside a card (the three verticals) anchor to their own offset,
-         with headroom for the nav bar */
-      card.querySelectorAll('.offer[id]').forEach(row=>{
-        anchorTargets[row.id]=()=>{
-          const flow=talls[i]?st.start-(card.offsetHeight-vh()):st.start;
-          return flow+row.offsetTop-80;
-        };
-      });
-    });
-
-    /* .nopin cards aren't pinned, so they have no ScrollTrigger start — their
-       anchor is just their natural document position (minus nav headroom). Nav
-       links to #work / #for-brands / #calling resolve here. */
-    cards.forEach((card,i)=>{
-      if(pinnable(card,i) || !card.id) return;
+    /* Every .deck card scrolls in normal flow (all are .nopin), so a section's
+       anchor is just its natural document position, minus nav headroom. Nav links
+       to #misfits / #work / #for-brands / #offerings / #calling resolve here, as
+       do the per-offering rows (.offer[id]). */
+    cards.forEach((card)=>{
+      if(!card.id) return;
       anchorTargets[card.id]=()=>card.getBoundingClientRect().top+window.scrollY-80;
       card.querySelectorAll('.offer[id]').forEach(row=>{
         anchorTargets[row.id]=()=>row.getBoundingClientRect().top+window.scrollY-80;
@@ -720,11 +598,9 @@ if(!reduce){
       });
     });
     theme(0);
-
-    return ()=>{ ScrollTrigger.removeEventListener('refreshInit',computeAll); };
   });
 
-  /* re-measure after fonts arrive (metrics change line counts) */
+  /* re-measure after fonts arrive (metrics can shift layout/anchor positions) */
   document.fonts.ready.then(()=>ScrollTrigger.refresh());
   /* On mobile the URL bar collapsing changes innerHeight by ~60-120px mid-scroll.
      Refreshing pins on that recomputes every trigger and visibly jumps the page,
@@ -762,7 +638,7 @@ if(!reduce){
 
   let ShaderMount, simplexNoise;
   try {
-    ({ ShaderMount } = await import('./vendor/paper-shaders/index.js'));
+    ({ ShaderMount } = await import('./vendor/paper-shaders/shader-mount.js'));
     ({ simplexNoise } = await import('./vendor/paper-shaders/shader-utils.js'));
   } catch(_) { return; }                               // import failed → CSS fallback
 
@@ -956,7 +832,7 @@ if(!reduce){
 
   let ShaderMount, simplexNoise;
   try{
-    ({ ShaderMount } = await import('./vendor/paper-shaders/index.js'));
+    ({ ShaderMount } = await import('./vendor/paper-shaders/shader-mount.js'));
     ({ simplexNoise } = await import('./vendor/paper-shaders/shader-utils.js'));
   }catch(_){ return; }
 

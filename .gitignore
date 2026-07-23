@@ -7,3 +7,4 @@ Archive/
 node_modules/
 dist/
 .DS_Store
+lod-*.glb
