@@ -786,8 +786,10 @@ body.no-grain::after{opacity:0}
 .fb-chart.in .fb-axis{opacity:.9}
 /* when the shader is active it hides the CSS fallback axes */
 .fb-plot.has-crayon .fb-axis{display:none}
-/* alien mark in the top-right quadrant — fades in with everything else */
-.fb-alien{position:absolute;top:16%;left:75%;transform:translate(-50%,-50%);z-index:2;
+/* alien mark + note are a stacked PAIR in the plot's top-right quadrant: alien on
+   top, note directly beneath it on the same axis (alien marks the spot, note asks
+   why it matters). Same layout at every width. */
+.fb-alien{position:absolute;top:18%;left:75%;transform:translate(-50%,-50%);z-index:2;
   width:clamp(28px,3.8vw,52px);height:auto;opacity:0;transition:opacity .6s var(--ease)}
 .fb-chart.in .fb-alien{opacity:1}
 /* curly arrow: sits to the RIGHT of the note and curls down-left to the alien.
@@ -812,8 +814,9 @@ body.no-grain::after{opacity:0}
 @media(max-width:760px){.fb-curl{width:clamp(44px,10vw,72px);top:-10%}}
 /* handwritten note — sits directly ABOVE the alien, sharing its horizontal
    centre (left:75%) so the two line up vertically */
-.fb-note{position:absolute;left:75%;top:-16%;z-index:3;color:#e5018c;
-  width:max-content;max-width:22ch;text-align:center;pointer-events:none;transform-origin:center bottom;
+/* note sits directly under the alien (top:18%), centred on the same 75% axis */
+.fb-note{position:absolute;left:75%;top:33%;z-index:3;color:#e5018c;
+  width:max-content;max-width:16ch;text-align:center;pointer-events:none;transform-origin:center top;
   opacity:0;transform:translateX(-50%) rotate(-3deg);transition:opacity .6s var(--ease)}
 .fb-chart.in .fb-note{opacity:1}
 .fb-note p{font-family:'Caveat',cursive;font-weight:600;line-height:1.02;letter-spacing:.01em;
@@ -822,14 +825,11 @@ body.no-grain::after{opacity:0}
   .fb-cols{grid-template-columns:1fr;gap:clamp(28px,6vh,48px)}
   .fb-chart{max-width:none}
   .fb-copy .fb-lead{max-width:none}
-  /* note + alien are a PAIR (the note asks "isn't your brand here?", the alien
-     sits "here"). On desktop the note floats right of the plot at left:75% — on a
-     full-width phone plot that lands it on the "Made Real" highlight above. Stack
-     them centred in the plot's top-right quadrant instead: alien up top, note
-     directly UNDER it, both centred on the same axis, note a touch smaller. */
-  .fb-alien{top:16%;left:72%;width:clamp(26px,6vw,38px)}
-  .fb-note{top:26%;left:72%;right:auto;transform:translateX(-50%) rotate(-3deg);
-    max-width:15ch;text-align:center;font-size:.82em}
+  /* the alien-over-note stack is now the base layout; phones just nudge the axis
+     in slightly (72% vs 75%) so the note clears the right edge, and shrink both a
+     touch for the narrower plot. */
+  .fb-alien{left:72%;width:clamp(26px,6vw,38px)}
+  .fb-note{left:72%;font-size:.82em}
 }
 .fb-list{margin-top:.6em;list-style:none;max-width:44ch}
 .fb-list li{font-weight:400;font-size:var(--t-body);line-height:1.3;opacity:.9;
