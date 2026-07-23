@@ -4,3 +4,7 @@ node_modules/
 .venv*/
 # full-res photo sources — the optimized versions live in assets/
 Archive/
+node_modules/
+dist/
+.DS_Store
+lod-*.glb

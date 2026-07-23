@@ -1,0 +1,17 @@
+  <!-- THE MISFITS ACTS — brand red field, cream type. Two IPs today; the layout
+       scales to N. To add a 3rd Act: copy one .witem block below, bump its reveal
+       class (d2 → d3), and set the .txt h3 / p / Follow link + .oshot data-photos.
+       The alternating image side, top borders, and even/odd ordering are all
+       handled by CSS (.witem:nth-child(even), :first-of-type) — no extra work. -->
+  <section class="card red work tall nopin" id="work" data-nav="dark" data-navbg="#DB1A21">
+    <div class="wrap">
+      <h2 class="head reveal d1" data-m>{{ work.heading | safe }}</h2>
+{% for item in work.items %}      <div class="witem reveal d{{ loop.index }}">
+        <div class="txt" data-m><h3>{{ item.title | safe }}</h3><p>{{ item.copy | safe }}</p><a class="fl" href="{{ item.linkHref }}" target="_blank" rel="noopener">{{ item.linkLabel }}</a></div>
+        <div class="oshot" data-photos="{{ item.photos | join(',') }}" style="--co:{{ item.accentColor }}">
+          <span class="idx">1/{{ item.photos | length }}</span>
+        </div>
+      </div>
+{% endfor %}    </div>
+  </section>
+

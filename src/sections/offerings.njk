@@ -1,0 +1,26 @@
+  <!-- OFFERINGS — ink field; pillar accents from the PRIMARIES: red / yellow / green. -->
+  <section class="card dark offerings tall nopin" id="offerings" data-nav="dark" data-navbg="#231F20">
+    <div class="wrap">
+      <h2 class="head reveal d1" data-m style="margin-bottom:clamp(30px,4vw,64px)">{{ offerings.heading | safe }}</h2>
+{% for item in offerings.items %}
+      <article class="offer reveal" id="{{ item.id }}" style="--co:{{ item.accentColor }}">
+        <!-- one list drives everything: the row cycles these images and the
+             Read-more modal pages are built from the same slides -->
+        <div class="oshot" data-photos="{{ item.slides | imgs }}">
+          <span class="idx">1/{{ item.slides | length }}</span>
+        </div>
+        <div class="otext" data-m>
+          <h3>{{ item.title | safe }}</h3>
+          <p>{{ item.copy | safe }}</p>
+{%- if item.partnerLede %}
+          <p class="partner">{{ item.partnerLede }}</p>
+          <ul class="offer-list">
+{% for li in item.partnerList %}            <li>{{ li | safe }}</li>
+{% endfor %}          </ul>
+{%- endif %}
+          <a class="more" href="{{ item.linkHref }}"{% if item.linkScroll %} data-scroll{% endif %}>{{ item.linkLabel }}</a>
+        </div>
+      </article>
+{% endfor %}    </div>
+  </section>
+

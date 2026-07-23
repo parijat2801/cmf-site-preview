@@ -4,20 +4,20 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Cultural (Mis)fits — A Catalyst for Culture</title>
-<meta name="description" content="Cultural (Mis)fits: a culture company for the culturally fluid generation — Culturist Network, IRL &amp; Live experiences, and a Film Studio for misfit communities." />
+<meta name="description" content="Cultural (Mis)fits: a culture company for the culturally fluid generation — Culturist Network, IRL & Live experiences, and a Film Studio for misfit communities." />
 <!-- Open Graph / Twitter: og:url, og:image, and the canonical URL below use a
      placeholder domain (culturalmisfits.com, inferred from the hello@culturalmisfits.com
      contact address on this page) and a placeholder social image (assets/crew.webp,
      an existing large photo asset). Confirm/replace both before relying on them. -->
 <meta property="og:type" content="website" />
 <meta property="og:title" content="Cultural (Mis)fits — A Catalyst for Culture" />
-<meta property="og:description" content="Cultural (Mis)fits: a culture company for the culturally fluid generation — Culturist Network, IRL &amp; Live experiences, and a Film Studio for misfit communities." />
+<meta property="og:description" content="Cultural (Mis)fits: a culture company for the culturally fluid generation — Culturist Network, IRL & Live experiences, and a Film Studio for misfit communities." />
 <meta property="og:url" content="https://culturalmisfits.com/" />
 <meta property="og:image" content="assets/crew.webp" />
 <meta property="og:site_name" content="Cultural (Mis)fits" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Cultural (Mis)fits — A Catalyst for Culture" />
-<meta name="twitter:description" content="Cultural (Mis)fits: a culture company for the culturally fluid generation — Culturist Network, IRL &amp; Live experiences, and a Film Studio for misfit communities." />
+<meta name="twitter:description" content="Cultural (Mis)fits: a culture company for the culturally fluid generation — Culturist Network, IRL & Live experiences, and a Film Studio for misfit communities." />
 <meta name="twitter:image" content="assets/crew.webp" />
 <link rel="canonical" href="https://culturalmisfits.com/" />
 <link rel="icon" href="assets/favicon/favicon.ico" sizes="any">
@@ -58,9 +58,9 @@ img{display:block;max-width:100%}
 .wrap{padding-inline:var(--gutter);width:100%}
 /* ONE shared keyboard focus ring — :focus-visible only, so mouse/touch clicks
    never show it. Brand-red outline with offset reads on dark/red/cream alike.
-   Covers nav links, .more/.fl "read more" links, .biglink CTA, footer links,
+   Covers nav links, .more/.fl "read more" links, footer links,
    and the modal's prev/next/close controls. */
-.nav a:focus-visible,.more:focus-visible,.fl:focus-visible,.biglink:focus-visible,
+.nav a:focus-visible,.more:focus-visible,.fl:focus-visible,
 .foot .frow a:focus-visible,
 .varrows button:focus-visible,.vclose:focus-visible,
 [data-mfcard]:focus-visible{
@@ -103,6 +103,9 @@ body.no-grain::after{opacity:0}
    content length instead of the spacing rhythm. Sizing them to their content
    makes every boundary exactly --sec-y (bottom) + --sec-y (top). */
 .card.nopin{box-shadow:none;min-height:0}
+/* the hero is nopin (no deck stacking) but must still fill the viewport —
+   same vh-then-dvh pair as .card so it doesn't reflow with the URL bar */
+.card.nopin.hero{min-height:100vh;min-height:100dvh}
 /* flat ink on all dark sections (no radial gradient) — a gradient's lighter
    centre meeting a flat neighbour showed a tonal SEAM at the boundary, so every
    dark surface is now the exact same colour. */
@@ -113,8 +116,6 @@ body.no-grain::after{opacity:0}
 
 .head{font-weight:900;letter-spacing:-.03em;line-height:.94;font-size:calc(var(--t-head)*var(--fz));max-width:18ch}
 .head .it{font-style:italic}
-/* .klabel — small uppercase eyebrow under/near a .head (e.g. "Our Artists"). */
-.klabel{margin-top:.4em;font-weight:500;letter-spacing:.2em;text-transform:uppercase;font-size:var(--t-label);opacity:.6}
 .lede{margin-top:calc(clamp(18px,2.6vh,34px)*var(--fz));font-weight:300;font-size:calc(var(--t-lead)*var(--fz));line-height:1.15;max-width:26ch}
 .lede b{font-weight:900;font-style:italic}
 /* .lede-wide: opt a lede OUT of the narrow 26ch measure so the sentence flows
@@ -332,15 +333,6 @@ body.no-grain::after{opacity:0}
   opacity:0;transform:translateY(10px);transition:opacity .35s var(--ease),transform .35s var(--ease);
   will-change:opacity}
 .hero .hbeat.on{opacity:1;transform:none}
-/* PHOSPHOR PERSISTENCE: when a beat is replaced it doesn't cut or slide — it
-   stays PUT (transform:none overrides the base 10px drop), glyphs stay lit, and
-   its opacity + brightness are driven frame-by-frame BY JS (render()), not a CSS
-   animation. A JS-owned fade can't leak state the way a fire-and-forget CSS
-   animation + animationend could (that was the stacking bug). CSS only sets the
-   resting look; the render loop owns the fade. z-index keeps the ghost above the
-   incoming beat as it cools. transition:none so JS opacity writes are immediate. */
-.hero .hbeat.decay{transform:none;transition:none;z-index:2;
-  text-shadow:0 0 18px rgba(255,255,255,.55)}   /* soft phosphor glow while cooling */
 /* line breaks come from the copy's meaning (.bp), NOT from the column running
    out of room — so each phrase stays whole. .ph never wraps mid-phrase; if a
    phrase is wider than the viewport (phones), the fit-scale (--fz) shrinks the
@@ -395,11 +387,8 @@ body.no-grain::after{opacity:0}
   100%{color:var(--red);text-shadow:none}
 }
 /* reduced-motion / fallback: no typewriter, no strike — glyphs just appear white */
-.hero .hstage.flowed .g,.hero .hbeat.notype .g{visibility:visible;animation:none;color:#fff}
-.hero .hstage.flowed .mis .g,.hero .hbeat.notype .mis .g{color:var(--red)}
-/* fallback layout (tall phones): beats flow vertically instead of stacking */
-.hero .hstage.flowed{display:block}
-.hero .hstage.flowed .hbeat{margin-bottom:.6em;max-width:26ch}
+.hero .hbeat.notype .g{visibility:visible;animation:none;color:#fff}
+.hero .hbeat.notype .mis .g{color:var(--red)}
 /* .mega type treatment kept: heavy display type, CRT chroma-split shadow.
    Size is WIDTH-AWARE: the longest phrase ("The connected and culturally fluid
    generation", ~45ch) must fit ONE line inside the gutters at every width, so no
@@ -433,15 +422,11 @@ body.no-grain::after{opacity:0}
 }
 .hero .scroll{position:absolute;bottom:clamp(24px,3vw,44px);left:var(--gutter);color:var(--white);font-size:var(--t-label);letter-spacing:.2em;text-transform:uppercase;opacity:.7;display:flex;align-items:center;gap:.8em;z-index:12;
   transition:opacity .4s var(--ease)}
-/* the idle meter: a 46px rail that fills red 0→100% over the dwell, telling the
-   reader when the next beat will auto-type. --mp is set per-frame by JS. Once
-   the reader scrolls, .scroll gets .took and the whole cue fades out. */
-.hero .scroll .meter{position:relative;width:46px;height:1px;background:rgba(255,255,255,.35);--mp:0}
-.hero .scroll .meter::after{content:"";position:absolute;inset:0;transform-origin:left;
-  transform:scaleX(var(--mp));background:var(--red)}
-/* before the meter is armed (or on the last beat) fall back to the pull hint */
+/* the scroll cue's 46px rail. Once the statement has typed, .scroll gets .hint
+   and the rail pulses (pull) to invite scrolling; once the reader scrolls,
+   .scroll gets .took and the whole cue fades out. */
+.hero .scroll .meter{position:relative;width:46px;height:1px;background:rgba(255,255,255,.35)}
 .hero .scroll.hint .meter{background:currentColor;animation:pull 1.8s ease-in-out infinite}
-.hero .scroll.hint .meter::after{display:none}
 .hero .scroll.took{opacity:0;pointer-events:none}
 @keyframes pull{0%,100%{transform:scaleX(.35);transform-origin:left;opacity:.4}50%{transform:scaleX(1);opacity:1}}
 /* CRT overlays — hero only. "Late-night broadcast", not video-game glitch. */
@@ -480,10 +465,8 @@ body.no-grain::after{opacity:0}
 .oshot img.on{opacity:1}
 .oshot.flip img.on{animation:settle .9s var(--ease)}
 @keyframes settle{0%{transform:scale(1.03)}100%{transform:none}}
-/* segmented index: the active tick is a 900ms progress bar while cycling */
-/* the dash markers are gone — the number counter IS the progress indicator now
-   (they showed the same thing twice). Keep .ticks out of the layout entirely. */
-.oshot .ticks{display:none}
+/* the number counter (e.g. "2/3") is the sole progress indicator; while cycling
+   the section accent sweeps through it over --tickdur (below). */
 @media(hover:none) and (pointer:coarse){.oshot{--tickdur:2.2s}}   /* match the touch auto-cycle cadence */
 /* the counter (e.g. "2/3") sits white by default; while cycling, the section accent
    sweeps left→right through it over the cycle duration — same role the filling dash
@@ -582,8 +565,6 @@ body.no-grain::after{opacity:0}
 .mcell .mrole{position:absolute;left:12px;bottom:8px;display:inline-block;background:var(--yellow);color:var(--ink);
   font-weight:700;font-size:clamp(.58rem,.72vw,.75rem);letter-spacing:.12em;text-transform:uppercase;
   padding:.32em .6em;border-radius:3px;line-height:1}
-.mproof{margin-top:calc(clamp(18px,3vh,40px)*var(--fz));font-weight:300;font-size:calc(var(--t-lead)*var(--fz))}
-.mproof b{font-weight:900;font-style:italic;color:var(--yellow)}
 /* phones stay 3-up (2-up made the roster read as a short list, not a wall), but a
    3-up cell is only ~105px wide. Shrinking the OVERLAY type to fit inside the photo
    drove the name to ~11px and the role pill to ~7px — technically non-overflowing,
@@ -654,15 +635,6 @@ body.no-grain::after{opacity:0}
   .vtextcol{grid-column:1;min-height:0}
 }
 
-/* ============ PARTNER CTA — the page finally asks its audience to act ============ */
-.cta{text-align:left}
-.cta .head{max-width:16ch}
-.cta .biglink{display:inline-block;margin-top:calc(clamp(30px,6vh,72px)*var(--fz));font-weight:900;font-style:italic;letter-spacing:-.02em;
-  font-size:calc(clamp(1.7rem,min(4.2vw,5.5vh),4.4rem)*var(--fz));line-height:1;color:var(--cream);text-decoration:none;
-  border-bottom:3px solid var(--red);padding-bottom:.12em;transition:color .5s var(--ease)}
-.cta .biglink:hover{color:var(--red)}
-.cta .biglink .arr{font-style:normal;color:var(--red)}
-
 /* ============ FOOTER — slim strip; the memo lives here now ============ */
 /* FOOTER — a big closing block: About Us heading + blurb, then stacked rows of
    pipe-separated links (Home / site nav / socials), then the © base line. */
@@ -711,9 +683,6 @@ body.no-grain::after{opacity:0}
 @media(max-width:760px){.mf-collage{z-index:11}}
 .mf-panel{position:relative;background:var(--ink);overflow:visible;
   margin:0 clamp(30px,8vw,120px);padding:clamp(30px,4vw,56px) clamp(28px,4vw,60px) clamp(28px,4vw,52px)}
-/* small uppercase section label above the opening line */
-.mf-eyebrow{font-weight:500;letter-spacing:.22em;text-transform:uppercase;font-size:var(--t-label);
-  color:var(--cream);opacity:.6;margin-bottom:clamp(14px,2.2vh,26px)}
 /* HEADING for the chant section — the manifesto opens on this. Full headline
    scale (near the "Where…" beats), cream. */
 .mf-lede{font-weight:900;letter-spacing:-.03em;line-height:.94;color:var(--cream);
@@ -1007,7 +976,7 @@ body.no-grain::after{opacity:0}
   <div class="lk">
     <a href="#misfits">Misfit Brigade</a>
     <a href="#culturist-network">Culturist Network</a>
-    <a href="#irl-live">IRL &amp; Live</a>
+    <a href="#irl-live">IRL & Live</a>
     <a href="#film-studio">Film Studio</a>
     <a class="ig" href="https://www.instagram.com/culturalmisfits.live/" target="_blank" rel="noopener" aria-label="Follow us on Instagram">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
@@ -1026,7 +995,7 @@ body.no-grain::after{opacity:0}
   <div class="navmenu" id="navMenu" hidden>
     <a href="#misfits">Misfit Brigade</a>
     <a href="#culturist-network">Culturist Network</a>
-    <a href="#irl-live">IRL &amp; Live</a>
+    <a href="#irl-live">IRL & Live</a>
     <a href="#film-studio">Film Studio</a>
     <a href="mailto:hello@culturalmisfits.com">Contact</a>
   </div>
@@ -1034,11 +1003,10 @@ body.no-grain::after{opacity:0}
 
 <div class="deck" id="top">
 
-  <!-- HERO — CRT card. Three beats crossfade in the SAME slot as the reader
-       scrolls (pin+scrub+snap, like manifesto); if they don't scroll, an idle
-       timer advances them so the brand signature always lands. Beat 1 is the
-       rest state after power-on — the screen is never empty. -->
-  <header class="card dark hero" data-nav="dark" data-navbg="#231F20">
+  <!-- HERO — CRT card. ONE statement (the brand signature), CRT-typed once
+       after power-on. The hero does not pin (nopin): it scrolls away into the
+       manifesto like any other section. -->
+  <header class="card dark hero nopin" data-nav="dark" data-navbg="#231F20" data-navclear>
     <!-- 3D CMF-glyph balloon (real swept-tube geometry, foil material), rendered
          B&W to sit inside the CRT hero. Falls back to a poster image if WebGL
          is unavailable — see .hero-canvas.poster and hero-balloon.js. -->
@@ -1046,19 +1014,14 @@ body.no-grain::after{opacity:0}
     <div class="tv"><div class="scan"></div><div class="roll"></div><div class="glass"></div></div>
     <div class="flash"></div>
     <div class="content wrap">
-      <!-- beats stack in one grid cell; only .on is visible. id=mega keeps the
-           power-on settle hook (its animationend flips .hero.settled). -->
       <div class="hstage">
         <!-- intentional line breaks: each .ph is one sense-unit that stays whole
              (never wraps mid-phrase); .bp is the break between them. On phones the
              fit-scale shrinks type so phrases still hold one line each. -->
-        <h1 class="hbeat mega on" id="mega"><span class="ph">The connected and culturally fluid generation</span><br class="bp"><span class="ph">lives, feels and creates differently.</span></h1>
-        <p class="hbeat mega"><span class="ph">They deserve better.</span></p>
-        <p class="hbeat mega sig"><span class="ph">A Catalyst for Culture.</span><br class="bp"><span class="ph">A Sanctuary for the Misfits.</span><br class="bp"><span class="ph">We are Cultural <span class="mis">(Mis)</span>fits.</span></p>
+        <h1 class="hbeat mega sig on" id="mega"><span class="ph">We are Cultural <span class="mis">(Mis)</span>fits.</span><br class="bp"><span class="ph">The infrastructure for counter culture</span><br class="bp"><span class="ph">Because, Ordinary was never the point.</span></h1>
       </div>
     </div>
-    <!-- idle-advance meter: fills over the dwell before the next beat auto-types.
-         Hidden the moment the reader takes over by scrolling. -->
+    <!-- scroll cue: pulses once the statement has typed; fades on first scroll. -->
     <div class="scroll" id="hscroll"><span class="lbl">Scroll</span><i class="meter" id="hmeter"></i></div>
   </header>
 
@@ -1094,24 +1057,11 @@ body.no-grain::after{opacity:0}
     </div>
   </section>
 
-  <section class="mf-unite" id="audience">
-    <div class="mf-ustage">
-      <div class="mf-uhead mf-rise">Who are we <span class="mark mark-w" style="--hl:var(--red)">building for?</span></div>
-      <div class="mf-reel" id="mf-reel">
-        <figure class="mf-card" data-mfcard tabindex="0" role="button"><img src="assets/traits/curious.webp" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Curious</h4><div class="mf-q">Do you ask why and how, more than what?</div></figcaption></figure>
-        <figure class="mf-card" data-mfcard tabindex="0" role="button"><img src="assets/traits/expressive.webp" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Expressive</h4><div class="mf-q">Do you use music, fashion and memes to introduce yourself?</div></figcaption></figure>
-        <figure class="mf-card" data-mfcard tabindex="0" role="button"><img src="assets/traits/culturally-fluid.webp" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Culturally Fluid</h4><div class="mf-q">Do you live with contradictions — and are OK with it?</div></figcaption></figure>
-        <figure class="mf-card" data-mfcard tabindex="0" role="button"><img src="assets/traits/sameness.webp" alt="" decoding="async"><figcaption class="mf-cap"><h4>The (Mis)fit</h4><div class="mf-q">For every square hole, round peg. Are you tired of one-size-fits-all narratives?</div></figcaption></figure>
-      </div>
-    </div>
-    <div class="mf-reel-runway" aria-hidden="true"></div>
-  </section>
-
   <!-- THE MISFITS BRIGADE — the client's "Our Artists" roster, moved ABOVE
        Offerings so the reader meets the artists before the offerings that carry
        them. Photo wall: grayscale, hover reveals colour + the bigger image.
        Names are PLACEHOLDER until the client supplies the real roster. -->
-  <section class="card dark misfits tall nopin" id="misfits" data-nav="dark" data-navbg="#231F20">
+  <section class="card dark misfits tall nopin" id="misfits" data-nav="dark" data-navbg="#231F20" data-navclear data-nograin>
     <div class="wrap">
       <h2 class="head reveal d1" data-m>The (Mis)fit <span class="mark" style="--hl:var(--yellow)">Brigade</span></h2>
       <p class="lede lede-wide reveal d2" data-m>[Placeholder] A short line about the artists and creators we work with — the misfits shaping culture alongside us.</p>
@@ -1128,7 +1078,7 @@ body.no-grain::after{opacity:0}
           <img src="assets/brigade/2.webp" alt="Eshna Kutty" loading="lazy" decoding="async">
           <img class="mno" src="assets/brand/alien-white.webp" alt="" aria-hidden="true"><span class="mname">Eshna Kutty</span><span class="mrole">Hoop Artist</span>
         </figure>
-        <figure class="mcell" data-photo="assets/brigade/3.webp" data-name="Nicki Wells" data-order="03" data-bio="English singer, composer and songwriter known for blending Indian classical, Western classical, folk and jazz influences. She rose to prominence as featured vocalist in Nitin Sawhney&#x27;s band and released her debut album under the name TURYA before recording as Nicki Wells.">
+        <figure class="mcell" data-photo="assets/brigade/3.webp" data-name="Nicki Wells" data-order="03" data-bio="English singer, composer and songwriter known for blending Indian classical, Western classical, folk and jazz influences. She rose to prominence as featured vocalist in Nitin Sawhney's band and released her debut album under the name TURYA before recording as Nicki Wells.">
           <img src="assets/brigade/3.webp" alt="Nicki Wells" loading="lazy" decoding="async">
           <img class="mno" src="assets/brand/alien-white.webp" alt="" aria-hidden="true"><span class="mname">Nicki Wells</span><span class="mrole">Singer</span>
         </figure>
@@ -1136,7 +1086,7 @@ body.no-grain::after{opacity:0}
           <img src="assets/brigade/4.webp" alt="Nirvair Singh Rai" loading="lazy" decoding="async">
           <img class="mno" src="assets/brand/alien-white.webp" alt="" aria-hidden="true"><span class="mname">Nirvair Singh Rai</span><span class="mrole">Photographer</span>
         </figure>
-        <figure class="mcell" data-photo="assets/brigade/5.webp" data-name="Ravi-Ra" data-order="05" data-bio="Lyricist, singer-songwriter and screenwriter working in India&#x27;s film and music industry, credited in the music departments of films including Forensic (2022), Half CA (2023) and Anu Aur DI (2023).">
+        <figure class="mcell" data-photo="assets/brigade/5.webp" data-name="Ravi-Ra" data-order="05" data-bio="Lyricist, singer-songwriter and screenwriter working in India's film and music industry, credited in the music departments of films including Forensic (2022), Half CA (2023) and Anu Aur DI (2023).">
           <img src="assets/brigade/5.webp" alt="Ravi-Ra" loading="lazy" decoding="async">
           <img class="mno" src="assets/brand/alien-white.webp" alt="" aria-hidden="true"><span class="mname">Ravi-Ra</span><span class="mrole">Musician</span>
         </figure>
@@ -1160,57 +1110,6 @@ body.no-grain::after{opacity:0}
     </div>
   </section>
 
-  <!-- OFFERINGS — ink field; pillar accents from the PRIMARIES: red / yellow / green. -->
-  <section class="card dark offerings tall nopin" id="offerings" data-nav="dark" data-navbg="#231F20">
-    <div class="wrap">
-      <h2 class="head reveal d1" data-m style="margin-bottom:clamp(30px,4vw,64px)">How we bring these <span class="mark mark-w" style="--hl:var(--red)">narratives</span> to you.</h2>
-
-      <article class="offer reveal" id="culturist-network" style="--co:var(--red)">
-        <div class="oshot" data-photos="assets/offer/net-1.webp,assets/offer/net-2.webp,assets/offer/net-3.webp">
-          <span class="idx">1/3</span>
-          <span class="ticks"><i class="cur"></i><i></i><i></i></span>
-        </div>
-        <div class="otext" data-m>
-          <h3>Culturist Network</h3>
-          <p>Writers, anthropologists, designers, thinkers, and community-builders who document evolving cultures, identities, and truths. By bringing lived context to every story, they shape how narratives are told and co-create collective experiences.</p>
-          <a class="more" href="#">Read more ↗</a>
-        </div>
-      </article>
-
-      <article class="offer reveal" id="irl-live" style="--co:var(--yellow)">
-        <div class="oshot" data-photos="assets/offer/live-1.webp,assets/offer/live-2.webp,assets/offer/live-3.webp">
-          <span class="idx">1/3</span>
-          <span class="ticks"><i class="cur"></i><i></i><i></i></span>
-        </div>
-        <div class="otext" data-m>
-          <h3>IRL &amp; Live Experiences</h3>
-          <p>Experiences that feel less like events and more like temporary worlds. Built around subcultures, shared identities, and creative rituals, these IRL and live experiences are where (mis)fit communities come together to express, exchange, and belong.</p>
-          <a class="more" href="#work" data-scroll>Explore ↗</a>
-        </div>
-      </article>
-
-      <article class="offer reveal" id="film-studio" style="--co:var(--green)">
-        <!-- images come from VERTICALS['film-studio'].slides (same as the modal);
-             buildShot() rebuilds the ticks/idx to match the real count. -->
-        <div class="oshot">
-          <span class="idx">1/4</span>
-          <span class="ticks"><i class="cur"></i><i></i><i></i><i></i></span>
-        </div>
-        <div class="otext" data-m>
-          <h3>Film Studio</h3>
-          <p>Led by <b class="lead-name">Nirvair Rai</b>, this production and narrative arm of the Cultural (Mis)fits ecosystem collaborates with brands, media, fashion, and CSR initiatives to create authentic, culture-native content rooted in real communities.</p>
-          <p class="partner">Partner with us to create:</p>
-          <ul class="offer-list">
-            <li>Branded Content &amp; Films</li>
-            <li>Scripted &amp; Feature Content</li>
-            <li>CSR &amp; Purpose Driven Content</li>
-          </ul>
-          <a class="more" href="#">Read more ↗</a>
-        </div>
-      </article>
-    </div>
-  </section>
-
   <!-- THE MISFITS ACTS — brand red field, cream type. Two IPs today; the layout
        scales to N. To add a 3rd Act: copy one .witem block below, bump its reveal
        class (d2 → d3), and set the .txt h3 / p / Follow link + .oshot data-photos.
@@ -1223,17 +1122,28 @@ body.no-grain::after{opacity:0}
         <div class="txt" data-m><h3>Ruhbaru</h3><p>The sound of home, scaled into a cinematic live experience. From Sufi to cinematic pop, ghazal to qawwali — an intimate world of longing, devotion, memory, and renewal. <b>Come face to face · India tour 2026.</b></p><a class="fl" href="https://www.instagram.com/ruhbaru.in/" target="_blank" rel="noopener">Follow ↗</a></div>
         <div class="oshot" data-photos="assets/photo-ruhbaru.webp,assets/photo-concert.webp,assets/photo-hands.webp" style="--co:var(--cream)">
           <span class="idx">1/3</span>
-          <span class="ticks"><i class="cur"></i><i></i><i></i></span>
         </div>
       </div>
       <div class="witem reveal d2">
         <div class="txt" data-m><h3>Jupiter Pe Juice</h3><p>Truth wrapped in melody. Satire served fresh. A 90-minute musical satire where everyday absurdities become songs, punchlines, and cultural commentary. <b>Funny first. Truth later. Stays after.</b></p><a class="fl" href="https://www.instagram.com/jupiterpejuice/" target="_blank" rel="noopener">Follow ↗</a></div>
         <div class="oshot" data-photos="assets/photo-jupiter.webp,assets/photo-jupiter-2.webp,assets/photo-jupiter-3.webp" style="--co:var(--cream)">
           <span class="idx">1/3</span>
-          <span class="ticks"><i class="cur"></i><i></i><i></i></span>
         </div>
       </div>
     </div>
+  </section>
+
+  <section class="mf-unite" id="audience">
+    <div class="mf-ustage">
+      <div class="mf-uhead mf-rise">Who are we <span class="mark mark-w" style="--hl:var(--red)">building for?</span></div>
+      <div class="mf-reel" id="mf-reel">
+        <figure class="mf-card" data-mfcard tabindex="0" role="button"><img src="assets/traits/curious.webp" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Curious</h4><div class="mf-q">Do you ask why and how, more than what?</div></figcaption></figure>
+        <figure class="mf-card" data-mfcard tabindex="0" role="button"><img src="assets/traits/expressive.webp" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Expressive</h4><div class="mf-q">Do you use music, fashion and memes to introduce yourself?</div></figcaption></figure>
+        <figure class="mf-card" data-mfcard tabindex="0" role="button"><img src="assets/traits/culturally-fluid.webp" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Culturally Fluid</h4><div class="mf-q">Do you live with contradictions — and are OK with it?</div></figcaption></figure>
+        <figure class="mf-card" data-mfcard tabindex="0" role="button"><img src="assets/traits/sameness.webp" alt="" decoding="async"><figcaption class="mf-cap"><h4>The (Mis)fit</h4><div class="mf-q">For every square hole, round peg. Are you tired of one-size-fits-all narratives?</div></figcaption></figure>
+      </div>
+    </div>
+    <div class="mf-reel-runway" aria-hidden="true"></div>
   </section>
 
   <!-- FOR BRANDS — ink field, matching Offerings/Misfits. Positioning chart
@@ -1292,6 +1202,58 @@ body.no-grain::after{opacity:0}
     </div>
   </section>
 
+  <!-- OFFERINGS — ink field; pillar accents from the PRIMARIES: red / yellow / green. -->
+  <section class="card dark offerings tall nopin" id="offerings" data-nav="dark" data-navbg="#231F20">
+    <div class="wrap">
+      <h2 class="head reveal d1" data-m style="margin-bottom:clamp(30px,4vw,64px)">How we bring these <span class="mark mark-w" style="--hl:var(--red)">narratives</span> to you.</h2>
+
+      <article class="offer reveal" id="culturist-network" style="--co:var(--red)">
+        <!-- one list drives everything: the row cycles these images and the
+             Read-more modal pages are built from the same slides -->
+        <div class="oshot" data-photos="assets/offer/net-1.webp,assets/photo-manifesto.webp">
+          <span class="idx">1/2</span>
+        </div>
+        <div class="otext" data-m>
+          <h3>Culturist Network</h3>
+          <p>Writers, anthropologists, designers, thinkers, and community-builders who document evolving cultures, identities, and truths. By bringing lived context to every story, they shape how narratives are told and co-create collective experiences.</p>
+          <a class="more" href="#">Read more ↗</a>
+        </div>
+      </article>
+
+      <article class="offer reveal" id="irl-live" style="--co:var(--yellow)">
+        <!-- one list drives everything: the row cycles these images and the
+             Read-more modal pages are built from the same slides -->
+        <div class="oshot" data-photos="assets/offer/live-1.webp,assets/photo-ruhbaru.webp">
+          <span class="idx">1/2</span>
+        </div>
+        <div class="otext" data-m>
+          <h3>IRL & Live Experiences</h3>
+          <p>Experiences that feel less like events and more like temporary worlds. Built around subcultures, shared identities, and creative rituals, these IRL and live experiences are where (mis)fit communities come together to express, exchange, and belong.</p>
+          <a class="more" href="#work" data-scroll>Explore ↗</a>
+        </div>
+      </article>
+
+      <article class="offer reveal" id="film-studio" style="--co:var(--green)">
+        <!-- one list drives everything: the row cycles these images and the
+             Read-more modal pages are built from the same slides -->
+        <div class="oshot" data-photos="assets/offer/nirvair-1.webp,assets/offer/nirvair-2.webp,assets/offer/nirvair-3.webp,assets/offer/nirvair-4.webp">
+          <span class="idx">1/4</span>
+        </div>
+        <div class="otext" data-m>
+          <h3>Film Studio</h3>
+          <p>Led by <b class="lead-name">Nirvair Rai</b>, this production and narrative arm of the Cultural (Mis)fits ecosystem collaborates with brands, media, fashion, and CSR initiatives to create authentic, culture-native content rooted in real communities.</p>
+          <p class="partner">Partner with us to create:</p>
+          <ul class="offer-list">
+            <li>Branded Content & Films</li>
+            <li>Scripted & Feature Content</li>
+            <li>CSR & Purpose Driven Content</li>
+          </ul>
+          <a class="more" href="#">Read more ↗</a>
+        </div>
+      </article>
+    </div>
+  </section>
+
   <!-- WE WORK WITH — ink field, grey radial-gradient texture (same as
        Offerings/Misfits/For Brands). .head + .mark heading (mark-w keeps
        the highlighted text cream over the red fill), cream body copy at
@@ -1326,7 +1288,7 @@ body.no-grain::after{opacity:0}
       </nav>
       <nav class="frow">
         <a href="#culturist-network">Culturist Network</a>
-        <a href="#irl-live">IRL &amp; Live Experiences</a>
+        <a href="#irl-live">IRL & Live Experiences</a>
         <a href="#film-studio">Film Studio</a>
       </nav>
       <nav class="frow">
@@ -1423,11 +1385,6 @@ try {
 </script>
 
 <script type="module">
-/* pretext measures text without touching layout; if it can't load, the
-   engine falls back to a rough per-block line estimate. */
-let pretext=null;
-try{ pretext=await import('./vendor/pretext.esm.js'); }catch(_){ }
-
 /* ---------- reveals on enter ---------- */
 /* IO fires the fade when an element scrolls in — but a fast flight (anchor
    jump, flick) can cross the viewport between IO callbacks and skip it.
@@ -1460,7 +1417,7 @@ addEventListener('scroll',()=>{
 },{passive:true});
 
 /* ---------- hero: settle the CRT glow after power-on ---------- */
-const mega=document.getElementById('mega');   // = hero beat 1, the rest state
+const mega=document.getElementById('mega');   // = the hero statement
 // the power-on "open" clip-path animation runs on .content; when it ends the
 // broadcast has "tuned in", so soften the chroma glow. (Beat 1 no longer has
 // its own keyframe animation, so we key off .content, which does.)
@@ -1469,7 +1426,7 @@ document.querySelector('.hero .content')
 
 /* Safety net: the power-on clip-path uses forwards-fill. If the tab loads
    backgrounded, throttled rAF can leave the content clipped shut. Guarantee
-   the resting state — content open, beat 1 visible — and retry autoplay.
+   the resting state — content open, statement visible — and retry autoplay.
    The beats' own opacity is class-driven (.on), so we only need to force
    the clip-path open and make sure beat 1 carries .on. */
 (function heroFailsafe(){
@@ -1489,14 +1446,10 @@ document.querySelector('.hero .content')
 
 /* ---------- offerings: hover auto-cycles; touch taps advance ---------- */
 function buildShot(shot){
-  // Single source of truth: if this .oshot belongs to a modal-linked .offer,
-  // use the SAME images the modal shows (VERTICALS[id].slides) so the section's
-  // cycle and the pop-up never drift apart. Otherwise fall back to data-photos.
-  const vid=shot.closest('.offer')?.id;
-  const linked=vid&&VERTICALS[vid]&&VERTICALS[vid].slides;
-  const srcs=linked
-    ? VERTICALS[vid].slides.map(s=>s.image)
-    : (shot.dataset.photos||'').split(',').filter(Boolean);
+  // data-photos is the single source of truth: for offerings it's generated
+  // from the row's slides (the same list the modal renders), so the section's
+  // cycle and the pop-up can never drift apart.
+  const srcs=(shot.dataset.photos||'').split(',').filter(Boolean);
   if(!srcs.length||shot.dataset.built)return; shot.dataset.built='1';
   // (dash ticks removed — the number counter is the sole progress indicator now)
   const idx=shot.querySelector('.idx');
@@ -1569,34 +1522,7 @@ document.querySelectorAll('.offer,.witem').forEach(o=>oio.observe(o));
    The ‹ › arrows step through slides (image + its paragraphs advance together).
    TO EXTEND: add another {image, paragraphs:[...]} object to a vertical's array;
    add more paragraph strings to any slide's `paragraphs`. That's the whole API. */
-const VERTICALS={
-  'culturist-network':{accent:'var(--red)',slides:[
-    {image:'assets/offer/net-1.webp',paragraphs:[
-      'A media publication for the ones the algorithm skips — culture-led stories from emerging worlds and unheard voices.',
-      'Long-form profiles, scene reports, and photo essays that treat the margins as the main stage. First dispatch: late 2026.']},
-    {image:'assets/photo-manifesto.webp',paragraphs:[
-      'We document evolving cultures, identities, and truths — bringing lived context to every story.',
-      'Writers, anthropologists, designers, thinkers, and community-builders shape how narratives are told and co-created.']},
-  ]},
-  'irl-live':{accent:'var(--yellow)',slides:[
-    {image:'assets/offer/live-1.webp',paragraphs:[
-      'Temporary worlds you can stand inside. Experiences that feel less like events and more like places.',
-      'Built around subcultures, shared identities, and creative rituals — where (mis)fit communities come together to express, exchange, and belong.']},
-    {image:'assets/photo-ruhbaru.webp',paragraphs:[
-      'Ruhbaru — the sound of home, scaled into a cinematic live experience. India tour 2026.',
-      'Jupiter Pe Juice — a 90-minute musical satire where everyday absurdities become songs, punchlines, and cultural commentary.']},
-  ]},
-  'film-studio':{accent:'var(--green)',slides:[
-    {image:'assets/offer/nirvair-1.webp',paragraphs:[
-      'Films and brand work that carry cultural consequence. Led by Nirvair Rai.']},
-    {image:'assets/offer/nirvair-2.webp',paragraphs:[
-      'His body of work spans documentary projects such as Landless Kings, which followed the lives of Rohingya refugees along the Myanmar–Bangladesh border, and Memory of Land, a reflection on 100 years of the Jallianwala Bagh massacre and the afterlives of colonial trauma, exhibited internationally.']},
-    {image:'assets/offer/nirvair-3.webp',paragraphs:[
-      'Alongside this, Nirvair has built an extensive commercial and fashion portfolio, collaborating with brands and designers including Nike, Netflix, Sabyasachi, Tarun Tahiliani, Satya Paul, Vivo, Lenskart, Elle, and Vogue.']},
-    {image:'assets/offer/nirvair-4.webp',paragraphs:[
-      'We help brands participate in culture without flattening it — documentary instincts, cinematic craft, and access to scenes no agency deck can fake.']},
-  ]},
-};
+const VERTICALS=Object.fromEntries([{"id":"culturist-network","accent":"var(--red)","slides":[{"image":"assets/offer/net-1.webp","paragraphs":["A media publication for the ones the algorithm skips — culture-led stories from emerging worlds and unheard voices.","Long-form profiles, scene reports, and photo essays that treat the margins as the main stage. First dispatch: late 2026."]},{"image":"assets/photo-manifesto.webp","paragraphs":["We document evolving cultures, identities, and truths — bringing lived context to every story.","Writers, anthropologists, designers, thinkers, and community-builders shape how narratives are told and co-created."]}]},{"id":"irl-live","accent":"var(--yellow)","slides":[{"image":"assets/offer/live-1.webp","paragraphs":["Temporary worlds you can stand inside. Experiences that feel less like events and more like places.","Built around subcultures, shared identities, and creative rituals — where (mis)fit communities come together to express, exchange, and belong."]},{"image":"assets/photo-ruhbaru.webp","paragraphs":["Ruhbaru — the sound of home, scaled into a cinematic live experience. India tour 2026.","Jupiter Pe Juice — a 90-minute musical satire where everyday absurdities become songs, punchlines, and cultural commentary."]}]},{"id":"film-studio","accent":"var(--green)","slides":[{"image":"assets/offer/nirvair-1.webp","paragraphs":["Films and brand work that carry cultural consequence. Led by Nirvair Rai."]},{"image":"assets/offer/nirvair-2.webp","paragraphs":["His body of work spans documentary projects such as Landless Kings, which followed the lives of Rohingya refugees along the Myanmar–Bangladesh border, and Memory of Land, a reflection on 100 years of the Jallianwala Bagh massacre and the afterlives of colonial trauma, exhibited internationally."]},{"image":"assets/offer/nirvair-3.webp","paragraphs":["Alongside this, Nirvair has built an extensive commercial and fashion portfolio, collaborating with brands and designers including Nike, Netflix, Sabyasachi, Tarun Tahiliani, Satya Paul, Vivo, Lenskart, Elle, and Vogue."]},{"image":"assets/offer/nirvair-4.webp","paragraphs":["We help brands participate in culture without flattening it — documentary instincts, cinematic craft, and access to scenes no agency deck can fake."]}]}].map(v=>[v.id,v]));
 const vmodal=document.getElementById('vmodal');
 const vImg=document.getElementById('vimg'), vBody=document.getElementById('vbody');
 const vTitle=document.getElementById('vtitle');
@@ -1641,7 +1567,7 @@ function vTrapKeydown(e){
   else if(!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); }
 }
 function openVertical(id,trigger){
-  const v=VERTICALS[id]; if(!v)return;
+  const v=VERTICALS[id]; if(!v||!(v.slides&&v.slides.length))return;
   vTrigger=trigger||document.activeElement;
   vmodal.style.setProperty('--vc',v.accent);
   vSlides=v.slides||[]; renderSlide(0);
@@ -1715,12 +1641,10 @@ document.querySelectorAll('.mwall .mcell').forEach(cell=>{
 });
 
 /* ============================================================
-   SCROLL ENGINE — Lenis (feel) + GSAP ScrollTrigger (pinned scenes).
-   Each card pins (pinSpacing:false) for an explicit dwell, then the
-   next card slides up and covers it. Dwell comes from pretext text
-   measurement: more lines to read = more scroll room. Tall cards
-   (content > viewport) scroll through their content first and pin
-   from the bottom, so nothing ever clips.
+   SCROLL ENGINE — Lenis (feel) + GSAP ScrollTrigger.
+   Every section scrolls normally in flow (all .deck cards are .nopin);
+   ScrollTrigger drives the nav-theme flips, the manifesto mf-reel scrub,
+   and anchor-link resolution against each section's natural position.
    ============================================================ */
 const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
 if(!reduce){
@@ -1743,9 +1667,8 @@ if(!reduce){
   lenis.on('scroll',ScrollTrigger.update);
   gsap.ticker.add(t=>lenis.raf(t*1000));
   gsap.ticker.lagSmoothing(0);
-  /* the deck's spacers + pins change the page height after Lenis measures it;
-     re-measure whenever ScrollTrigger refreshes or scrollTo clamps to a stale
-     (too small) limit */
+  /* re-measure Lenis whenever ScrollTrigger refreshes (fonts/layout settling can
+     change the page height after Lenis first measured it) */
   ScrollTrigger.addEventListener('refresh',()=>lenis.resize());
 
   /* anchor links through Lenis — resolved against pin positions, because a
@@ -1792,156 +1715,36 @@ if(!reduce){
     lenis.on('scroll',()=>closeMenu());
   }
 
+  /* the deck cards stack by source order (z-index) so a section can visually sit
+     over the one before it where the layout overlaps them. */
   const cards=gsap.utils.toArray('.deck > .card');
   cards.forEach((c,i)=>c.style.zIndex=10+i);
 
-  /* .nopin cards opt OUT of the pinned-deck stacking: they scroll normally, in
-     flow, with no card-over-card overlap. A card pins only if it isn't .nopin and
-     isn't the footer (last). `pins` is the pinned subset the deck systems act on. */
-  const pinnable=(card,i)=> i<cards.length-1 && !card.classList.contains('nopin');
-
-  /* spacers give each PINNED card its dwell room. nopin cards get no spacer (they
-     reserve their own height in normal flow). */
-  const spacers=cards.map((c,i)=>{
-    if(!pinnable(c,i)) return null;
-    const sp=document.createElement('div');sp.className='spacer';
-    c.after(sp);return sp;
-  });
-
-  /* ------- pretext: measure the text a card asks you to read ------- */
-  function fontOf(el){
-    const cs=getComputedStyle(el);
-    const fam=cs.fontFamily.split(',')[0].replace(/["']/g,'');
-    return `${cs.fontStyle==='italic'?'italic ':''}${cs.fontWeight} ${cs.fontSize} ${fam}`;
-  }
-  function measureLines(card){
-    let lines=0;
-    card.querySelectorAll('[data-m]').forEach(el=>{
-      try{
-        const cs=getComputedStyle(el);
-        const lh=cs.lineHeight==='normal'?parseFloat(cs.fontSize)*1.2:parseFloat(cs.lineHeight);
-        const prep=pretext.prepare(el.textContent.replace(/\s+/g,' ').trim(),fontOf(el));
-        const res=pretext.layout(prep,el.clientWidth||el.parentElement.clientWidth,lh);
-        lines+=res.lineCount;
-      }catch(_){ lines+=4; } /* measurement must never break the page */
-    });
-    return lines;
-  }
-
   const mm=gsap.matchMedia();
   mm.add({small:'(max-width:860px)',large:'(min-width:861px)'},(ctx)=>{
-    const k=ctx.conditions.small?0.6:1;      // shorter dwell on phones
-    const vh=()=>window.innerHeight;
-    const dwells=new Array(cards.length).fill(0);
-    const talls=new Array(cards.length).fill(false);
-
-    /* fit pass: one-screen cards ([data-fit]) must FIT the window they're
-       shown in. Shrink their display scale (--fz) until the card's real
-       height fits 100vh — iterate because line wraps change non-linearly.
-       Floor at .72: below that, readability wins and the card falls back
-       to scrolling (tall mode). */
-    function fitPass(){
-      cards.forEach(card=>{
-        if(card.dataset.fit===undefined)return;
-        card.style.setProperty('--fz','1');
-        for(let n=0;n<3;n++){
-          const h=card.offsetHeight;
-          if(h<=vh()+1)break;
-          const cur=parseFloat(getComputedStyle(card).getPropertyValue('--fz'))||1;
-          const f=Math.max(.72,cur*(vh()-2)/h);
-          card.style.setProperty('--fz',f.toFixed(3));
-          if(f<=.72)break;
-        }
-      });
-    }
-
-    function computeAll(){
-      fitPass();
-      cards.forEach((card,i)=>{
-        if(!pinnable(card,i))return;                        // footer + .nopin cards never pin
-        /* ANY card still taller than the viewport is "tall": it scrolls
-           through its content first and pins from the bottom — pinning it
-           top-aligned would clip whatever hangs below the fold. */
-        talls[i]=card.offsetHeight>vh()+2;
-        let d;
-        if(card.classList.contains('hero')) d=vh()*0.5;   // short hold; scroll releases to the manifesto collage
-        else{
-          const lines=measureLines(card);
-          d=vh()*(0.45+0.055*lines);
-          d=Math.max(vh()*0.55,Math.min(vh()*2.1,d));
-        }
-        dwells[i]=Math.round(d*k);
-        /* a pinned card that reserves its OWN room (pinSpacing:true) needs a zero
-           spacer to avoid a double gap; that's the hero AND the last pinned card
-           before a .nopin region (see the pin loop). Others use their spacer. */
-        const selfSpace=card.classList.contains('hero') || !pinnable(cards[i+1],i+1);
-        if(spacers[i]) spacers[i].style.height=(selfSpace?0:dwells[i])+'px';
-      });
-    }
-    computeAll();
-    ScrollTrigger.addEventListener('refreshInit',computeAll);
-
-    /* pins: dwell solo, then one viewport of being covered */
-    cards.forEach((card,i)=>{
-      if(!pinnable(card,i))return;                    // footer + .nopin cards: no pin, normal flow
-      /* pinSpacing:false = the card stays fixed and relies on the NEXT pinned card
-         scrolling up to COVER it (the "layering" stack). That only works while the
-         following card also pins. A pinned card that is the LAST before a non-pinned
-         region — the hero (before the non-card manifesto) OR the last pinned card
-         before a .nopin section — has nothing to cover it, so it must use
-         pinSpacing:true to reserve its own room and release cleanly into flow.
-         Its spacer is then zeroed (below) to avoid a double gap. */
-      const selfSpace=card.classList.contains('hero') || !pinnable(cards[i+1],i+1);
-      const st=ScrollTrigger.create({
-        trigger:card,
-        start:()=>talls[i]?'bottom bottom':'top top',
-        /* pin until the NEXT card has fully covered: dwell + the distance its
-           top must travel. From a bottom-pin that distance is one viewport;
-           from a top-pin it is this card's own height. A self-spacing card just
-           holds for its dwell, then releases (pinSpacing:true reserves that room). */
-        end:()=>selfSpace?'+='+dwells[i]:'+='+(dwells[i]+(talls[i]?vh():card.offsetHeight)),
-        pin:true,pinSpacing:selfSpace,invalidateOnRefresh:true,
-      });
-      if(selfSpace && spacers[i]) spacers[i].style.height='0px';   // pinSpacing reserves the room
-      if(card.id)anchorTargets[card.id]=()=>talls[i]?st.start-(card.offsetHeight-vh()):st.start;
-      /* rows inside a card (the three verticals) anchor to their own offset,
-         with headroom for the nav bar */
-      card.querySelectorAll('.offer[id]').forEach(row=>{
-        anchorTargets[row.id]=()=>{
-          const flow=talls[i]?st.start-(card.offsetHeight-vh()):st.start;
-          return flow+row.offsetTop-80;
-        };
-      });
-    });
-
-    /* .nopin cards aren't pinned, so they have no ScrollTrigger start — their
-       anchor is just their natural document position (minus nav headroom). Nav
-       links to #work / #for-brands / #calling resolve here. */
-    cards.forEach((card,i)=>{
-      if(pinnable(card,i) || !card.id) return;
+    /* Every .deck card scrolls in normal flow (all are .nopin), so a section's
+       anchor is just its natural document position, minus nav headroom. Nav links
+       to #misfits / #work / #for-brands / #offerings / #calling resolve here, as
+       do the per-offering rows (.offer[id]). */
+    cards.forEach((card)=>{
+      if(!card.id) return;
       anchorTargets[card.id]=()=>card.getBoundingClientRect().top+window.scrollY-80;
       card.querySelectorAll('.offer[id]').forEach(row=>{
         anchorTargets[row.id]=()=>row.getBoundingClientRect().top+window.scrollY-80;
       });
     });
 
-    /* hero: three beats crossfade in one slot. TWO drivers, but only ONE is
-       ever live. State is a single index via show(n) — idempotent, so double
-       calls can't flicker.
-         1) idle auto-advance: a setTimeout chain steps 0→1→2 then STOPS, so a
-            reader who never scrolls still reaches the brand signature.
-         2) scroll: a pinned scrub maps scroll position → beat with snap.
-       The FIRST real scroll kills the timer forever (killed=true); from then
-       the scrub owns state. The scrub's onUpdate is gated on `killed`, so
-       before the handoff the timer is the sole writer — the two never fight. */
+    /* hero: ONE statement, CRT-typed once after the power-on settles. No pin,
+       no idle advance, no beat crossfade — scrolling mid-type snaps the line
+       complete (the reader has taken over) and fades the cue. */
     const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
     const hi=cards.findIndex(c=>c.classList.contains('hero'));
     const hbeats=gsap.utils.toArray('.hero .hbeat');
 
     /* wrap each beat's text in .hink, splitting every character into a .g span so
        the reveal flows glyph-by-glyph through real inline layout (correct
-       line-by-line wrapping). We walk text nodes so the nested .mis span in beat
-       3 is preserved — its glyphs keep the red color. A caret rides the edge. */
+       line-by-line wrapping). We walk text nodes so the nested .mis span
+       is preserved — its glyphs keep the red color. A caret rides the edge. */
     const glyphs=new Map();                              // beat → [.g spans in order]
     hbeats.forEach(b=>{
       const ink=document.createElement('span'); ink.className='hink';
@@ -1969,132 +1772,40 @@ if(!reduce){
       b.append(ink);
     });
 
-    if(hi>-1 && !talls[hi] && hbeats.length && !reduce){
-      /* ---- SINGLE SOURCE OF TRUTH beat engine ----
-         Two earlier attempts leaked state (async animationend cleanup + class
-         juggling) and let beats stack. This model makes overlap STRUCTURALLY
-         impossible: one render() runs every frame; it first hard-clears EVERY
-         beat, then paints exactly ONE active beat (+ an optional decaying ghost).
-         There is no deferred cleanup to miss. State is just a few numbers:
-           active  – index of the beat that should be visible (-1 = none yet)
-           typeAt  – timestamp the active beat began typing (for the reveal)
-           ghost   – {i, at} of the beat currently phosphor-decaying, or null
-           killed  – handoff done; render locks to the signature forever         */
-      const meterEl=document.getElementById('hmeter');
+    if(hi>-1 && hbeats.length && !reduce){
       const scrollCue=document.getElementById('hscroll');
-      const N=hbeats.length, SIG=N-1;
-      const TYPE_MS=n=>Math.min(3400,950+n*34);           // slower, more deliberate typing
-      const DECAY_MS=650, DWELL=2200;                     // hold (meter fill) AFTER a beat finishes typing
-      const dur=hbeats.map(b=>TYPE_MS((b.textContent||'').length));
-
-      let active=-1, typeAt=0, ghost=null, killed=false, timer=null, raf=0, meterAt=0;
-
-      // paint one beat: light the first `p` fraction of its glyphs, set opacity.
-      const paint=(b,i,p,op,decay)=>{
-        const gs=glyphs.get(b), lit=Math.round(p*gs.length);
-        // toggle('lit', j<lit) is a no-op for already-lit glyphs, so the per-glyph
-        // hot-phosphor "strike" animation fires exactly ONCE per glyph, on the frame
-        // it's first struck — never re-fires while it stays lit.
+      const b=hbeats[0], gs=glyphs.get(b);
+      const dur=Math.min(3400,950+(b.textContent||'').length*34);   // same typing pace as before
+      let typeAt=0, raf=0, done=false;
+      // light the first `p` fraction of the glyphs; typing/done drive the caret
+      const paint=p=>{
+        const lit=Math.round(p*gs.length);
         gs.forEach((g,j)=>g.classList.toggle('lit',j<lit));
-        b.classList.toggle('on',op>0);
-        b.classList.toggle('done',p>=1&&!decay);
-        b.classList.toggle('typing',p<1&&op>0&&!decay);
-        b.classList.toggle('decay',!!decay);
-        b.style.opacity=op<1?op.toFixed(3):'';            // JS-driven fade (no CSS anim to leak)
+        b.classList.toggle('done',p>=1);
+        b.classList.toggle('typing',p<1);
       };
-      const clear=b=>{ paint(b,0,0,0,false); b.style.opacity=''; };
-
-      // the ONE render. Idempotent: clears all, then paints active (+ghost).
-      function render(now){
-        for(let i=0;i<N;i++){
-          const b=hbeats[i];
-          if(i===active){
-            const p=killed?1:Math.min(1,(now-typeAt)/dur[i]);
-            paint(b,i,p,1,false);
-          }else if(ghost&&ghost.i===i&&!killed){
-            const e=(now-ghost.at)/DECAY_MS;
-            if(e>=1){ ghost=null; clear(b); }
-            else{ const bloom=e<.14; paint(b,i,1,1-e,true);
-              b.style.filter=bloom?'brightness(1.9)':''; }
-          }else{
-            clear(b); b.style.filter='';
-          }
-        }
-      }
-      function loop(now){ render(now);
-        // keep looping while typing OR a ghost is decaying (not after kill's lock)
-        const b=hbeats[active];
-        const stillTyping=active>=0 && !killed && (now-typeAt)<dur[active];
-        if(stillTyping || ghost) raf=requestAnimationFrame(loop);
-      }
-      const kick=()=>{ cancelAnimationFrame(raf); raf=requestAnimationFrame(loop); };
-
-      // advance to beat n: the current active becomes the decaying ghost.
-      function go(n){
-        if(n===active)return;
-        if(active>=0) ghost={i:active, at:performance.now()};
-        active=n; typeAt=performance.now();
-        kick();
-      }
-
-      // idle auto-advance: type a beat, fill the meter over the dwell, advance.
-      function runMeter(onFull){ meterAt=performance.now(); scrollCue?.classList.remove('hint');
-        (function m(now){ if(killed)return;
-          const p=Math.min(1,(now-meterAt)/DWELL); meterEl?.style.setProperty('--mp',p.toFixed(3));
-          if(p<1) requestAnimationFrame(m); else onFull&&onFull();
-        })(performance.now());
-      }
-      const tick=()=>{ if(killed)return;
-        if(active<SIG){ go(active+1);
-          /* HOLD the freshly-typed beat: wait for it to finish TYPING, THEN run the
-             dwell meter. Previously the dwell was measured from when a beat started
-             typing, so a long first sentence typed for most of the dwell and barely
-             held before advancing. Now the visible hold is a full DWELL regardless
-             of how long the phrase took to type. */
-          const holdThenAdvance=()=>runMeter(()=>{ if(!killed) timer=setTimeout(tick,50); });
-          timer=setTimeout(holdThenAdvance, dur[active]);
-        }
-        else scrollCue?.classList.add('hint');
-      };
-
-      // beat 0 waits for the CRT power-on to finish (.content "open" anim → .settled)
+      const finish=()=>{ if(done)return; done=true; cancelAnimationFrame(raf);
+        paint(1); scrollCue?.classList.add('hint'); };
+      const loop=now=>{ const p=Math.min(1,(now-typeAt)/dur);
+        paint(p); if(p<1) raf=requestAnimationFrame(loop); else finish(); };
+      const startBeat=()=>{ if(typeAt)return;
+        typeAt=performance.now(); raf=requestAnimationFrame(loop); };
+      // wait for the CRT power-on to finish (.content "open" anim -> .settled)
       const heroEl=document.querySelector('.hero');
-      const startBeats=()=>{ if(killed||active>-1)return;
-        /* beat 0: let it finish typing, THEN hold a full dwell before advancing */
-        go(0); timer=setTimeout(()=>runMeter(()=>{ if(!killed) timer=setTimeout(tick,50); }), dur[0]); };
-      if(heroEl?.classList.contains('settled')){ startBeats(); }
+      if(heroEl?.classList.contains('settled')) startBeat();
       else{
-        document.querySelector('.hero .content')?.addEventListener('animationend',startBeats,{once:true});
-        setTimeout(startBeats,1600);
+        document.querySelector('.hero .content')?.addEventListener('animationend',startBeat,{once:true});
+        setTimeout(startBeat,1600);   // backstop if the power-on anim never fires
       }
-
-      // handoff: first real user scroll locks the signature FOREVER. render()'s
-      // killed branch forces active=SIG, opacity 1, no ghost — scroll-up re-pin
-      // can't resurrect anything because render always clears all-but-active.
-      const kill=()=>{ if(killed)return; killed=true;
-        if(timer){clearTimeout(timer);timer=null;}
-        ghost=null; active=SIG; scrollCue?.classList.add('took');
-        cancelAnimationFrame(raf); render(performance.now());   // one authoritative paint
-      };
+      // the reader taking over: snap the line complete, retire the cue
       ['wheel','touchmove','keydown'].forEach(ev=>
-        addEventListener(ev,e=>{ if(ev==='keydown'&&!['ArrowDown','PageDown',' ','Spacebar'].includes(e.key))return; kill(); },{passive:true,once:false}));
-      anchorTargets['top']=()=>0;
-    }else if(hi>-1 && hbeats.length && !reduce){
-      /* fallback (phones where the card is tall, or no scrub): no pin, no
-         timer. Un-grid the stage so the beats flow vertically (no overlap),
-         step them in with a stagger, and leave ALL visible so nothing is
-         stranded and nothing clips. Reduced-motion is CSS-only (all visible). */
-      document.querySelector('.hero .hstage')?.classList.add('flowed');
-      document.getElementById('hscroll')?.classList.add('took');   // no idle meter in flow mode
-      hbeats.forEach((b,i)=>{
-        b.classList.add('notype');                                 // ink shown full, no caret
-        gsap.to(b,{autoAlpha:1,y:0,duration:.7,ease:'power2.out',delay:.2+i*.5,
-          onStart:()=>b.classList.add('on')});
-      });
-    }else if(hi>-1 && hbeats.length){   // reduced-motion: every beat visible, full ink, no cue
+        addEventListener(ev,e=>{ if(ev==='keydown'&&!['ArrowDown','PageDown',' ','Spacebar'].includes(e.key))return;
+          startBeat(); finish(); scrollCue?.classList.add('took'); },{passive:true}));
+    }else if(hi>-1 && hbeats.length){   // reduced-motion: full ink, no typing, no cue
       hbeats.forEach(b=>b.classList.add('on','notype'));
       document.getElementById('hscroll')?.classList.add('took');
     }
+    anchorTargets['top']=()=>0;
 
     /* MANIFESTO COLLAGE — the four-types filmstrip reel. The .mf-ustage is
        sticky (CSS) and its sibling .mf-reel-runway (420vh) gives the scrub its
@@ -2144,11 +1855,12 @@ if(!reduce){
     function theme(i){
       i=Math.max(0,i);
       nav.classList.toggle('thm-light',themes[i]==='light');
-      // hero (0) + manifesto (1) wear a transparent bar so their video/photo
-      // reads edge-to-edge; every other card keeps the solid field bar
-      nav.classList.toggle('transparent',i===0||i===1);
-      // drop the film grain over the manifesto photo so the image reads clean
-      document.body.classList.toggle('no-grain',i===1);
+      // data-navclear cards wear a transparent bar so their imagery reads
+      // edge-to-edge; the rest keep the solid field bar. Attribute-driven (not
+      // index-driven) so operator reordering of sections can't misplace it.
+      nav.classList.toggle('transparent','navclear' in cards[i].dataset);
+      // data-nograin cards drop the film grain so their photos read clean
+      document.body.classList.toggle('no-grain','nograin' in cards[i].dataset);
       // over a RED section (e.g. Misfits Acts), the logo's red "(Mis)" would
       // vanish into the background — flag it so the CSS recolors it to cream.
       nav.classList.toggle('over-red',(navbgs[i]||'').toUpperCase()==='#DB1A21');
@@ -2162,11 +1874,9 @@ if(!reduce){
       });
     });
     theme(0);
-
-    return ()=>{ ScrollTrigger.removeEventListener('refreshInit',computeAll); };
   });
 
-  /* re-measure after fonts arrive (metrics change line counts) */
+  /* re-measure after fonts arrive (metrics can shift layout/anchor positions) */
   document.fonts.ready.then(()=>ScrollTrigger.refresh());
   /* On mobile the URL bar collapsing changes innerHeight by ~60-120px mid-scroll.
      Refreshing pins on that recomputes every trigger and visibly jumps the page,
@@ -2204,7 +1914,7 @@ if(!reduce){
 
   let ShaderMount, simplexNoise;
   try {
-    ({ ShaderMount } = await import('./vendor/paper-shaders/index.js'));
+    ({ ShaderMount } = await import('./vendor/paper-shaders/shader-mount.js'));
     ({ simplexNoise } = await import('./vendor/paper-shaders/shader-utils.js'));
   } catch(_) { return; }                               // import failed → CSS fallback
 
@@ -2309,7 +2019,13 @@ if(!reduce){
     if(cv){ cv.style.position='absolute'; cv.style.zIndex='-1'; cv.style.pointerEvents='none';
       cv.style.left=(-OVERHANG)+'px'; cv.style.top=(-VPAD)+'px';
       cv.style.width='calc(100% + '+(OVERHANG*2)+'px)';
-      cv.style.height='calc(100% + '+(VPAD*2)+'px)'; }
+      cv.style.height='calc(100% + '+(VPAD*2)+'px)';
+      // context loss (iOS evicts the oldest context when too many are alive):
+      // this mark drops back to the CSS swipe highlight instead of going blank
+      cv.addEventListener('webglcontextlost',e=>{ e.preventDefault();
+        el.classList.remove('mark-shader');
+        try{ mount.dispose&&mount.dispose(); }catch(_){}
+        cv.remove(); },{once:true}); }
 
     // trigger element: the chart label keys off .fb-chart.in; the manifesto beats
     // reveal via .mf-rise; everything else via its nearest .reveal ancestor. All
@@ -2398,7 +2114,7 @@ if(!reduce){
 
   let ShaderMount, simplexNoise;
   try{
-    ({ ShaderMount } = await import('./vendor/paper-shaders/index.js'));
+    ({ ShaderMount } = await import('./vendor/paper-shaders/shader-mount.js'));
     ({ simplexNoise } = await import('./vendor/paper-shaders/shader-utils.js'));
   }catch(_){ return; }
 
@@ -2473,6 +2189,11 @@ if(!reduce){
   catch(_){ return; }                                   // fall back to CSS axes
   if(!cv) return;
   cv.classList.add('fb-crayon'); plot.classList.add('has-crayon');   // hide CSS axes
+  // context loss → put the CSS hairline axes back instead of leaving no axes
+  cv.addEventListener('webglcontextlost',e=>{ e.preventDefault();
+    plot.classList.remove('has-crayon');
+    try{ mount.dispose&&mount.dispose(); }catch(_){}
+    cv.remove(); },{once:true});
 
   // offscreen guard: this is a one-shot draw-in (step() stops itself at p>=1),
   // but a fast scroll-past mid-draw could otherwise keep it rendering unseen —

@@ -1,0 +1,956 @@
+  <!-- FOOTER — About Us blurb, site nav, and socials. -->
+  <footer class="card foot" data-nav="dark" data-navbg="#1B1818">
+    <div class="wrap">
+      <div class="about">
+        <h3 class="fh">{{ footer.aboutHeading }}</h3>
+        <p>{{ footer.aboutBlurb | safe }}</p>
+      </div>
+      <nav class="frow frow-home">
+{%- for l in footer.homeLinks %}
+        <a href="{{ l.href }}">{{ l.label | safe }}</a>
+{%- endfor %}
+      </nav>
+      <nav class="frow">
+{%- for l in footer.navLinks %}
+        <a href="{{ l.href }}">{{ l.label | safe }}</a>
+{%- endfor %}
+      </nav>
+      <nav class="frow">
+{%- for l in footer.socialLinks %}
+        <a href="{{ l.href }}" target="_blank" rel="noopener">{{ l.label | safe }}</a>
+{%- endfor %}
+      </nav>
+      <div class="base">
+        <span>{{ footer.copyright | safe }}</span>
+        <span>{{ footer.tagline | safe }}</span>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<!-- VERTICAL MODAL — "Read more" on a pillar opens its world:
+     detail copy + a misfits-style photo grid, populated per vertical. -->
+<div class="vmodal" id="vmodal" hidden>
+  <div class="vscrim" data-close></div>
+  <article class="vpanel" role="dialog" aria-modal="true" aria-labelledby="vtitle" tabindex="-1">
+    <h2 class="sr-only" id="vtitle"></h2>
+    <figure class="vfig"><img id="vimg" src="" alt="" decoding="async"></figure>
+    <div class="vtextcol">
+      <div class="vbody" id="vbody"></div>
+      <!-- nav row pinned to the bottom of the text column (level with the image bottom):
+           arrows on the left, close on the right -->
+      <div class="vnav">
+        <div class="varrows" aria-label="Slides">
+          <button class="vprev" id="vprev" aria-label="Previous">
+            <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 5l-7 7 7 7"/></svg>
+          </button>
+          <button class="vnext" id="vnext" aria-label="Next">
+            <svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+        <button class="vclose" data-close aria-label="Close">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+    </div>
+  </article>
+</div>
+
+<script src="vendor/lenis.min.js"></script>
+<script src="vendor/gsap.min.js"></script>
+<script src="vendor/ScrollTrigger.min.js"></script>
+
+<!-- 3D hero balloon: init in its own module so a WebGL failure can't take down
+     the main hero/scroll engine. On success it clears the poster fallback. -->
+<script type="module">
+/* GFX — the one knob for decorative-GPU quality across the page (hero balloon,
+   crayon axes, text highlighters). Deliberately NOT a hard mobile kill-switch
+   (product call: newer phones can carry full quality) — instead every canvas
+   pauses off-screen + respects DPR caps, so cost scales down smoothly instead
+   of being switched off by device class. window.GFX (not a module-scoped
+   const) because each shader lives in its OWN <script type="module"> and
+   modules don't share scope — this is the one object all three read.
+     maxDPR_shader — cap for the 2D fragment-shader canvases (highlighters +
+       crayon axes). 1.5 keeps fill-rate sane on 3x-DPR phones; visually a
+       no-op since these are small, soft-edged marks (see per-canvas note).
+     maxDPR_hero   — cap for the WebGL hero balloon (real 3D geometry benefits
+       more from resolution, so it gets a higher ceiling than the flat shaders).
+     decorativeFPS — frame-time gate for the highlighters + crayon axes (NOT
+       the hero balloon, which should stay smooth): halves GPU work for
+       slow-moving decorative effects where 30fps reads identically to 60fps.
+     pauseOffscreen — IntersectionObserver gate; every rAF loop below checks it.
+     tier — 'auto' runs the coarse-but-robust signal (matchMedia max-width:860px
+       + prefers-reduced-motion) documented at the call sites; force 'low' or
+       'high' here (e.g. from the console: GFX.tier='low') to test either path
+       without spoofing a device. Kept coarse deliberately: deviceMemory is
+       Chrome-only, hardwareConcurrency is clamped to 2 on all iOS (unreliable
+       on iPhone), and WEBGL_debug_renderer_info strings are being sanitised —
+       none of those are robust tier signals, so we don't gate on them. */
+window.GFX = {
+  maxDPR_shader: 1.5,
+  maxDPR_hero: 2,
+  decorativeFPS: 30,
+  pauseOffscreen: true,
+  tier: 'auto',
+};
+try {
+  const { initHeroBalloon } = await import('./vendor/hero-balloon.js');
+  const cv = document.getElementById('heroCanvas');
+  if (cv) {
+    // no poster by default (avoids the old flat image flashing before the model
+    // loads). Only reveal the poster if the model actually fails to load.
+    cv.addEventListener('balloonfailed', () => cv.classList.add('poster'), { once: true });
+    if (!initHeroBalloon(cv)) cv.classList.add('poster');   // WebGL unavailable
+  }
+} catch (e) {
+  document.getElementById('heroCanvas')?.classList.add('poster');
+}
+</script>
+
+<script type="module">
+/* ---------- reveals on enter ---------- */
+/* IO fires the fade when an element scrolls in — but a fast flight (anchor
+   jump, flick) can cross the viewport between IO callbacks and skip it.
+   The sweep is the guarantee: anything the scroll position has already
+   reached gets revealed, no matter how it got there. */
+/* For Brands is a plain reveal section (the staged chart choreography + replay
+   were removed) — its reveals and the .fb-chart go through the same once-only
+   observer as the rest of the site, fading in together on scroll-in. */
+/* The four filmstrip cards join the reveal set ONLY on phones. On desktop they're
+   a live scroll-scrubbed accordion (they must never start hidden); on phones they're
+   a static vertical stack with no motion, so they get the same scroll-in reveal as
+   the rest of the mobile page — staggered via .mf-card:nth-child in CSS. */
+const revealSel='.reveal, .mf-rise, .fb-chart'+
+  (matchMedia('(max-width:760px)').matches?', .mf-card':'');
+const pendingReveals=new Set(document.querySelectorAll(revealSel));
+function fireReveal(el){ el.classList.add('in'); pendingReveals.delete(el); io.unobserve(el); }
+const io=new IntersectionObserver((es)=>{
+  es.forEach(e=>{ if(e.isIntersecting)fireReveal(e.target); });
+},{threshold:.15});
+pendingReveals.forEach(el=>io.observe(el));
+
+let sweepAt=0;
+addEventListener('scroll',()=>{
+  const now=performance.now();
+  if(now-sweepAt<150||!pendingReveals.size)return;
+  sweepAt=now;
+  pendingReveals.forEach(el=>{
+    if(el.getBoundingClientRect().top<innerHeight*.92)fireReveal(el);
+  });
+},{passive:true});
+
+/* ---------- hero: settle the CRT glow after power-on ---------- */
+const mega=document.getElementById('mega');   // = the hero statement
+// the power-on "open" clip-path animation runs on .content; when it ends the
+// broadcast has "tuned in", so soften the chroma glow. (Beat 1 no longer has
+// its own keyframe animation, so we key off .content, which does.)
+document.querySelector('.hero .content')
+  ?.addEventListener('animationend',()=>document.querySelector('.hero').classList.add('settled'),{once:true});
+
+/* Safety net: the power-on clip-path uses forwards-fill. If the tab loads
+   backgrounded, throttled rAF can leave the content clipped shut. Guarantee
+   the resting state — content open, statement visible — and retry autoplay.
+   The beats' own opacity is class-driven (.on), so we only need to force
+   the clip-path open and make sure beat 1 carries .on. */
+(function heroFailsafe(){
+  const hero=document.querySelector('.hero');
+  if(!hero)return;
+  const content=hero.querySelector('.content');
+  const clipped=()=>content && getComputedStyle(content).clipPath!=='none';
+  const settle=()=>{
+    if(content) content.style.clipPath='none';
+    if(mega && !mega.classList.contains('on')) mega.classList.add('on');
+    hero.classList.add('settled');
+  };
+  document.addEventListener('visibilitychange',()=>{ if(!document.hidden && clipped()) settle(); });
+  // hard backstop well past the ~2.9s power-on sequence
+  setTimeout(()=>{ if(clipped()) settle(); },4000);
+})();
+
+/* ---------- offerings: hover auto-cycles; touch taps advance ---------- */
+function buildShot(shot){
+  // data-photos is the single source of truth: for offerings it's generated
+  // from the row's slides (the same list the modal renders), so the section's
+  // cycle and the pop-up can never drift apart.
+  const srcs=(shot.dataset.photos||'').split(',').filter(Boolean);
+  if(!srcs.length||shot.dataset.built)return; shot.dataset.built='1';
+  // (dash ticks removed — the number counter is the sole progress indicator now)
+  const idx=shot.querySelector('.idx');
+  const imgs=srcs.map((s,i)=>{const im=new Image();im.src=s;im.alt='';im.decoding='async';
+    im.className=i===0?'on':'';shot.insertBefore(im,shot.firstChild);return im;});
+  let cur=0,timer=null;
+  function show(n){
+    cur=(n+srcs.length)%srcs.length;
+    imgs.forEach((im,i)=>im.classList.toggle('on',i===cur));
+    if(idx){
+      idx.textContent=(cur+1)+'/'+srcs.length;
+      /* restart the accent sweep on the counter for the new image (the .cycling
+         class stays on, so the animation must be re-triggered by reflow) */
+      idx.style.animation='none';void idx.offsetWidth;idx.style.animation='';
+    }
+    shot.classList.remove('flip');void shot.offsetWidth;shot.classList.add('flip');
+  }
+  const next=()=>show(cur+1);
+  const reduceMotion=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  const isTouch=matchMedia('(hover:none) and (pointer:coarse)').matches;
+  const startCycle=()=>{ if(timer||reduceMotion||srcs.length<2)return;
+    shot.classList.add('cycling'); timer=setInterval(next,2200); };
+  const stopCycle=()=>{ if(timer){clearInterval(timer);timer=null;} shot.classList.remove('cycling'); };
+
+  if(isTouch){
+    /* PHONE: no hover, so the photos auto-cycle on their own — but ONLY while the
+       shot is on screen (and the tab is visible), so it doesn't run unseen or drain
+       battery. A slower 2.2s cadence suits passive viewing (vs the 0.9s hover cycle).
+       A tap still advances immediately. */
+    const cyIO=new IntersectionObserver(es=>es.forEach(e=>{
+      (e.isIntersecting && !document.hidden) ? startCycle() : stopCycle();
+    }),{threshold:0.35});
+    cyIO.observe(shot);
+    document.addEventListener('visibilitychange',()=>{ if(document.hidden)stopCycle();
+      else if(shot.getBoundingClientRect().top<innerHeight&&shot.getBoundingClientRect().bottom>0)startCycle(); });
+    shot.addEventListener('click',()=>{ next(); });   // tap = manual advance, cycle continues
+  }else{
+    /* DESKTOP: hover cycles fast; leaving stops and rests on the current image. */
+    shot.addEventListener('pointerenter',e=>{
+      if(e.pointerType==='touch')return;
+      if(reduceMotion)return;   // keep the first image static; no hover auto-cycle
+      next(); shot.classList.add('cycling');
+      timer=setInterval(next,900);
+    });
+    shot.addEventListener('pointerleave',stopCycle);
+    shot.addEventListener('click',e=>{ if(!timer)next(); });   // keyboard-ish advance
+  }
+}
+/* lazy-build the layered <img>s only when the row first nears the viewport */
+const oio=new IntersectionObserver((es)=>{
+  es.forEach(e=>{ if(e.isIntersecting){ buildShot(e.target.querySelector('.oshot')); oio.unobserve(e.target);} });
+},{rootMargin:'300px 0px'});
+document.querySelectorAll('.offer,.witem').forEach(o=>oio.observe(o));
+
+/* ---------- Brigade roster order: each cell's data-order is the single source of
+   truth for its position (the visible badge is now the alien mark, not a number).
+   Sort the .mcell nodes by data-order and re-append, so changing a cell's number
+   (by hand or via TinaCMS later) moves it in the grid — no need to reorder the
+   source markup. The auto-fit grid then flows them left-to-right in order. ------- */
+(function orderRoster(){
+  const wall=document.querySelector('.mwall'); if(!wall)return;
+  const num=el=>{ const n=parseInt(el.dataset.order,10); return isNaN(n)?1e9:n; };
+  [...wall.querySelectorAll('.mcell')]
+    .sort((a,b)=>num(a)-num(b))
+    .forEach(cell=>wall.appendChild(cell));   // stable re-append in numeric order
+})();
+
+/* ---------- vertical modal: "Read more" opens the vertical's world ---------- */
+/* Each vertical is an ARRAY OF SLIDES. One slide = { image, paragraphs:[...] }.
+   The ‹ › arrows step through slides (image + its paragraphs advance together).
+   TO EXTEND: add another {image, paragraphs:[...]} object to a vertical's array;
+   add more paragraph strings to any slide's `paragraphs`. That's the whole API. */
+const VERTICALS=Object.fromEntries({{ offerings.items | modaldata | safe }}.map(v=>[v.id,v]));
+const vmodal=document.getElementById('vmodal');
+const vImg=document.getElementById('vimg'), vBody=document.getElementById('vbody');
+const vTitle=document.getElementById('vtitle');
+const vPanel=document.querySelector('.vpanel');
+const vPrev=document.getElementById('vprev'), vNext=document.getElementById('vnext');
+let lenisRef=null;   // set by the scroll engine; modal pauses it while open
+let vSlides=[], vAt=0;
+let vTrigger=null;   // element that opened the modal — focus returns here on close
+
+// render one slide: image on the left, its paragraphs on the right.
+function renderSlide(i){
+  const s=vSlides[i]; if(!s)return;
+  vAt=i;
+  vImg.src=s.image; vImg.alt='';
+  vBody.innerHTML=(s.paragraphs||[]).map(p=>`<p>${p}</p>`).join('');
+  vBody.scrollTop=0;
+  // arrows disabled at the ends (single-slide verticals hide the arrows via CSS)
+  vPrev.disabled=i<=0;
+  vNext.disabled=i>=vSlides.length-1;
+  vmodal.classList.toggle('single',vSlides.length<=1);
+}
+// background inert: keeps Tab/AT from reaching the page behind the open modal.
+// Marks the fixed nav bar and the .deck content wrapper (siblings of #vmodal),
+// never the modal itself.
+function setBgInert(on){
+  document.querySelectorAll('#nav,#top').forEach(el=>{
+    if(!el)return;
+    if(on){ el.setAttribute('inert',''); el.setAttribute('aria-hidden','true'); }
+    else { el.removeAttribute('inert'); el.removeAttribute('aria-hidden'); }
+  });
+}
+function vFocusables(){
+  if(!vPanel)return [];
+  return [...vPanel.querySelectorAll('a[href],button:not(:disabled),[tabindex]:not([tabindex="-1"])')]
+    .filter(el=>el.offsetParent!==null);
+}
+function vTrapKeydown(e){
+  if(e.key!=='Tab')return;
+  const items=vFocusables(); if(!items.length)return;
+  const first=items[0], last=items[items.length-1];
+  if(e.shiftKey && document.activeElement===first){ e.preventDefault(); last.focus(); }
+  else if(!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); }
+}
+function openVertical(id,trigger){
+  const v=VERTICALS[id]; if(!v||!(v.slides&&v.slides.length))return;
+  vTrigger=trigger||document.activeElement;
+  vmodal.style.setProperty('--vc',v.accent);
+  vSlides=v.slides||[]; renderSlide(0);
+  if(vTitle) vTitle.textContent=document.getElementById(id)?.querySelector('h3')?.textContent||'';
+  vmodal.hidden=false;
+  setBgInert(true);
+  setTimeout(()=>{
+    vmodal.classList.add('open');
+    (vPanel?.querySelector('a[href],button:not(:disabled)')||vPanel)?.focus?.();
+  },20);
+  vPanel?.addEventListener('keydown',vTrapKeydown);
+  lenisRef?.stop(); document.documentElement.style.overflow='hidden';
+}
+function closeVertical(){
+  vmodal.classList.remove('open');
+  vPanel?.removeEventListener('keydown',vTrapKeydown);
+  setBgInert(false);
+  lenisRef?.start(); document.documentElement.style.overflow='';
+  setTimeout(()=>{vmodal.hidden=true;},450);
+  vTrigger?.focus?.();
+  vTrigger=null;
+}
+const vGo=d=>renderSlide(Math.max(0,Math.min(vSlides.length-1,vAt+d)));
+vPrev.addEventListener('click',()=>vGo(-1));
+vNext.addEventListener('click',()=>vGo(1));
+document.querySelectorAll('.offer .more').forEach(a=>{
+  if(a.hasAttribute('data-scroll'))return;         // this one scrolls to a section (handled by the anchor handler), not the modal
+  const id=a.closest('.offer').id;
+  a.addEventListener('click',e=>{e.preventDefault();openVertical(id,a);});
+});
+vmodal.addEventListener('click',e=>{ if(e.target.closest('[data-close]'))closeVertical(); });
+addEventListener('keydown',e=>{ if(vmodal.hidden)return;
+  if(e.key==='Escape')closeVertical();
+  else if(e.key==='ArrowLeft')vGo(-1);
+  else if(e.key==='ArrowRight')vGo(1);
+});
+
+/* ---------- Brigade artists: click a photo → open the SAME modal, showing the
+   artist's photo + name + role pill + bio. Reuses openVertical's machinery
+   (inert bg, focus trap, scroll lock) but populates from the cell's data. A
+   single artist = one "slide", so vSlides is emptied and .single hides ‹ ›. --- */
+function openArtist(cell){
+  vTrigger=cell;
+  vmodal.style.setProperty('--vc','var(--red)');
+  vSlides=[]; vAt=0;                                  // no slide nav for a single artist
+  const name=cell.dataset.name||'';
+  const role=cell.querySelector('.mrole')?.textContent||'';
+  const bio=cell.dataset.bio||'';
+  vImg.src=cell.dataset.photo||cell.querySelector('img')?.src||''; vImg.alt=name;
+  vBody.innerHTML=
+    `<h3 class="vname">${name}</h3>`+
+    (role?`<span class="vrole">${role}</span>`:'')+
+    `<p>${bio}</p>`;
+  vBody.scrollTop=0;
+  if(vTitle) vTitle.textContent=name;
+  vmodal.classList.add('single');                    // hide the ‹ › arrows
+  vmodal.hidden=false;
+  setBgInert(true);
+  setTimeout(()=>{ vmodal.classList.add('open');
+    (vPanel?.querySelector('button:not(:disabled)')||vPanel)?.focus?.(); },20);
+  vPanel?.addEventListener('keydown',vTrapKeydown);
+  lenisRef?.stop(); document.documentElement.style.overflow='hidden';
+}
+document.querySelectorAll('.mwall .mcell').forEach(cell=>{
+  cell.style.cursor='pointer';
+  cell.setAttribute('role','button'); cell.setAttribute('tabindex','0');
+  cell.addEventListener('click',()=>openArtist(cell));
+  cell.addEventListener('keydown',e=>{
+    if(e.key==='Enter'||e.key===' '||e.key==='Spacebar'){ e.preventDefault(); openArtist(cell); }
+  });
+});
+
+/* ============================================================
+   SCROLL ENGINE — Lenis (feel) + GSAP ScrollTrigger.
+   Every section scrolls normally in flow (all .deck cards are .nopin);
+   ScrollTrigger drives the nav-theme flips, the manifesto mf-reel scrub,
+   and anchor-link resolution against each section's natural position.
+   ============================================================ */
+const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+if(!reduce){
+  gsap.registerPlugin(ScrollTrigger);
+
+  /* MOBILE PINNING (see docs/plans research):
+     - Lenis smooth-scroll FIGHTS iOS/Android native momentum on touch, and that
+       fight is a prime cause of pins jumping. So Lenis smoothing is OFF on touch
+       (syncTouch:false) — native scroll drives the phone, ScrollTrigger reads it.
+       This also avoids the Lenis-vs-normalizeScroll conflict (can't run both).
+     - ignoreMobileResize:true stops the URL-bar collapse/expand from firing a
+       full pin refresh mid-scroll (which is what slid the manifesto under the
+       fixed hero). Pairs with the invalidateOnRefresh:true already on each pin. */
+  const isTouch=matchMedia('(hover:none) and (pointer:coarse)').matches;
+  ScrollTrigger.config({ignoreMobileResize:true});
+  /* syncTouch:false = let native momentum handle touch; smoothWheel stays on so a
+     trackpad/mouse on desktop keeps the Lenis feel. */
+  const lenis=new Lenis({lerp:.12,syncTouch:!isTouch});
+  lenisRef=lenis;
+  lenis.on('scroll',ScrollTrigger.update);
+  gsap.ticker.add(t=>lenis.raf(t*1000));
+  gsap.ticker.lagSmoothing(0);
+  /* re-measure Lenis whenever ScrollTrigger refreshes (fonts/layout settling can
+     change the page height after Lenis first measured it) */
+  ScrollTrigger.addEventListener('refresh',()=>lenis.resize());
+
+  /* anchor links through Lenis — resolved against pin positions, because a
+     pinned card's live rect is not its scroll destination */
+  const anchorTargets={}; // id -> () => scroll position
+  document.querySelectorAll('a[href^="#"]').forEach(a=>{
+    a.addEventListener('click',e=>{
+      const id=a.getAttribute('href').slice(1);
+      const t=document.getElementById(id);
+      if(!t)return;
+      e.preventDefault();
+      const fn=anchorTargets[id];
+      lenis.scrollTo(fn?fn():t,{offset:0});
+    });
+  });
+
+  /* nav: auto-hide on scroll down, show on scroll up */
+  const nav=document.getElementById('nav');
+  let lastY=0;
+  lenis.on('scroll',({scroll})=>{
+    if(scroll>140&&scroll>lastY+4)nav.classList.add('hid');
+    else if(scroll<lastY-4)nav.classList.remove('hid');
+    lastY=scroll;
+  });
+
+  /* PHONE nav "more" menu: toggle a dropdown of the links not shown on the bar.
+     hidden attr gates display; a rAF flip to .open drives the fade so the very
+     first open animates. Closes on: a link tap, an outside tap, or Escape. */
+  const moreBtn=document.getElementById('navMore');
+  const moreMenu=document.getElementById('navMenu');
+  if(moreBtn && moreMenu){
+    const closeMenu=()=>{ if(moreMenu.hidden) return;
+      moreMenu.classList.remove('open'); moreBtn.setAttribute('aria-expanded','false');
+      setTimeout(()=>{ if(!moreMenu.classList.contains('open')) moreMenu.hidden=true; },300); };
+    const openMenu=()=>{ moreMenu.hidden=false; moreBtn.setAttribute('aria-expanded','true');
+      requestAnimationFrame(()=>moreMenu.classList.add('open')); };
+    moreBtn.addEventListener('click',e=>{ e.stopPropagation();
+      moreMenu.hidden ? openMenu() : closeMenu(); });
+    moreMenu.addEventListener('click',e=>{ if(e.target.closest('a')) closeMenu(); });
+    document.addEventListener('click',e=>{ if(!moreMenu.hidden && !nav.contains(e.target)) closeMenu(); });
+    addEventListener('keydown',e=>{ if(e.key==='Escape') closeMenu(); });
+    /* the nav hides itself on scroll-down — close the menu with it so it can't
+       float detached */
+    lenis.on('scroll',()=>closeMenu());
+  }
+
+  /* the deck cards stack by source order (z-index) so a section can visually sit
+     over the one before it where the layout overlaps them. */
+  const cards=gsap.utils.toArray('.deck > .card');
+  cards.forEach((c,i)=>c.style.zIndex=10+i);
+
+  const mm=gsap.matchMedia();
+  mm.add({small:'(max-width:860px)',large:'(min-width:861px)'},(ctx)=>{
+    /* Every .deck card scrolls in normal flow (all are .nopin), so a section's
+       anchor is just its natural document position, minus nav headroom. Nav links
+       to #misfits / #work / #for-brands / #offerings / #calling resolve here, as
+       do the per-offering rows (.offer[id]). */
+    cards.forEach((card)=>{
+      if(!card.id) return;
+      anchorTargets[card.id]=()=>card.getBoundingClientRect().top+window.scrollY-80;
+      card.querySelectorAll('.offer[id]').forEach(row=>{
+        anchorTargets[row.id]=()=>row.getBoundingClientRect().top+window.scrollY-80;
+      });
+    });
+
+    /* hero: ONE statement, CRT-typed once after the power-on settles. No pin,
+       no idle advance, no beat crossfade — scrolling mid-type snaps the line
+       complete (the reader has taken over) and fades the cue. */
+    const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+    const hi=cards.findIndex(c=>c.classList.contains('hero'));
+    const hbeats=gsap.utils.toArray('.hero .hbeat');
+
+    /* wrap each beat's text in .hink, splitting every character into a .g span so
+       the reveal flows glyph-by-glyph through real inline layout (correct
+       line-by-line wrapping). We walk text nodes so the nested .mis span
+       is preserved — its glyphs keep the red color. A caret rides the edge. */
+    const glyphs=new Map();                              // beat → [.g spans in order]
+    hbeats.forEach(b=>{
+      const ink=document.createElement('span'); ink.className='hink';
+      const gs=[];
+      const wrap=node=>{
+        [...node.childNodes].forEach(n=>{
+          if(n.nodeType===3){                            // text node → one .g per char
+            const frag=document.createDocumentFragment();
+            for(const ch of n.textContent){
+              if(ch===' '){                              // real breakable space, no span
+                frag.appendChild(document.createTextNode(' ')); continue;
+              }
+              const g=document.createElement('span'); g.className='g';
+              g.textContent=ch;
+              frag.appendChild(g); gs.push(g);
+            }
+            node.replaceChild(frag,n);
+          } else if(n.nodeType===1){ wrap(n); }          // element (.mis) → recurse, keep it
+        });
+      };
+      while(b.firstChild) ink.appendChild(b.firstChild);
+      wrap(ink);
+      if(gs.length) gs[gs.length-1].classList.add('last');   // caret home when done
+      glyphs.set(b,gs);
+      b.append(ink);
+    });
+
+    if(hi>-1 && hbeats.length && !reduce){
+      const scrollCue=document.getElementById('hscroll');
+      const b=hbeats[0], gs=glyphs.get(b);
+      const dur=Math.min(3400,950+(b.textContent||'').length*34);   // same typing pace as before
+      let typeAt=0, raf=0, done=false;
+      // light the first `p` fraction of the glyphs; typing/done drive the caret
+      const paint=p=>{
+        const lit=Math.round(p*gs.length);
+        gs.forEach((g,j)=>g.classList.toggle('lit',j<lit));
+        b.classList.toggle('done',p>=1);
+        b.classList.toggle('typing',p<1);
+      };
+      const finish=()=>{ if(done)return; done=true; cancelAnimationFrame(raf);
+        paint(1); scrollCue?.classList.add('hint'); };
+      const loop=now=>{ const p=Math.min(1,(now-typeAt)/dur);
+        paint(p); if(p<1) raf=requestAnimationFrame(loop); else finish(); };
+      const startBeat=()=>{ if(typeAt)return;
+        typeAt=performance.now(); raf=requestAnimationFrame(loop); };
+      // wait for the CRT power-on to finish (.content "open" anim -> .settled)
+      const heroEl=document.querySelector('.hero');
+      if(heroEl?.classList.contains('settled')) startBeat();
+      else{
+        document.querySelector('.hero .content')?.addEventListener('animationend',startBeat,{once:true});
+        setTimeout(startBeat,1600);   // backstop if the power-on anim never fires
+      }
+      // the reader taking over: snap the line complete, retire the cue
+      ['wheel','touchmove','keydown'].forEach(ev=>
+        addEventListener(ev,e=>{ if(ev==='keydown'&&!['ArrowDown','PageDown',' ','Spacebar'].includes(e.key))return;
+          startBeat(); finish(); scrollCue?.classList.add('took'); },{passive:true}));
+    }else if(hi>-1 && hbeats.length){   // reduced-motion: full ink, no typing, no cue
+      hbeats.forEach(b=>b.classList.add('on','notype'));
+      document.getElementById('hscroll')?.classList.add('took');
+    }
+    anchorTargets['top']=()=>0;
+
+    /* MANIFESTO COLLAGE — the four-types filmstrip reel. The .mf-ustage is
+       sticky (CSS) and its sibling .mf-reel-runway (420vh) gives the scrub its
+       scroll distance; this scrub sets which card is .active as you pass through.
+       No pin trigger here — the section is not a .card, so the deck's pin system
+       never touches it and the CSS sticky does the holding. (The old manifesto's
+       beat-scrub/snap/lfill timeline was deleted with those sections.) */
+    const mfReel=document.getElementById('mf-reel');
+    if(mfReel && !reduce){
+      const mfCards=[...mfReel.querySelectorAll('[data-mfcard]')];
+      let mfCur=-1;
+      const mfActive=(idx)=>{ if(idx===mfCur)return; mfCur=idx;
+        mfCards.forEach((c,k)=>c.classList.toggle('active',k===idx)); };
+      const mfST=ScrollTrigger.create({
+        trigger:'.mf-unite', start:'top top', end:'bottom bottom', scrub:.5,
+        invalidateOnRefresh:true,
+        onUpdate:self=>mfActive(Math.min(mfCards.length-1,Math.floor(self.progress*mfCards.length))),
+      });
+      mfActive(0);
+      /* CLICKABLE (+ keyboard-operable, since these are tabindex="0" figures):
+         activating a card scrolls to the position that makes it active,
+         so click/Enter/Space and scroll stay in one source of truth (the
+         scrub sets .active). Each card owns the band [i/N, (i+1)/N) of the
+         pin range; aim at its middle. */
+      const mfActivate=i=>{
+        const frac=(i+0.5)/mfCards.length;
+        const y=mfST.start + (mfST.end-mfST.start)*frac;
+        lenis.scrollTo(y,{duration:0.8});
+      };
+      mfCards.forEach((card,i)=>{
+        card.style.cursor='pointer';
+        card.addEventListener('click',()=>mfActivate(i));
+        card.addEventListener('keydown',e=>{
+          if(e.key!=='Enter' && e.key!==' ' && e.key!=='Spacebar')return;
+          e.preventDefault(); mfActivate(i);
+        });
+      });
+    } else if(mfReel){
+      // reduced-motion: reveal the first card's question, no scroll-driven change
+      mfReel.querySelector('[data-mfcard]')?.classList.add('active');
+    }
+
+    /* nav theme: flip text color AND bar background when a card's top passes
+       under the nav — the bar always wears the current section's field color */
+    const themes=cards.map(c=>c.dataset.nav||'dark');
+    const navbgs=cards.map(c=>c.dataset.navbg||'#231F20');
+    function theme(i){
+      i=Math.max(0,i);
+      nav.classList.toggle('thm-light',themes[i]==='light');
+      // data-navclear cards wear a transparent bar so their imagery reads
+      // edge-to-edge; the rest keep the solid field bar. Attribute-driven (not
+      // index-driven) so operator reordering of sections can't misplace it.
+      nav.classList.toggle('transparent','navclear' in cards[i].dataset);
+      // data-nograin cards drop the film grain so their photos read clean
+      document.body.classList.toggle('no-grain','nograin' in cards[i].dataset);
+      // over a RED section (e.g. Misfits Acts), the logo's red "(Mis)" would
+      // vanish into the background — flag it so the CSS recolors it to cream.
+      nav.classList.toggle('over-red',(navbgs[i]||'').toUpperCase()==='#DB1A21');
+      nav.style.setProperty('--navbg',navbgs[i]);
+    }
+    cards.forEach((card,i)=>{
+      ScrollTrigger.create({
+        trigger:card,start:'top 90px',
+        onEnter:()=>theme(i),
+        onLeaveBack:()=>theme(i-1),
+      });
+    });
+    theme(0);
+  });
+
+  /* re-measure after fonts arrive (metrics can shift layout/anchor positions) */
+  document.fonts.ready.then(()=>ScrollTrigger.refresh());
+  /* On mobile the URL bar collapsing changes innerHeight by ~60-120px mid-scroll.
+     Refreshing pins on that recomputes every trigger and visibly jumps the page,
+     so only refresh when the width changes (a real layout change, incl. rotation)
+     or the height moves more than the browser chrome ever would. */
+  /* ScrollTrigger ALSO auto-refreshes on resize by itself, so gating our own
+     listener wasn't enough — a URL-bar nudge still refreshed once, via GSAP.
+     Drop "resize" from its auto-refresh events so the guard below is the single
+     decision point. (visibilitychange/DOMContentLoaded/load stay: they're the
+     safe ones.) Verified: without this, a height-only change still fired 1 refresh. */
+  ScrollTrigger.config({autoRefreshEvents:'visibilitychange,DOMContentLoaded,load'});
+  let lastW=innerWidth,lastH=innerHeight;
+  const URLBAR_SLOP=140;
+  let rto;addEventListener('resize',()=>{
+    const dw=Math.abs(innerWidth-lastW),dh=Math.abs(innerHeight-lastH);
+    if(dw===0&&dh<=URLBAR_SLOP)return;   // URL bar only — ignore
+    lastW=innerWidth;lastH=innerHeight;
+    clearTimeout(rto);rto=setTimeout(()=>ScrollTrigger.refresh(),200);
+  });
+}
+</script>
+
+<!-- SHADER HIGHLIGHTER: draws each .mark's marker stroke with a WebGL shader
+     (Paper Shaders ShaderMount + a custom fragment shader). Progressive
+     enhancement — if WebGL2 is unavailable or reduced-motion is set, this module
+     does nothing and the CSS .mark swipe (above) remains as the fallback. -->
+<script type="module">
+(async () => {
+  const reduce = matchMedia('(prefers-reduced-motion:reduce)').matches;
+  if (reduce) return;                                  // CSS fallback (static filled)
+
+  // WebGL2 probe — bail to the CSS swipe if unavailable
+  try { const t=document.createElement('canvas').getContext('webgl2'); if(!t) return; }
+  catch(_) { return; }
+
+  let ShaderMount, simplexNoise;
+  try {
+    ({ ShaderMount } = await import('./vendor/paper-shaders/shader-mount.js'));
+    ({ simplexNoise } = await import('./vendor/paper-shaders/shader-utils.js'));
+  } catch(_) { return; }                               // import failed → CSS fallback
+
+  // locked recipe from the lab
+  const R = { draw:0.9, wet:0.95, wetw:0.02, dry:3, tipr:0.006, edge:0,
+              streak:0.78, bub:0.4, alpha:0.68, skewMag:0.05 };
+  const OVERHANG=6, VPAD=8;
+
+  // GFX: the page's one quality knob (see window.GFX in the hero-balloon module
+  // block) — DPR cap + the 30fps gate for this decorative shader. Fallbacks let
+  // this module keep working even if that script hasn't run yet for some reason.
+  const GFX = window.GFX || { maxDPR_shader:1.5, decorativeFPS:30, pauseOffscreen:true };
+  // ShaderMount's own `minPixelRatio` is a FLOOR (renderScale = max(dpr, floor)),
+  // so it can't cap a 3x-DPR phone down to 1.5 — the actual ceiling knob it
+  // exposes is `maxPixelCount` (total rendered pixels). Convert our DPR cap into
+  // a pixel-count ceiling for a given CSS-pixel box so devicePixelRatio 3
+  // renders at ~1.5x instead of 3x on these small word-sized canvases.
+  const maxPixelsFor = (cssW, cssH) => Math.max(1, cssW) * Math.max(1, cssH) * GFX.maxDPR_shader * GFX.maxDPR_shader;
+  const FRAME_MS = 1000 / GFX.decorativeFPS;   // 30fps gate → skip GPU writes on off-cadence frames
+
+  const frag = `#version 300 es
+  precision mediump float;
+  uniform float u_time;
+  uniform vec2  u_res;
+  uniform float u_progress;
+  uniform vec3  u_color;
+  uniform float u_alpha, u_wet, u_wetWidth, u_streak, u_bubbles, u_tipRag, u_edgeRag, u_skew, u_seed;
+  out vec4 fragColor;
+  ${simplexNoise}
+  void main(){
+    vec2 uv = gl_FragCoord.xy / u_res.xy; uv.y = 1.0 - uv.y;
+    float aspect = u_res.x / u_res.y;
+    vec2 nuv = vec2(uv.x*aspect, uv.y);
+    float midTop=0.12, midBot=0.88;
+    float slant=(uv.x-0.5)*u_skew;
+    float top=midTop+slant + u_edgeRag*0.12*snoise(vec2(uv.x*7.0+u_seed,1.3));
+    float bot=midBot+slant - u_edgeRag*0.12*snoise(vec2(uv.x*6.0+u_seed*1.7,4.1));
+    float body=smoothstep(top,top+0.03,uv.y)*(1.0-smoothstep(bot-0.03,bot,uv.y));
+    if(body<=0.001){ fragColor=vec4(0.0); return; }
+    float tip=u_progress + u_tipRag*snoise(vec2(uv.y*5.0+u_seed*2.3,u_progress*3.0));
+    float inked=1.0-smoothstep(tip-0.012,tip+0.004,uv.x);
+    if(inked<=0.001){ fragColor=vec4(0.0); return; }
+    float streaks=0.5+0.5*snoise(vec2(uv.x*2.0,uv.y*46.0+u_seed));
+    float density=1.0-u_streak*(0.55*streaks+0.45*(0.5+0.5*snoise(nuv*9.0+u_seed)));
+    density=clamp(density,0.0,1.0);
+    float bub=snoise(nuv*14.0+u_seed*3.1);
+    float holes=clamp(1.0-u_bubbles*smoothstep(0.55,0.78,bub),0.0,1.0);
+    float ink=u_alpha*body*inked*density*holes;
+    float behind=tip-uv.x;
+    float wetBand=smoothstep(u_wetWidth,0.0,behind)*step(0.0,behind);
+    float dryOut=1.0-smoothstep(0.9,1.0,u_progress);
+    float wet=u_wet*wetBand*dryOut*body*inked*holes;
+    vec3 col=mix(u_color, mix(u_color,vec3(1.0),0.55), clamp(wet,0.0,1.0));
+    fragColor=vec4(col, clamp(ink+wet*0.6,0.0,1.0));
+  }`;
+
+  // parse a computed color (hex or rgb()) to [r,g,b] floats 0..1
+  const parseColor = (raw) => {
+    raw = (raw||'').trim();
+    const el=document.createElement('span'); el.style.color=raw; document.body.appendChild(el);
+    const m=getComputedStyle(el).color.match(/[\d.]+/g); el.remove();
+    if(!m) return [0.859,0.102,0.129];
+    return [ (+m[0])/255, (+m[1])/255, (+m[2])/255 ];
+  };
+
+  const marks=[];
+  document.querySelectorAll('.mark').forEach((el,i)=>{
+    // resolve the accent color from the element's own --hl (falls back to red)
+    const hl = getComputedStyle(el).getPropertyValue('--hl');
+    const color = parseColor(hl || '#DB1A21');
+    // text-flip colors: lit = the color the text should END at once the stroke has
+    // passed. That's the mark's REVEALED color, not its resting one — and the two
+    // differ: a .mark-w word ends cream (light, over a red stroke), a plain .mark
+    // ends ink (dark, over a yellow stroke, so it reads on the highlight).
+    // getComputedStyle(el).color at init returns the RESTING cream for both, so
+    // using it made plain marks light to cream then the CSS flip slammed the whole
+    // word to ink at once — the "cream, then all black mid-word" you saw. Pick the
+    // destination explicitly by mark type instead.
+    const cs0 = getComputedStyle(el);
+    const litText = el.classList.contains('mark-w')
+      ? cs0.getPropertyValue('--cream').trim() || '#E7E1D4'
+      : cs0.getPropertyValue('--ink').trim()   || '#231F20';
+    el.style.setProperty('--mark-lit', litText);
+    // random per-mark tilt (stable) so no two highlights match
+    const jr = Math.sin(i*127.1+3.7)*43758.5453; const jitter=(jr-Math.floor(jr))*2-1;
+    const skew = +(jitter*R.skewMag).toFixed(4);
+    const seed = 1.0 + i*7.13;
+
+    el.classList.add('mark-shader');                   // suppress CSS swipe, enable --rv text
+    const u=(p,cv)=>({ u_res:[cv?cv.width:300, cv?cv.height:80], u_progress:p, u_color:color,
+      u_alpha:R.alpha, u_wet:R.wet, u_wetWidth:R.wetw, u_streak:R.streak, u_bubbles:R.bub,
+      u_tipRag:R.tipr, u_edgeRag:R.edge, u_skew:skew, u_seed:seed });
+    let mount;
+    // minPixelRatio:1 (was the library default of 2 — a FLOOR, so leaving it at
+    // 2 would force 2x even on 1x screens); the real ceiling comes from
+    // maxPixelCount below, sized to the mark's own box so the DPR cap holds
+    // regardless of how big any individual highlighted word is.
+    const box=el.getBoundingClientRect();
+    try { mount=new ShaderMount(el, frag, u(0,null), undefined, 0.0, 0, 1, maxPixelsFor(box.width||300, box.height||80)); }
+    catch(_) { el.classList.remove('mark-shader'); return; }  // this mark → CSS fallback
+    const cv=el.querySelector('canvas');
+    if(cv){ cv.style.position='absolute'; cv.style.zIndex='-1'; cv.style.pointerEvents='none';
+      cv.style.left=(-OVERHANG)+'px'; cv.style.top=(-VPAD)+'px';
+      cv.style.width='calc(100% + '+(OVERHANG*2)+'px)';
+      cv.style.height='calc(100% + '+(VPAD*2)+'px)';
+      // context loss (iOS evicts the oldest context when too many are alive):
+      // this mark drops back to the CSS swipe highlight instead of going blank
+      cv.addEventListener('webglcontextlost',e=>{ e.preventDefault();
+        el.classList.remove('mark-shader');
+        try{ mount.dispose&&mount.dispose(); }catch(_){}
+        cv.remove(); },{once:true}); }
+
+    // trigger element: the chart label keys off .fb-chart.in; the manifesto beats
+    // reveal via .mf-rise; everything else via its nearest .reveal ancestor. All
+    // three gain .in through the same IntersectionObserver.
+    const trigger = el.closest('.fb-chart') || el.closest('.reveal') || el.closest('.mf-rise') || el;
+    marks.push({ el, mount, cv, u, trigger, armed:false, start:0, prog:0, visible:true });
+  });
+  if(!marks.length) return;
+
+  // pause shaders whose mark is off-screen (cap live GPU work)
+  const vis=new IntersectionObserver(es=>es.forEach(e=>{
+    const m=marks.find(x=>x.el===e.target); if(m) m.visible=e.isIntersecting;
+  }),{threshold:0});
+  marks.forEach(m=>vis.observe(m.el));
+
+  // arm/replay a mark: reset progress and (re)start its draw
+  const arm = (m) => { m.armed=true; m.start=performance.now(); m.prog=0; };
+  const disarm = (m) => { m.armed=false; m.prog=0; m.el.style.setProperty('--rv','0');
+    if(m.cv) m.mount.setUniforms(m.u(0,m.cv)); };
+
+  // watch each trigger's class list for .in (added → arm, removed → reset so
+  // #for-brands replays on re-entry). Fire immediately if already .in.
+  marks.forEach(m=>{
+    const check = () => {
+      const on=m.trigger.classList.contains('in') || m.trigger.classList.contains('settled');
+      if(on && !m.armed) arm(m);
+      else if(!on && m.armed) disarm(m);
+    };
+    new MutationObserver(check).observe(m.trigger,{attributes:true,attributeFilter:['class']});
+    check();
+  });
+
+  // single rAF drives every armed, visible mark's u_progress 0→1
+  // frame-time gate (GFX.decorativeFPS): these strokes sweep over ~1s, so 30fps
+  // reads identically to 60fps — halves GPU writes for a purely decorative effect.
+  // document.hidden check: a backgrounded tab keeps intersecting (IO doesn't fire
+  // on tab-hide), so without this the writes would continue while unseen.
+  let lastTick=0;
+  const tick = (now) => {
+    if(document.hidden){ requestAnimationFrame(tick); return; }
+    if(now-lastTick<FRAME_MS){ requestAnimationFrame(tick); return; }
+    lastTick=now;
+    marks.forEach(m=>{
+      if(!m.armed || !m.visible || !m.cv) return;
+      const p=Math.min(1,(now-m.start)/(R.draw*1000));
+      if(p===m.prog) return;                            // no change → skip GPU write
+      m.prog=p;
+      m.el.style.setProperty('--rv', p.toFixed(3));     // text colors in with the tip
+      m.mount.setUniforms(m.u(p,m.cv));
+    });
+    requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+
+  // re-push uniforms for every mark at its CURRENT progress + CURRENT canvas size.
+  // The rAF skips writes once a stroke completes (p===prog), so if the canvas
+  // buffer resizes AFTER that — most commonly when web fonts load and reflow the
+  // word wider — u_res would stay stale and the stroke clips (e.g. "lan" instead
+  // of "languages"). Call this on fonts-ready and resize to correct the size.
+  const resync=()=>marks.forEach(m=>{ if(!m.cv) return;
+    // re-derive the DPR-cap pixel ceiling for the mark's CURRENT box (a word
+    // reflow can change its size) before re-measuring, so the cap stays correct.
+    const box=m.el.getBoundingClientRect();
+    try{ m.mount.setMaxPixelCount && m.mount.setMaxPixelCount(maxPixelsFor(box.width||300, box.height||80)); }catch(_){}
+    // force ShaderMount to re-measure its canvas buffer + u_resolution from the
+    // (now-final) box, THEN re-push our u_res at the current progress.
+    try{ m.mount.handleResize && m.mount.handleResize(); }catch(_){}
+    m.mount.setUniforms(m.u(m.prog,m.cv));
+  });
+  addEventListener('resize',resync);
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>{ resync(); requestAnimationFrame(resync); setTimeout(resync,150); });
+})();
+</script>
+
+<!-- CRAYON AXES: draws the For Brands chart's two axes as a red hand-drawn
+     "crayon" stroke via a WebGL shader (adapted from the highlighter). Draws the
+     L on scroll-in, replays when the section re-enters. No WebGL / reduced-motion
+     → the CSS fallback axes (.fb-axis) show instead. -->
+<script type="module">
+(async () => {
+  const plot=document.querySelector('.fb-plot');
+  const chart=document.querySelector('.fb-chart');
+  if(!plot||!chart) return;
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches) return;   // CSS fallback
+  try{ if(!document.createElement('canvas').getContext('webgl2')) return; }catch(_){ return; }
+
+  let ShaderMount, simplexNoise;
+  try{
+    ({ ShaderMount } = await import('./vendor/paper-shaders/shader-mount.js'));
+    ({ simplexNoise } = await import('./vendor/paper-shaders/shader-utils.js'));
+  }catch(_){ return; }
+
+  // recipe from the crayon-axes lab
+  const R={draw:1.2,thick:0.028,rough:0.56,grain:0.78,gscale:40,streak:0.2,alpha:0.96,waver:0.004};
+  const COLOR=[0.898,0.004,0.549];   // #e5018c magenta
+
+  // GFX: the page's one quality knob (see window.GFX in the hero-balloon module
+  // block). Same DPR-cap math as the highlighter module (ShaderMount's
+  // minPixelRatio is a floor, not a ceiling — maxPixelCount is the real cap).
+  const GFX = window.GFX || { maxDPR_shader:1.5, decorativeFPS:30, pauseOffscreen:true };
+  const maxPixelsFor = (cssW, cssH) => Math.max(1, cssW) * Math.max(1, cssH) * GFX.maxDPR_shader * GFX.maxDPR_shader;
+  const FRAME_MS = 1000 / GFX.decorativeFPS;   // 30fps gate for this one-shot draw-in
+
+  const frag = `#version 300 es
+  precision mediump float;
+  uniform float u_time;
+  uniform vec2  u_res;
+  uniform float u_progress;
+  uniform vec3  u_color;
+  uniform float u_alpha,u_thick,u_rough,u_grain,u_gscale,u_streak,u_waver;
+  out vec4 fragColor;
+  ${simplexNoise}
+  float crayon(float d, vec2 nuv, float seed){
+    float edge=u_thick*0.5*(1.0+u_rough*0.6*snoise(nuv*7.0+seed));
+    float body=1.0-smoothstep(edge*0.6,edge,abs(d));
+    if(body<=0.0) return 0.0;
+    float dens=1.0-u_streak*(0.5+0.5*snoise(nuv*vec2(3.0,22.0)+seed));
+    float g=0.5+0.5*snoise(nuv*u_gscale+seed*2.7);
+    float thr=mix(1.02,0.15,u_grain);
+    float grain=smoothstep(thr-0.18,thr+0.05,g);
+    return clamp(body*dens*grain,0.0,1.0);
+  }
+  void main(){
+    vec2 uv=gl_FragCoord.xy/u_res.xy; uv.y=1.0-uv.y;
+    float aspect=u_res.x/u_res.y;
+    vec2 nuv=vec2(uv.x*aspect,uv.y);
+    float x0=0.10, y1=0.90;
+    float xw=x0+u_waver*snoise(vec2(uv.y*6.0,2.3));
+    float yw=y1+u_waver*snoise(vec2(uv.x*6.0,8.1));
+    float pY=clamp(u_progress/0.5,0.0,1.0);
+    float pX=clamp((u_progress-0.5)/0.5,0.0,1.0);
+    float ink=0.0;
+    /* at the origin the two strokes OVERSHOOT past each other — a hand-drawn
+       corner doesn't stop dead, the pen runs on a little. The vertical carries
+       below the baseline and the horizontal starts left of the upright, so they
+       cross like the reference sketch instead of meeting in a clean join. */
+    if(uv.x<x0+0.2){
+      float dV=(uv.x-xw)*aspect;
+      float topY=y1-pY*(y1-0.06);
+      float alongV=step(topY,uv.y)*step(uv.y,y1+0.055);   // runs past the baseline
+      if(alongV>0.5) ink=max(ink,crayon(dV,nuv,1.0));
+    }
+    if(uv.y>y1-0.2){
+      float dH=(uv.y-yw);
+      float rightX=x0+pX*(0.94-x0);
+      float alongH=step(x0-0.055,uv.x)*step(uv.x,rightX);  // starts left of the upright
+      if(alongH>0.5) ink=max(ink,crayon(dH,nuv,5.0));
+    }
+    if(ink<=0.001){ fragColor=vec4(0.0); return; }
+    fragColor=vec4(u_color,ink*u_alpha);
+  }`;
+
+  const u=(p,cv)=>({u_res:[cv?cv.width:600,cv?cv.height:480],u_progress:p,u_color:COLOR,
+    u_alpha:R.alpha,u_thick:R.thick,u_rough:R.rough,u_grain:R.grain,u_gscale:R.gscale,u_streak:R.streak,u_waver:R.waver});
+
+  let mount,cv;
+  // minPixelRatio:1 (library default is 2, a FLOOR not a ceiling) + maxPixelCount
+  // sized to the plot's own box, so the DPR cap actually holds on 3x phones.
+  const plotBox=plot.getBoundingClientRect();
+  try{ mount=new ShaderMount(plot, frag, u(0,null), undefined, 0.0, 0, 1, maxPixelsFor(plotBox.width||600, plotBox.height||480)); cv=plot.querySelector('canvas'); }
+  catch(_){ return; }                                   // fall back to CSS axes
+  if(!cv) return;
+  cv.classList.add('fb-crayon'); plot.classList.add('has-crayon');   // hide CSS axes
+  // context loss → put the CSS hairline axes back instead of leaving no axes
+  cv.addEventListener('webglcontextlost',e=>{ e.preventDefault();
+    plot.classList.remove('has-crayon');
+    try{ mount.dispose&&mount.dispose(); }catch(_){}
+    cv.remove(); },{once:true});
+
+  // offscreen guard: this is a one-shot draw-in (step() stops itself at p>=1),
+  // but a fast scroll-past mid-draw could otherwise keep it rendering unseen —
+  // and a doc-hidden tab would too, since IO doesn't fire on tab-hide.
+  let plotVisible=true;
+  const plotIO=new IntersectionObserver(es=>{ plotVisible=es[0].isIntersecting; },{threshold:0});
+  plotIO.observe(plot);
+
+  let raf=0,start=0,armed=false,lastStep=0,pausedAt=0;
+  function step(now){
+    if(document.hidden||!plotVisible){ if(!pausedAt)pausedAt=now; raf=requestAnimationFrame(step); return; }   // paused, not stopped
+    if(pausedAt){ start+=now-pausedAt; pausedAt=0; }    // shift start forward so the sweep resumes where it left off, no jump-cut
+    if(now-lastStep<FRAME_MS){ raf=requestAnimationFrame(step); return; }           // 30fps gate
+    lastStep=now;
+    if(!start)start=now; const p=Math.min(1,(now-start)/(R.draw*1000));
+    mount.setUniforms(u(p,cv)); if(p<1) raf=requestAnimationFrame(step); }
+  function play(){ cancelAnimationFrame(raf); start=0; lastStep=0; pausedAt=0; raf=requestAnimationFrame(step); }
+  function reset(){ cancelAnimationFrame(raf); mount.setUniforms(u(0,cv)); }
+
+  // draw when .fb-chart gains .in; reset on leave so it replays on re-enter
+  const check=()=>{ const on=chart.classList.contains('in');
+    if(on&&!armed){ armed=true; play(); } else if(!on&&armed){ armed=false; reset(); } };
+  new MutationObserver(check).observe(chart,{attributes:true,attributeFilter:['class']});
+  check();
+  // keep the draw sized correctly after fonts/layout settle
+  const resync=()=>{
+    const box=plot.getBoundingClientRect();
+    try{ mount.setMaxPixelCount&&mount.setMaxPixelCount(maxPixelsFor(box.width||600, box.height||480)); }catch(_){}
+    try{ mount.handleResize&&mount.handleResize(); }catch(_){}; mount.setUniforms(u(armed?1:0,cv)); };
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>{ resync(); setTimeout(resync,150); });
+  addEventListener('resize',resync);
+})();
+</script>
+
+</body>
+</html>

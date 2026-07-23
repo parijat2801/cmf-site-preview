@@ -1,0 +1,57 @@
+  <!-- FOR BRANDS — ink field, matching Offerings/Misfits. Positioning chart
+       reinterprets the client's hand-drawn 2x2 sketch in the site's own
+       language: hairline rules, heavy display type, one accent (red). -->
+  <section class="card dark for-brands tall nopin" id="for-brands" data-nav="dark" data-navbg="#231F20">
+    <div class="wrap">
+      <h2 class="head reveal d1" data-m>{{ for_brands.heading | safe }}</h2>
+
+      <div class="fb-cols">
+        <figure class="fb-chart reveal d2" data-m>
+          <div class="fb-plot">
+            <!-- red hand-drawn crayon axes: WebGL shader draws the L here; the two
+                 .fb-axis spans are the no-WebGL CSS fallback (hidden when shader on) -->
+            <span class="fb-axis fb-axis-y" aria-hidden="true"></span>
+            <span class="fb-axis fb-axis-x" aria-hidden="true"></span>
+            <!-- axis labels sit INSIDE the plot, hugging their own line -->
+            <span class="fb-yaxis">{{ for_brands.chartYAxisLabel }}</span>
+            <span class="fb-xaxis">{{ for_brands.chartXAxisLabel }}</span>
+            <!-- hand-drawn curly arrow: loops out from the end of the note and
+                 sweeps back down-left into an arrowhead pointing at the alien -->
+            <!-- The box is anchored so its BOTTOM-LEFT corner sits on the alien's
+                 centre (see .fb-curl), and the path ends there — so the arrowhead
+                 always lands on the logo regardless of viewport size. -->
+            <svg class="fb-curl" viewBox="0 0 120 120" fill="none" aria-hidden="true">
+              <!-- tail: starts top-right under the note, loops once, then sweeps
+                   down-left, finishing at (14,104) — the alien's centre. -->
+              <path class="fb-curl-line"
+                d="M92 10 C108 16 112 34 98 40 C86 45 78 32 88 26 C100 19 112 32 108 50
+                   C103 74 74 92 14 104"
+                stroke="currentColor" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <!-- arrowhead: two strokes meeting AT the path's end point (14,104),
+                   splayed back up-right along the incoming direction -->
+              <path class="fb-curl-head" d="M34 92 L14 104 L30 114"
+                stroke="currentColor" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <!-- alien mark in the top-right quadrant (replaces the old 2x2 labels) -->
+            <img class="fb-alien" src="assets/brand/alien-magenta.webp" alt="{{ for_brands.alienAlt }}" aria-hidden="true">
+            <!-- the handwritten note floats above the top-right quadrant -->
+            <div class="fb-note" aria-hidden="true">
+              <p>{{ for_brands.note }}</p>
+            </div>
+          </div>
+        </figure>
+
+        <div class="fb-copy reveal d2" data-m>
+          <p class="fb-lead">{{ for_brands.lead }}</p>
+          <ul class="fb-list">
+{%- for li in for_brands.list %}
+            <li>{{ li | safe }}</li>
+{%- endfor %}
+          </ul>
+        </div>
+      </div>
+
+      <p class="fb-write reveal d3" data-m>{{ for_brands.writeLede }} <a href="mailto:{{ for_brands.email }}"><span class="mark mark-w" style="--hl:#e5018c">{{ for_brands.email }}</span></a></p>
+    </div>
+  </section>
+

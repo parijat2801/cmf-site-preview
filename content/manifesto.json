@@ -1,0 +1,27 @@
+{
+  "beats": [
+    {
+      "eyebrow": "Manifesto",
+      "headline": "Where new <span class=\"mark mark-w\" style=\"--hl:var(--red)\">languages</span> are formed.",
+      "body": "Slang, sound, and syntax the mainstream hasn't caught up to yet.",
+      "photo": "assets/collage/blur.webp",
+      "alt": "",
+      "side": "r"
+    },
+    {
+      "headline": "Where new <span class=\"mark mark-w\" style=\"--hl:var(--red)\">aesthetics</span> are tested.",
+      "body": "Looks and worlds tried on in public, long before they trend.",
+      "photo": "assets/collage/arcade.webp",
+      "alt": "",
+      "side": "l"
+    },
+    {
+      "headline": "Where new <span class=\"mark mark-w\" style=\"--hl:var(--red)\">truths</span> are spoken.",
+      "body": "The things people actually mean, said out loud without translation.",
+      "photo": "assets/collage/banana.webp",
+      "alt": "",
+      "side": "r"
+    }
+  ],
+  "lede": "Mainstream or niche, a space to be seen, understood, and valued."
+}

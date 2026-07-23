@@ -1,0 +1,23 @@
+  <!-- THE MISFITS BRIGADE — the client's "Our Artists" roster, moved ABOVE
+       Offerings so the reader meets the artists before the offerings that carry
+       them. Photo wall: grayscale, hover reveals colour + the bigger image.
+       Names are PLACEHOLDER until the client supplies the real roster. -->
+  <section class="card dark misfits tall nopin" id="misfits" data-nav="dark" data-navbg="#231F20" data-navclear data-nograin>
+    <div class="wrap">
+      <h2 class="head reveal d1" data-m>{{ misfits.heading | safe }}</h2>
+      <p class="lede lede-wide reveal d2" data-m>{{ misfits.intro | safe }}</p>
+      <!-- CONFIGURABLE ROSTER: uniform, repeating .mcell blocks (the shape TinaCMS
+           will bind to later). To add an artist, copy one block and set its photo,
+           name (.mname + alt + data-name), and number (.mno). The grid auto-fits
+           and cells are ordered BY THE NUMBER, so source order doesn't matter. -->
+      <div class="mwall reveal d1">
+{%- for item in misfits.items %}
+        <figure class="mcell" data-photo="{{ item.photo }}" data-name="{{ item.name }}" data-order="{{ item.order }}" data-bio="{{ item.bio }}">
+          <img src="{{ item.photo }}" alt="{{ item.name }}" loading="lazy" decoding="async">
+          <img class="mno" src="assets/brand/alien-white.webp" alt="" aria-hidden="true"><span class="mname">{{ item.name }}</span><span class="mrole">{{ item.role }}</span>
+        </figure>
+{%- endfor %}
+      </div>
+    </div>
+  </section>
+

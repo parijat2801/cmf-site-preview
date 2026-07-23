@@ -1,0 +1,949 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{{ site.title }}</title>
+<meta name="description" content="{{ site.description }}" />
+<!-- Open Graph / Twitter: og:url, og:image, and the canonical URL below use a
+     placeholder domain (culturalmisfits.com, inferred from the hello@culturalmisfits.com
+     contact address on this page) and a placeholder social image (assets/crew.webp,
+     an existing large photo asset). Confirm/replace both before relying on them. -->
+<meta property="og:type" content="website" />
+<meta property="og:title" content="{{ site.title }}" />
+<meta property="og:description" content="{{ site.description }}" />
+<meta property="og:url" content="{{ site.url }}" />
+<meta property="og:image" content="{{ site.image }}" />
+<meta property="og:site_name" content="{{ site.siteName }}" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="{{ site.title }}" />
+<meta name="twitter:description" content="{{ site.description }}" />
+<meta name="twitter:image" content="{{ site.image }}" />
+<link rel="canonical" href="{{ site.url }}" />
+<link rel="icon" href="assets/favicon/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon/favicon-16x16.png">
+<link rel="apple-touch-icon" href="assets/favicon/apple-touch-icon.png">
+<link rel="preload" as="image" href="assets/quote-bg.webp">
+<style>
+@font-face{font-family:'NHG';src:url('fonts/NeueHaasDisplayLight.ttf') format('truetype');font-weight:300;font-style:normal;font-display:swap}
+@font-face{font-family:'NHG';src:url('fonts/NeueHaasDisplayRoman.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'NHG';src:url('fonts/NeueHaasDisplayMediu.ttf') format('truetype');font-weight:500;font-style:normal;font-display:swap}
+@font-face{font-family:'NHG';src:url('fonts/NeueHaasDisplayBlack.ttf') format('truetype');font-weight:900;font-style:normal;font-display:swap}
+@font-face{font-family:'NHG';src:url('fonts/NeueHaasDisplayBlackItalic.ttf') format('truetype');font-weight:900;font-style:italic;font-display:swap}
+@font-face{font-family:'NHG';src:url('fonts/NeueHaasDisplayThinItalic.ttf') format('truetype');font-weight:200;font-style:italic;font-display:swap}
+@font-face{font-family:'Caveat';src:url('fonts/Caveat-SemiBold.woff2') format('woff2');font-weight:600;font-style:normal;font-display:swap}
+:root{
+  /* brand palette — exact values from brand.css (the brand book) */
+  --ink:#231F20;--cream:#E7E1D4;--white:#FFFFFF;
+  --red:#DB1A21;--yellow:#FFDD00;--green:#009E49;--blue:#084CA1;
+  /* type + spacing scale with BOTH axes: min(vw, vh) keeps a short, wide
+     window (laptops) from getting poster-sized type that overflows it */
+  /* --sec-y is THE vertical rhythm: every section's top/bottom breathing room.
+     --sec-y-tight is the deliberately smaller footer pad. Both scale on vh so the
+     whole page keeps one rhythm as the viewport changes. */
+  --gutter:clamp(24px,6vw,120px);--sec-y:clamp(56px,9vh,160px);--sec-y-tight:clamp(40px,6vh,104px);
+  --t-label:clamp(.78rem,.8vw,.92rem);--t-body:clamp(1rem,1.15vw,1.35rem);
+  --t-lead:clamp(1.3rem,min(2.2vw,3vh),2.4rem);--t-head:clamp(2.4rem,min(7.5vw,10vh),8.5rem);
+  --hair:1.5px;--font:'NHG','Helvetica Neue',Helvetica,Arial,sans-serif;
+  /* ONE motion language — heavy, decelerating, no bounce. */
+  --ease:cubic-bezier(.16,1,.3,1);
+  --ease-io:cubic-bezier(.7,0,.2,1);
+  --dur:1s;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased}
+body{font-family:var(--font);background:var(--ink);color:var(--cream);line-height:1.1;overflow-x:hidden}
+img{display:block;max-width:100%}
+.wrap{padding-inline:var(--gutter);width:100%}
+/* ONE shared keyboard focus ring — :focus-visible only, so mouse/touch clicks
+   never show it. Brand-red outline with offset reads on dark/red/cream alike.
+   Covers nav links, .more/.fl "read more" links, footer links,
+   and the modal's prev/next/close controls. */
+.nav a:focus-visible,.more:focus-visible,.fl:focus-visible,
+.foot .frow a:focus-visible,
+.varrows button:focus-visible,.vclose:focus-visible,
+[data-mfcard]:focus-visible{
+  outline:2px solid var(--red);outline-offset:3px;border-radius:2px}
+/* visually-hidden helper: keeps content in the accessibility tree without
+   showing it on screen (used for the modal's accessible name heading) */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0,0,0,0);white-space:nowrap;border:0}
+/* Film grain: pre-baked 128px noise tile. Normal blend + its own layer —
+   no per-frame SVG turbulence compositing. */
+body::after{content:"";position:fixed;inset:0;z-index:8000;pointer-events:none;opacity:.05;
+  background:url('assets/grain.webp');background-size:128px 128px;transform:translateZ(0);
+  transition:opacity .4s var(--ease,ease)}
+/* suppress grain over photographic sections (e.g. manifesto) so the image reads clean */
+body.no-grain::after{opacity:0}
+@media(prefers-reduced-motion:reduce){body::after{display:none}}
+
+/* ============================================================
+   THE DECK. Cards sit in normal flow; GSAP ScrollTrigger pins each
+   one (pinSpacing:false) for an explicit dwell, then the next card
+   scrolls up and covers it. Spacers between cards provide the dwell
+   scroll room. No sticky, no clipping: tall cards scroll through
+   their own content first (pin starts at bottom), so nothing is cut.
+   ============================================================ */
+.deck{position:relative}
+/* --fz: per-card fit factor. One-screen cards ([data-fit]) get it computed by
+   the engine so their content ALWAYS fits the window; display type and the
+   vertical rhythm shrink together. 1 everywhere else. */
+/* min-height:100vh then 100dvh — dvh tracks the URL bar so cards don't reflow
+   mid-scroll when it collapses/expands; 100vh stays first as the fallback for
+   browsers without dvh support. */
+.card{--fz:1;position:relative;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;justify-content:center;
+  padding-block:calc(var(--sec-y)*var(--fz));overflow:hidden;contain:layout paint}
+.card.tall{justify-content:flex-start}
+/* (the old top-edge drop-shadow that marked where one card slid over another has
+   been removed — sections read as continuous, no divider seam.) */
+/* .nopin sections scroll normally, so they don't need to fill a viewport. With
+   min-height:100vh they did, and a section whose content was shorter than the
+   screen left a big empty tail before the next one — making the gap depend on
+   content length instead of the spacing rhythm. Sizing them to their content
+   makes every boundary exactly --sec-y (bottom) + --sec-y (top). */
+.card.nopin{box-shadow:none;min-height:0}
+/* the hero is nopin (no deck stacking) but must still fill the viewport —
+   same vh-then-dvh pair as .card so it doesn't reflow with the URL bar */
+.card.nopin.hero{min-height:100vh;min-height:100dvh}
+/* flat ink on all dark sections (no radial gradient) — a gradient's lighter
+   centre meeting a flat neighbour showed a tonal SEAM at the boundary, so every
+   dark surface is now the exact same colour. */
+.card.dark{background:var(--ink);color:var(--cream)}
+.card.red{background:var(--red);color:var(--cream)}
+.spacer{height:0;pointer-events:none}
+.foot{box-shadow:none}
+
+.head{font-weight:900;letter-spacing:-.03em;line-height:.94;font-size:calc(var(--t-head)*var(--fz));max-width:18ch}
+.head .it{font-style:italic}
+.lede{margin-top:calc(clamp(18px,2.6vh,34px)*var(--fz));font-weight:300;font-size:calc(var(--t-lead)*var(--fz));line-height:1.15;max-width:26ch}
+.lede b{font-weight:900;font-style:italic}
+/* .lede-wide: opt a lede OUT of the narrow 26ch measure so the sentence flows
+   across the column and only wraps when it runs out of real horizontal space
+   (capped at a still-readable measure, not full-bleed). */
+.lede-wide{max-width:52ch}
+
+/* editorial reveals — fade + rise + stagger on enter */
+.reveal{opacity:0;transform:translateY(34px);transition:opacity var(--dur) var(--ease),transform var(--dur) var(--ease)}
+.reveal.in{opacity:1;transform:none}
+.reveal.d1{transition-delay:.1s}.reveal.d2{transition-delay:.2s}.reveal.d3{transition-delay:.3s}.reveal.d4{transition-delay:.4s}.reveal.d5{transition-delay:.5s}.reveal.d6{transition-delay:.6s}
+@media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+
+/* ============================================================
+   HIGHLIGHTER — marker stroke sweeps behind the accent word.
+   Text keeps its inherited (legible) color until the fill passes,
+   THEN flips to ink — never black-on-dark before the sweep.
+   ============================================================ */
+.mark{position:relative;display:inline-block;color:inherit;z-index:0}
+.mark::before{content:"";position:absolute;left:-.12em;right:-.12em;top:12%;bottom:8%;z-index:-1;
+  background:var(--hl,var(--yellow));transform:scaleX(0);transform-origin:left;border-radius:2px;
+  transition:transform .7s var(--ease-io) .25s;
+  clip-path:polygon(0 6%,100% 0,100% 94%,0 100%)}
+.reveal.in .mark::before{transform:scaleX(1)}
+/* TWO independent highlighter systems that MUST NOT touch the same properties:
+   - .mark (no-WebGL FALLBACK): a whole-word color flip synced to the ::before swipe.
+   - .mark-shader (WebGL): a per-letter gradient reveal driven by --rv (see below),
+     which needs color:transparent so the gradient shows through background-clip:text.
+   Historically the base color rules below applied to ALL marks, so on a shader mark
+   `.reveal.in .mark{color:ink}` (specificity 0,2,1) OVERRODE `.mark-shader{color:
+   transparent}` (0,1,0) — the text went solid, the gradient never rendered, and the
+   whole word flipped color mid-stroke via the CSS transition. Fix: the base color
+   system is now scoped to :not(.mark-shader) so the two systems never collide. */
+.mark:not(.mark-shader){transition:color .35s var(--ease-io) .5s}
+.reveal.in .mark:not(.mark-shader){color:var(--ink)}
+/* .mark-w keeps the highlighted TEXT light (over a red highlight) instead of the
+   default dark ink. Uses --cream to MATCH the surrounding heading (which is cream
+   on dark cards), so the highlighted word isn't a different, cooler white. */
+.mark.mark-w:not(.mark-shader),.reveal.in .mark.mark-w:not(.mark-shader){color:var(--cream)}
+@media(prefers-reduced-motion:reduce){.mark::before{transform:scaleX(1)}.mark:not(.mark-shader){color:var(--ink)}.mark.mark-w:not(.mark-shader){color:var(--cream)}}
+/* SHADER HIGHLIGHTER: when JS confirms WebGL, it adds .mark-shader to each .mark
+   and mounts a canvas behind the word (the shader draws the marker stroke). The
+   CSS swipe below is then the FALLBACK for no-WebGL — suppress it here so the two
+   don't both render. Text color is driven by --rv (0→1, the stroke's tip position,
+   updated per-frame by JS): the word colors in left→right AS the tip passes it,
+   matching the shader progress. Ahead of the tip it sits at a dimmer resting tone. */
+.mark-shader::before{display:none}
+/* TEXT-ON-TOP model: the text sits SOLID over the highlight; the per-letter reveal
+   is the marker STROKE (WebGL) sweeping up from behind. So the text just needs to be
+   its final colour, always — no gradient-through-text (background-clip:text was
+   fragile here and rendered the ink words blank). --mark-lit is set per mark by the
+   JS: cream for .mark-w (reads on the dark card AND the red stroke), ink for plain
+   marks (reads on their yellow stroke). */
+.mark-shader{color:var(--mark-lit,var(--cream));background:none;
+  -webkit-text-fill-color:currentColor;
+  -webkit-background-clip:border-box;background-clip:border-box}
+/* the shader's own canvas, mounted behind the text */
+.mark-shader > canvas{position:absolute;z-index:-1;pointer-events:none}
+
+/* ============ NAV — themed per card, auto-hides on scroll down ============ */
+/* LIQUID GLASS nav: a translucent frosted panel that refracts the content
+   scrolling behind it (was a solid per-section color bar). Neutral dark tint so
+   the white nav text stays legible over every section. The url(#navGlass) term
+   adds the SVG lens refraction in Chromium; the @supports block below gives
+   Safari/Firefox a plain frosted fallback. */
+.nav{position:fixed;top:0;left:0;right:0;z-index:900;display:flex;align-items:center;justify-content:space-between;
+  padding:clamp(18px,2vw,30px) var(--gutter);color:var(--white);
+  background:rgba(24,20,21,.42);                 /* neutral dark translucent glass */
+  -webkit-backdrop-filter:blur(16px) saturate(160%);
+  backdrop-filter:url(#navGlass) blur(16px) saturate(160%);
+  border-bottom:1px solid rgba(255,255,255,.12);
+  transition:color .5s var(--ease),transform .5s var(--ease),background-color .5s var(--ease)}
+/* top sheen — a soft highlight along the upper edge, like light catching glass */
+.nav::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:-1;
+  background:linear-gradient(180deg,rgba(255,255,255,.14),transparent 60%)}
+/* browsers without SVG-filter-in-backdrop (Safari/FF): plain frosted glass */
+@supports not (backdrop-filter: url(#navGlass)){
+  .nav{backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%)}
+}
+.nav.thm-light{color:var(--ink)}
+/* hero: let the glass go fully clear so the video reads edge-to-edge, but keep
+   the blur so the bar still reads as glass */
+.nav.transparent{background:rgba(24,20,21,.18)}
+.nav.hid{transform:translateY(-110%)}
+/* brand wordmark logo (inline SVG): its letters use currentColor so they
+   follow the nav theme (white on dark cards, ink on light ones); the "(MIS)"
+   paths are hard-set red. Height hugs the bar; width auto. */
+.nav .mk{display:flex;align-items:center;color:inherit;text-decoration:none}
+.nav .mk .brandlogo{display:block;height:clamp(30px,2.4vw,40px);width:auto;
+  /* tight OUTLINE-style halo: several stacked drop-shadows hug the mark's edges
+     from all sides, so it pops off ANY backdrop showing through the glass (red
+     content, photos, light or dark) — no visible plate, just a crisp dark edge */
+  filter:
+    drop-shadow(0 0 1px rgba(0,0,0,.9))
+    drop-shadow(1px 1px 1px rgba(0,0,0,.7))
+    drop-shadow(-1px -1px 1px rgba(0,0,0,.7))
+    drop-shadow(0 2px 4px rgba(0,0,0,.5))}
+/* over a solid red section, also recolor the red "(Mis)" group to the nav's text
+   color so it doesn't sit red-on-red (even the halo can't separate red-on-red) */
+.nav.over-red .brandlogo .mk-red{fill:currentColor}
+/* PHONE: drop the black outline halo — keep ONLY the over-red colour change. The
+   halo is a desktop safeguard against the logo sitting on busy photo backdrops; on
+   phones the client prefers the clean logo with no dark edge, relying on the
+   over-red recolour above for the one place it'd otherwise sit red-on-red. */
+@media(max-width:760px){
+  .nav .mk .brandlogo{filter:none}
+}
+.nav .lk{display:flex;gap:2em;align-items:center}
+.nav a{color:inherit;text-decoration:none;font-size:var(--t-label);font-weight:500;letter-spacing:.18em;text-transform:uppercase;opacity:1;transition:opacity .35s var(--ease)}
+.nav a:hover{opacity:.65}
+.nav .contact{border:var(--hair) solid currentColor;padding:.55em 1.1em;opacity:1;transition:background .5s var(--ease),color .5s var(--ease)}
+.nav .contact:hover{background:currentColor}
+.nav .contact:hover span{color:var(--ink)}
+.nav.thm-light .contact:hover span{color:var(--cream)}
+/* Instagram icon link — outline glyph in the nav's currentColor, sits just before Contact */
+.nav .ig{display:flex;align-items:center;opacity:1;line-height:0;padding:0;margin-right:-.4em;transition:opacity .35s var(--ease)}
+.nav .ig:hover{opacity:.65}
+.nav .ig svg{display:block;width:clamp(20px,1.5vw,24px);height:auto}
+/* ---- desktop: the more-menu button + dropdown don't exist ---- */
+.navmore{display:none}
+.navmenu{display:none}
+/* ---- COMPACT nav (phones AND tablets, up to 1024px): two controls only — a small
+        Instagram + a "more" menu holding the verticals + mail. The inline link bar
+        needs ~1024px to fit all four verticals + Contact without colliding with the
+        logo (at 768–900px it wrapped/overlapped), so tablets use the menu too. ---- */
+@media(max-width:1024px){
+  .nav .lk a:not(.ig){display:none}          /* verticals + Contact button off the bar */
+  /* IG lives inside .lk and .navmore is a separate nav child; with the nav's
+     space-between that stranded IG in the CENTRE. Push .lk hard to the right so it
+     sits flush against the more button — logo left, [IG][more] grouped right. */
+  .nav .lk{gap:0;margin-left:auto}
+  /* fat-finger spacing: both controls get a ~44px tap area and a real gap between
+     them, so the two targets don't overlap and a thumb can't miss-hit. */
+  .nav .ig{width:44px;height:44px;justify-content:center;margin-right:0}
+  /* match the more button's visual weight: bump the IG glyph up and thicken its
+     stroke a touch so the two controls read as equal-sized siblings, not a small
+     icon beside a heavy menu button. */
+  .nav .ig svg{width:27px;stroke-width:2}
+  .navmore{margin-left:14px}
+  /* the more button: two short bars (a compact menu glyph), same currentColor as the nav */
+  .navmore{display:inline-flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;
+    width:44px;height:44px;padding:0;margin-right:-10px;background:none;border:0;cursor:pointer;color:inherit}
+  /* bars: 27px wide (matches the IG glyph) so the two controls read equal weight */
+  .navmore-bar{display:block;height:2px;width:27px;background:currentColor;border-radius:2px;
+    transition:transform .3s var(--ease),opacity .3s var(--ease)}
+  /* open state: bars cross into an X */
+  .navmore[aria-expanded="true"] .navmore-bar:nth-child(1){transform:translateY(3.5px) rotate(45deg)}
+  .navmore[aria-expanded="true"] .navmore-bar:nth-child(2){transform:translateY(-3.5px) rotate(-45deg)}
+  /* dropdown panel: sits under the bar, right-aligned, same glass field as the nav */
+  .navmenu{display:block;position:absolute;top:100%;right:var(--gutter);margin-top:8px;
+    min-width:200px;padding:8px;border-radius:10px;
+    background:rgba(24,20,21,.92);backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%);
+    box-shadow:0 12px 40px rgba(0,0,0,.5);
+    display:flex;flex-direction:column;gap:2px;
+    opacity:0;transform:translateY(-6px);transition:opacity .28s var(--ease),transform .28s var(--ease)}
+  .navmenu[hidden]{display:none}
+  .navmenu.open{opacity:1;transform:none}
+  .navmenu a{display:block;color:var(--cream);padding:.7em .8em;border-radius:6px;
+    font-size:var(--t-label);letter-spacing:.14em;opacity:.9}
+  .navmenu a:hover,.navmenu a:active{opacity:1;background:rgba(255,255,255,.08)}
+}
+
+/* ---------- PHONE TYPE SCALE ----------
+   Every heading on the page is sized `clamp(floor, min(Nvw, Mvh), ceiling)`. The
+   vh term exists so headlines can't swamp a short desktop window — but on a phone
+   min(vw,vh) always resolves to the vw side, and at 390px that lands UNDER the
+   floor. So every heading rendered at its floor: the manifesto h3, the section
+   .head and the reel head all collapsed to an identical 38.4px and the page lost
+   its hierarchy — three different levels reading as one.
+
+   Fixed here by restating the scale in vw only (no vh term to starve it) with
+   deliberate intervals rather than a single shared floor. At 390px this yields
+   roughly:  head 47  ·  manifesto/reel 43  ·  vertical h3 36  ·  lead 21  ·  body 16
+   — a ~1.18 ratio between heading levels, so the levels stay legible AS levels.
+   Oversized headlines are the brand's signature; the phone should read as a small
+   poster, not as the desktop page with the type turned down. */
+@media(max-width:760px){
+  :root{
+    --t-head:clamp(2.9rem,12vw,4.4rem);
+    --t-lead:clamp(1.3rem,5.4vw,1.7rem);
+  }
+}
+
+/* ============ HERO (CRT) — video field, white type, red accent ============ */
+.hero{position:relative;isolation:isolate}
+/* 3D balloon field — a WebGL canvas fills the card, sits under every other
+   hero layer. The poster is a CSS background fallback (WebGL off / reduced
+   motion / load failure) and keeps the same B&W treatment the video had. */
+.hero .hero-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;display:block;
+  background:#231F20 center/cover no-repeat}
+/* PHONE: the hero box is 100dvh, which SHRINKS as the URL bar collapses on scroll.
+   The canvas (inset:0) followed it, so its box height changed continuously during
+   scroll — and the WebGL fit() read that changing/mid-reflow height and re-sized the
+   drawing buffer to it (measured swinging 75..742px on-device), stretching the scene
+   and zooming it in/out. Pin the canvas to a STABLE height instead: 100vh is the
+   LARGE (layout) viewport that does NOT shrink with the URL bar, unlike 100dvh. Now
+   the canvas box holds constant through scroll, fit() reads one height, the buffer
+   never re-sizes, and nothing zooms. (Bottom of the canvas simply sits under the URL
+   bar area, which is exactly where a full-bleed hero image should extend anyway.) */
+@media(max-width:760px){
+  .hero .hero-canvas{height:100vh;bottom:auto}
+}
+.hero .hero-canvas.poster{background-image:url('assets/brand/balloon-glyph-1k.webp');
+  background-size:auto 78%;background-position:66% 42%;filter:grayscale(1) contrast(1.05)}
+/* legibility scrim — darker on the left where the copy sits, lighter on the right */
+.hero::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(95deg,rgba(0,0,0,.9) 0%,rgba(0,0,0,.68) 34%,rgba(0,0,0,.25) 62%,rgba(0,0,0,.5) 100%)}
+.hero .content{position:relative;z-index:10;display:block;flex:1;
+  align-items:flex-start;text-align:left;padding-top:clamp(70px,8vh,120px)}
+/* the three beats stack in ONE slot so they crossfade in place — no layout
+   shift as they swap. The slot reserves height (the tallest beat) via a grid:
+   all beats occupy cell 1/1, only .on is opaque. */
+.hero .hstage{position:relative;display:grid;min-height:52vh;align-content:center}
+.hero .hbeat{grid-area:1/1;align-self:center;max-width:none;
+  opacity:0;transform:translateY(10px);transition:opacity .35s var(--ease),transform .35s var(--ease);
+  will-change:opacity}
+.hero .hbeat.on{opacity:1;transform:none}
+/* line breaks come from the copy's meaning (.bp), NOT from the column running
+   out of room — so each phrase stays whole. .ph never wraps mid-phrase; if a
+   phrase is wider than the viewport (phones), the fit-scale (--fz) shrinks the
+   type until it fits rather than breaking the phrase. */
+.hero .hbeat .ph{white-space:nowrap;display:inline}
+/* PHONE: the shrink-don't-break contract above assumes the type can always get
+   smaller. It can't any more — .mega now has a floor so the hero doesn't render at
+   body-copy size. At 390px the longest phrases are wider than the screen even at
+   that floor, so they must be allowed to wrap; overflowing off-screen is worse than
+   a break. Balanced wrapping keeps the resulting lines even rather than leaving one
+   orphaned word. */
+/* Scoped to match the .mega floor, which applies at EVERY width — so the escape
+   has to as well. Scoping this to 760px alone left a gap: at 768px the floor still
+   blocked the shrink but the phrase still couldn't wrap, and the beat rendered
+   814px wide in a 768px viewport. Tablets are narrow enough to hit that too. */
+@media(max-width:1024px){
+  .hero .hbeat .ph{white-space:normal;text-wrap:balance;overflow-wrap:break-word}
+}
+.hero .hbeat .bp{display:block;line-height:0}
+/* TYPEWRITER reveal: the active beat's text prints left-to-right, driven by
+   --rv (0→1). We reveal by wrapping the text in .hink and clipping it; a caret
+   rides the reveal edge. --rv is set per-frame by JS (typewriter) OR slammed to
+   1 instantly when the reader scrolls mid-type (skip-to-full). A beat only
+   types while it's .on; inactive beats hold at --rv:0 and are hidden by opacity.
+   The reveal is character-count based (--n glyphs) so timing is even. */
+.hero .hbeat{--rv:0}
+/* reveal is per-GLYPH: JS wraps each character in a .g span, then flips .lit on
+   the first N as --rv advances. Real inline flow → wraps line-by-line like a
+   real typewriter, and the red .mis span keeps its color. Hidden glyphs stay in
+   place (visibility) so nothing reflows as text appears. */
+.hero .hbeat .g{visibility:hidden;position:relative}
+/* HOT-PHOSPHOR STRIKE: as each glyph is struck (.lit added) it fires RED and hot
+   at the beam point, then cools to white over ~0.5s — the way a real CRT phosphor
+   ignites bright at the strike and settles to its resting colour. The freshly-lit
+   red glyphs at the leading edge ARE the cursor now (no separate block). The .mis
+   glyphs stay red (their resting colour is red, so they never cool to white). */
+.hero .hbeat .g.lit{visibility:visible;animation:strike .3s ease-out forwards}
+@keyframes strike{
+  /* tight hot point: small glow blur so red doesn't bleed sideways into the
+     neighbouring glyphs, and a fast cool-down so only the 1–2 glyphs at the
+     leading edge read red — a narrow strike, not a wide red band. */
+  0%{color:#FF2A32;text-shadow:0 0 3px rgba(255,42,50,.85)}
+  45%{color:#FF6068;text-shadow:0 0 2px rgba(255,80,90,.5)}
+  /* cools to white, landing on the hero's resting chroma-split CRT glow */
+  100%{color:#fff;text-shadow:-1.2px 0 0 rgba(255,0,60,.4),1.2px 0 0 rgba(0,180,255,.36),0 0 22px rgba(150,200,255,.32)}
+}
+/* the .mis mark ("(Mis)") is red at rest — it strikes hot then cools back to red,
+   not white, so the brand mark keeps its colour. */
+.hero .hbeat .mis .g.lit{animation:strikeRed .3s ease-out forwards}
+@keyframes strikeRed{
+  0%{color:#FF7A80;text-shadow:0 0 3px rgba(255,42,50,.85)}
+  100%{color:var(--red);text-shadow:none}
+}
+/* reduced-motion / fallback: no typewriter, no strike — glyphs just appear white */
+.hero .hbeat.notype .g{visibility:visible;animation:none;color:#fff}
+.hero .hbeat.notype .mis .g{color:var(--red)}
+/* .mega type treatment kept: heavy display type, CRT chroma-split shadow.
+   Size is WIDTH-AWARE: the longest phrase ("The connected and culturally fluid
+   generation", ~45ch) must fit ONE line inside the gutters at every width, so no
+   phrase ever overflows or force-wraps. --hfs is the vw ceiling that guarantees
+   that (tuned by measuring the widest line live); capped at --t-head so ultrawide
+   screens don't blow it up. */
+.hero .mega{font-weight:900;letter-spacing:-.03em;line-height:1.04;color:var(--white);
+  /* --hfs is measured by the hero fit routine so the longest beat fits its box; the
+     min() then caps it. There was no LOWER bound, so on a phone 4.5vw resolved to
+     ~18px — the opening statement rendering at body-copy size. max() floors it at a
+     real headline size. NOTE this trades against the .ph nowrap contract below: once
+     the type can't shrink any further, a phrase longer than the viewport has to wrap
+     instead of overflowing — see the phone rule after .ph. */
+  font-size:max(clamp(1.6rem,7.4vw,2.6rem),min(var(--hfs,4.5vw),84px));
+  text-shadow:-1.2px 0 0 rgba(255,0,60,.4),1.2px 0 0 rgba(0,180,255,.36),0 0 22px rgba(150,200,255,.32)}
+.hero .sig{max-width:none}
+.hero .sig .mis{color:var(--red)}   /* only "(Mis)" is red — matches the footer mark */
+.hero.settled .mega{text-shadow:0 0 14px rgba(255,255,255,.14)}
+@media(prefers-reduced-motion:reduce){
+  /* no crossfade choreography: every beat resolves visible, stacked in flow */
+  .hero .hstage{display:block}
+  .hero .hbeat{opacity:1;transform:none;transition:none;margin-bottom:.6em;max-width:26ch}
+}
+@media(max-width:860px){.hero .hbeat{max-width:100%}.hero .hstage{min-height:46vh}}
+/* HERO SCRIM, PHONE. The 95deg scrim darkens the LEFT, where the desktop copy
+   sits. At phone width the copy centres over the glyph instead, so the gradient
+   no longer sits under it — restate it bottom-up so the type keeps its backing.
+   (The type deliberately still overlaps the glyph: it reads as foreground.) */
+@media(max-width:760px){
+  .hero::after{background:linear-gradient(to top,rgba(0,0,0,.9) 0%,rgba(0,0,0,.6) 34%,rgba(0,0,0,.34) 62%,rgba(0,0,0,.42) 100%)}
+}
+.hero .scroll{position:absolute;bottom:clamp(24px,3vw,44px);left:var(--gutter);color:var(--white);font-size:var(--t-label);letter-spacing:.2em;text-transform:uppercase;opacity:.7;display:flex;align-items:center;gap:.8em;z-index:12;
+  transition:opacity .4s var(--ease)}
+/* the scroll cue's 46px rail. Once the statement has typed, .scroll gets .hint
+   and the rail pulses (pull) to invite scrolling; once the reader scrolls,
+   .scroll gets .took and the whole cue fades out. */
+.hero .scroll .meter{position:relative;width:46px;height:1px;background:rgba(255,255,255,.35)}
+.hero .scroll.hint .meter{background:currentColor;animation:pull 1.8s ease-in-out infinite}
+.hero .scroll.took{opacity:0;pointer-events:none}
+@keyframes pull{0%,100%{transform:scaleX(.35);transform-origin:left;opacity:.4}50%{transform:scaleX(1);opacity:1}}
+/* CRT overlays — hero only. "Late-night broadcast", not video-game glitch. */
+.tv{position:absolute;inset:0;pointer-events:none;z-index:11}
+.tv .scan{position:absolute;inset:0;opacity:.3;mix-blend-mode:multiply;background:repeating-linear-gradient(to bottom,rgba(0,0,0,0) 0 2px,rgba(0,0,0,.22) 2px 3px)}
+.tv .roll{position:absolute;left:0;right:0;top:0;height:26vh;opacity:.5;background:linear-gradient(to bottom,rgba(255,255,255,0),rgba(255,255,255,.05) 50%,rgba(255,255,255,0));animation:rollmove 7s linear infinite;will-change:transform}
+@keyframes rollmove{0%{transform:translateY(-30vh)}100%{transform:translateY(130vh)}}
+.tv .glass{position:absolute;inset:0;box-shadow:inset 0 0 160px rgba(0,0,0,.6);background:radial-gradient(130% 130% at 50% 50%,rgba(0,0,0,0) 60%,rgba(0,0,0,.4) 100%)}
+/* power-on */
+.hero .flash{position:absolute;left:0;right:0;top:50%;height:3px;background:#fff;box-shadow:0 0 30px 10px rgba(255,255,255,.85);z-index:40;transform:translateY(-50%);animation:power 1300ms ease-in forwards}
+@keyframes power{0%{opacity:0;height:3px}8%{opacity:1}22%{opacity:1;height:3px}45%{opacity:1;height:70vh}46%{opacity:1;height:100vh}100%{opacity:0;height:100vh}}
+.hero .content{clip-path:inset(50% 0 50% 0);animation:open 1300ms var(--ease-io) forwards}
+@keyframes open{0%,30%{clip-path:inset(50% 0 50% 0)}46%{clip-path:inset(49.6% 0 49.6% 0)}60%,100%{clip-path:inset(0 0 0 0)}}
+/* power-on runs exactly ONCE. When GSAP re-pins the hero (initial refresh, resize),
+   re-inserting .content would REPLAY the CSS animations → repeated CRT blinks. Once
+   settled, kill both animations and hide the flash so a re-pin can't retrigger them. */
+.hero.settled .content{animation:none;clip-path:none}
+.hero.settled .flash{display:none;animation:none}
+@media(prefers-reduced-motion:reduce){.hero .flash,.tv .roll{display:none}.hero .content{clip-path:none;animation:none}}
+
+
+/* ============ OFFERINGS — three pillars, hover auto-cycles the photos ============ */
+/* matches the Acts (.witem) layout: equal columns + a TIGHT gap so the text and
+   image sit close, and the image is large (fills its column). No mid-row void. */
+.offer{display:grid;grid-template-columns:1fr 1fr;gap:clamp(24px,3vw,64px);align-items:center;
+  padding-block:clamp(24px,4vh,56px);border-top:var(--hair) solid rgba(231,225,212,.16)}
+/* alternating layout, like the Acts (.witem): on even offers the image + text
+   swap columns so the section zig-zags. Markup order is .oshot then .otext. */
+.offer:nth-of-type(even) .oshot{order:2}
+.offer:nth-of-type(even) .otext{order:1}
+/* larger image, like Acts (up to 72vh), filling its column */
+.oshot{position:relative;aspect-ratio:1/1;width:min(100%,72vh);justify-self:start;overflow:hidden;user-select:none;background:#1B1818;--edge:var(--co)}
+.oshot::before{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;box-shadow:inset 0 0 0 0 var(--edge);transition:box-shadow .5s var(--ease)}
+.oshot:hover::before{box-shadow:inset 0 0 0 2px var(--edge)}
+.oshot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .6s var(--ease),transform var(--dur) var(--ease)}
+.oshot img.on{opacity:1}
+.oshot.flip img.on{animation:settle .9s var(--ease)}
+@keyframes settle{0%{transform:scale(1.03)}100%{transform:none}}
+/* the number counter (e.g. "2/3") is the sole progress indicator; while cycling
+   the section accent sweeps through it over --tickdur (below). */
+@media(hover:none) and (pointer:coarse){.oshot{--tickdur:2.2s}}   /* match the touch auto-cycle cadence */
+/* the counter (e.g. "2/3") sits white by default; while cycling, the section accent
+   sweeps left→right through it over the cycle duration — same role the filling dash
+   had, but on the number itself. Done with a two-stop gradient painted into the text
+   via background-clip, its split driven by an animated custom property. */
+@property --idxfill{syntax:'<percentage>';inherits:false;initial-value:0%}
+.oshot .idx{position:absolute;right:14px;bottom:12px;z-index:4;font-weight:900;font-style:italic;font-size:1.05rem;
+  color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.6)}
+/* the counter fills with --idxaccent (defaults to the section accent --co). Where
+   --co is a LIGHT tone the fill would vanish on the white number — the Acts (.witem)
+   photos set --co:cream, so their counter filled cream-on-white (invisible). Give
+   those a red fill instead so the sweep actually shows. */
+.oshot{--idxaccent:var(--co,var(--red))}
+.witem .oshot{--idxaccent:var(--red)}
+.oshot.cycling .idx{color:transparent;-webkit-text-fill-color:transparent;text-shadow:none;
+  background:linear-gradient(90deg,var(--idxaccent) 0 var(--idxfill),#fff var(--idxfill) 100%);
+  -webkit-background-clip:text;background-clip:text;
+  animation:idxfill var(--tickdur,.9s) linear forwards}
+@keyframes idxfill{0%{--idxfill:0%}100%{--idxfill:100%}}
+/* @property fallback (Safari <16.4 / Firefox): no animatable %, so just tint the
+   whole number the accent while cycling rather than a broken/empty sweep. */
+@supports not (background:linear-gradient(90deg,red 0 var(--idxfill),#fff 0)){
+  .oshot.cycling .idx{background:none;color:var(--idxaccent);-webkit-text-fill-color:var(--idxaccent);animation:none}
+}
+.offer .otext h3{margin-top:.2em;font-weight:900;font-size:clamp(2rem,4.4vw,4.6rem);letter-spacing:-.03em;line-height:.92;color:var(--co)}
+.offer .otext p{margin-top:.9em;font-weight:300;font-size:var(--t-lead);opacity:.86;line-height:1.35;max-width:34ch}
+/* the lead's name at full Black weight (like the headers) — same size, more thickness */
+.offer .otext p .lead-name{font-weight:900}
+/* Film Studio partner list: a short "Partner with us to create:" lead-in and a
+   hairline-marked list of offers, tinted with the pillar accent (--co). */
+.offer .otext p.partner{margin-top:1em;font-weight:500;opacity:.7;font-size:var(--t-body)}
+.offer .otext .offer-list{margin-top:.5em;list-style:none;max-width:34ch}
+.offer .otext .offer-list li{font-weight:400;font-size:var(--t-body);line-height:1.2;opacity:.9;
+  padding:.5em 0;border-top:var(--hair) solid rgba(231,225,212,.18)}
+.offer .otext .offer-list li::before{content:"#";color:var(--co);margin-right:.6em;font-weight:700}
+.offer .otext .date{display:block;margin-top:1em;font-weight:500;letter-spacing:.18em;text-transform:uppercase;font-size:var(--t-label);opacity:.6}
+.offer .otext .more{margin-top:1.3em;display:inline-block;font-weight:500;letter-spacing:.18em;text-transform:uppercase;font-size:var(--t-label);border-bottom:var(--hair) solid var(--co);padding-bottom:.2em;text-decoration:none;color:var(--co);transition:opacity .5s var(--ease)}
+.offer .otext .more:hover{opacity:.6}
+@media(max-width:860px){
+  .offer{grid-template-columns:1fr;gap:clamp(20px,5vw,36px)}
+  .oshot{aspect-ratio:4/3;width:100%}
+  /* stack image ALWAYS above text. The desktop zig-zag swaps even rows to
+     text-first (.oshot order:2); reset that so every card reads image-then-text. */
+  .offer:nth-of-type(even) .oshot{order:0}
+  .offer:nth-of-type(even) .otext{order:0}
+}
+
+/* ============ WORK — brand red field, cream type ============ */
+.witem{display:grid;grid-template-columns:1fr 1fr;gap:clamp(24px,3vw,64px);align-items:center;border-top:var(--hair) solid currentColor;padding-block:clamp(26px,3vw,52px)}
+.witem:first-of-type{border-top:0}
+.witem .txt{display:flex;flex-direction:column}.witem:nth-child(even) .txt{order:2}
+.witem h3{font-weight:900;font-style:italic;font-size:clamp(2.2rem,5vw,6rem);letter-spacing:-.03em;line-height:.9}
+.witem p{margin-top:.9em;font-weight:300;font-size:var(--t-body);line-height:1.45;max-width:42ch}
+.witem p b{font-weight:900;font-style:italic}
+/* work photos use the same hover-cycle stack as the offerings */
+.witem .oshot{aspect-ratio:5/4;width:min(100%,72vh);justify-self:start}
+.witem .fl{margin-top:1.2em;align-self:flex-start;font-weight:500;letter-spacing:.18em;text-transform:uppercase;font-size:var(--t-label);border-bottom:var(--hair) solid currentColor;padding-bottom:.25em;text-decoration:none;color:inherit;transition:opacity .5s var(--ease)}
+.witem .fl:hover{opacity:.6}
+@media(max-width:760px){
+  .witem,.witem:nth-child(even){grid-template-columns:1fr}
+  /* image ALWAYS above text. The DOM order is text-then-image, and desktop swaps
+     even rows on top of that — so force image first on every row via order. */
+  .witem .oshot{order:0}
+  .witem .txt,.witem:nth-child(even) .txt{order:1}
+}
+
+/* ============ THE MISFITS — photo wall; hover floats the bigger image ============
+   Cells are HEIGHT-driven (vh) so the whole section — head, 2 rows, proof
+   line — composes to one screen; the fit pass handles the rest. */
+/* CONFIGURABLE / AUTO-FIT roster grid: cells flow and wrap by available width
+   against a min cell size, so ANY number of .mcell blocks lays out cleanly —
+   add or remove artists and the grid reflows with no column math. Portrait 4/5
+   cells suit the B&W performance photography. */
+/* fixed 5 columns on desktop (roster reads as a tidy 5-up wall); steps down on
+   narrower screens. Adding/removing artists still reflows within the column count. */
+.mwall{display:grid;grid-template-columns:repeat(5,1fr);
+  gap:clamp(8px,1vw,18px);margin-top:clamp(8px,1.5vh,20px)}
+@media(max-width:1100px){.mwall{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:820px){.mwall{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:560px){.mwall{grid-template-columns:repeat(3,1fr);gap:6px}}
+.mcell{position:relative;aspect-ratio:4/5;overflow:hidden;background:#1B1818;margin:0}
+/* photos arrive already B&W, so we dim slightly at rest and lift brightness +
+   scale on hover (no grayscale→colour reveal — that'd be a no-op on mono art). */
+.mcell img{width:100%;height:100%;object-fit:cover;filter:brightness(.78);
+  transition:filter .6s var(--ease),transform .6s var(--ease)}
+.mcell:hover img{filter:brightness(1);transform:scale(1.04)}
+/* .mno is now the CMF alien mark (was a number). Small white badge, top-left. */
+.mcell .mno{position:absolute;top:10px;left:12px;width:clamp(16px,1.6vw,22px);height:auto;opacity:.9;
+  filter:drop-shadow(0 1px 4px rgba(0,0,0,.55))}
+/* name sits just above the role tag; small gap keeps the two close together */
+/* name sits above the tag: tag is 8px from the photo bottom, name 8px above it.
+   Tag height ≈ its font (~.72rem) × line-height 1 + .64em padding ≈ ~20px, so the
+   name's bottom = 8 (base) + ~20 (tag) + 8 (gap) ≈ 36px. */
+.mcell .mname{position:absolute;left:12px;right:12px;bottom:36px;font-weight:900;font-size:clamp(1.1rem,1.35vw,1.55rem);letter-spacing:-.01em;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.65)}
+/* role tag: yellow pill, 8px from the photo's bottom-left */
+.mcell .mrole{position:absolute;left:12px;bottom:8px;display:inline-block;background:var(--yellow);color:var(--ink);
+  font-weight:700;font-size:clamp(.58rem,.72vw,.75rem);letter-spacing:.12em;text-transform:uppercase;
+  padding:.32em .6em;border-radius:3px;line-height:1}
+/* phones stay 3-up (2-up made the roster read as a short list, not a wall), but a
+   3-up cell is only ~105px wide. Shrinking the OVERLAY type to fit inside the photo
+   drove the name to ~11px and the role pill to ~7px — technically non-overflowing,
+   practically unreadable. So on phones the caption moves OUT from over the photo and
+   sits beneath it, where it has the full cell width and can stay legible.
+   Must come AFTER the .mcell rules above: same specificity, so source order decides. */
+@media(max-width:560px){
+  .mcell{aspect-ratio:auto;overflow:visible;background:none}
+  .mcell img{aspect-ratio:4/5;height:auto;background:#1B1818}   /* photo keeps the portrait crop */
+  .mcell .mname{position:static;display:block;margin-top:6px;font-size:.82rem;letter-spacing:-.02em;line-height:1.12;text-shadow:none}
+  /* the tag is a secondary label UNDER the name. It must always start its own row:
+     as inline-block it rode up beside any short name ("Nicki Wells" SINGER,
+     "Ravi-Ra" MUSICIAN) and overlapped it. `display:table` gives it a shrink-to-fit
+     block box — it hugs its text like the old inline-block pill, but as a block it
+     can never share the name's line. */
+  .mcell .mrole{position:static;display:table;margin-top:5px;font-size:.58rem;letter-spacing:.05em;padding:.26em .4em;
+    white-space:normal}   /* PHOTOGRAPHER must still fit 105px — wrap rather than clip */
+  .mcell .mno{top:5px;left:5px;width:12px}
+}
+@media(hover:none){.mcell img{filter:brightness(.9)}}
+@media(prefers-reduced-motion:reduce){.mcell:hover img{transform:none}}
+
+/* ============ VERTICAL MODAL — image left, paragraphs right, ‹ › ✕ bottom ============ */
+.vmodal{position:fixed;inset:0;z-index:950;display:flex;opacity:0;pointer-events:none;transition:opacity .45s var(--ease)}
+.vmodal.open{opacity:1;pointer-events:auto}
+.vscrim{position:absolute;inset:0;background:rgba(16,14,15,.72)}
+/* CONTAINED panel (floats with margin, not full-bleed) on the site's exact dark
+   card surface — same radial ink gradient as .card.dark. Two columns: square
+   image | text; a bottom nav row spans both. */
+.vpanel{position:relative;margin:auto;width:min(1180px,90vw);max-height:88vh;color:var(--cream);
+  background:radial-gradient(120% 120% at 50% 35%,#2A2526,#231F20 78%);
+  border:var(--hair) solid rgba(231,225,212,.14);
+  padding:clamp(22px,3vw,52px);
+  display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);
+  gap:clamp(30px,3.4vw,72px);align-items:stretch;
+  transform:translateY(26px);transition:transform .5s var(--ease)}
+.vmodal.open .vpanel{transform:none}
+.vfig{grid-column:1;margin:0;aspect-ratio:1/1;width:100%;overflow:hidden;background:#1B1818}
+.vfig img{width:100%;height:100%;object-fit:cover;display:block}
+/* text column matches the image height; body scrolls, nav row pins to the bottom
+   (= bottom of the image). arrows on the left, close on the right. */
+.vtextcol{grid-column:2;display:flex;flex-direction:column;min-height:0}
+.vbody{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding-right:.4em;
+  font-weight:500;font-size:clamp(1.05rem,1.5vw,1.6rem);line-height:1.28;letter-spacing:-.01em;max-width:34ch}
+.vbody p{margin:0}
+.vbody p + p{margin-top:1.1em}
+.vbody b{font-weight:900}
+/* artist modal: name heading + red role pill above the bio */
+.vbody .vname{margin:0 0 .35em;font-weight:900;letter-spacing:-.02em;line-height:1;
+  font-size:clamp(1.6rem,2.6vw,2.6rem)}
+.vbody .vrole{display:inline-block;margin:0 0 1em;background:var(--yellow);color:var(--ink);
+  font-weight:700;font-size:clamp(.62rem,.8vw,.8rem);letter-spacing:.12em;text-transform:uppercase;
+  padding:.34em .7em;border-radius:3px;line-height:1}
+.vbody .vrole + p{margin-top:0}
+/* nav row: sits at the bottom of the text column, level with the image bottom */
+.vnav{display:flex;align-items:center;justify-content:space-between;margin-top:clamp(18px,2.4vh,34px)}
+.varrows{display:flex;gap:clamp(14px,1.6vw,26px)}
+.varrows button,.vclose{background:none;border:0;color:var(--cream);cursor:pointer;padding:6px;line-height:0;
+  opacity:.9;transition:opacity .3s var(--ease),transform .3s var(--ease)}
+.varrows button:hover,.vclose:hover{opacity:1}
+.varrows .vprev:hover{transform:translateX(-3px)}
+.varrows .vnext:hover{transform:translateX(3px)}
+.varrows button:disabled{opacity:.26;cursor:default;transform:none}
+.vmodal.single .varrows{visibility:hidden}      /* single-slide: keep close aligned */
+@media(max-width:860px){
+  .vpanel{grid-template-columns:1fr;gap:22px;align-items:start}
+  .vfig{grid-column:1}
+  .vtextcol{grid-column:1;min-height:0}
+}
+
+/* ============ FOOTER — slim strip; the memo lives here now ============ */
+/* FOOTER — a big closing block: About Us heading + blurb, then stacked rows of
+   pipe-separated links (Home / site nav / socials), then the © base line. */
+/* the footer sits deliberately tighter than a full section, but on the SAME
+   vh-based rhythm as everything else (was a vw clamp, which drifted out of step) */
+.foot{min-height:auto;padding-block:var(--sec-y-tight);justify-content:flex-start;background:#1B1818;color:var(--cream)}
+.foot .about{padding-top:clamp(32px,4vw,56px);max-width:60ch}
+.foot .fh{font-weight:900;letter-spacing:-.03em;line-height:.95;font-size:clamp(2.2rem,min(5.5vw,7vh),4.4rem);color:var(--cream)}
+.foot .about p{margin-top:.7em;font-weight:300;font-size:clamp(1rem,1.4vw,1.35rem);opacity:.82;line-height:1.5}
+/* link rows: pipe-separated inline lists. Same uppercase link treatment. */
+.foot .frow{display:flex;flex-wrap:wrap;align-items:center;gap:.9em 1.1em;margin-top:clamp(22px,3vw,38px)}
+.foot .frow-home{margin-top:clamp(32px,4.5vw,60px)}
+.foot .frow a{color:inherit;text-decoration:none;font-size:var(--t-label);font-weight:500;letter-spacing:.18em;text-transform:uppercase;opacity:.7;transition:opacity .5s var(--ease);position:relative}
+.foot .frow a:hover{opacity:1}
+/* pipe between items (not after the last) */
+.foot .frow a:not(:last-child)::after{content:"|";position:absolute;right:calc(-.55em - 1px);opacity:.35;font-weight:300}
+.foot .base{margin-top:clamp(40px,5vw,72px);display:flex;justify-content:space-between;gap:2em;font-size:var(--t-label);letter-spacing:.08em;opacity:.45}
+@media(max-width:860px){
+  /* rows stack vertically; drop the pipes so nothing overflows */
+  .foot .frow{flex-direction:column;align-items:flex-start;gap:.7em}
+  .foot .frow a:not(:last-child)::after{display:none}
+  .foot .base{flex-direction:column;gap:.6em}
+}
+
+/* ============================================================
+   MANIFESTO COLLAGE (ported from protos/m.html). All classes mf-prefixed to
+   avoid colliding with the deck's .card/.beat/.ph/.mk. These sections are NOT
+   .deck > .card, so they escape the pin/dwell/fit systems and scroll plainly.
+   ============================================================ */
+/* reveal-on-scroll (proto's .rise, renamed .mf-rise; driven by its own trigger) */
+.mf-rise{opacity:0;transform:translateY(34px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
+.mf-rise.in{opacity:1;transform:none}
+
+/* CHANT COLLAGE — red frame, dark inset panel, photos bleed off edges */
+/* red frame: equal band top AND bottom (padding), plus the sides (panel margin),
+   so the red wraps the dark panel symmetrically — a matching red edge after the
+   "Mainstream…valued." line, mirroring the band above the beats. */
+.mf-collage{position:relative;background:var(--red);overflow-x:clip;padding:clamp(30px,6vh,80px) 0}
+/* PHONE: the hero pins position:fixed (z-index 10) for its dwell, then releases.
+   On a real phone the URL bar collapsing changes innerHeight, so the release
+   times late and the fixed, full-height hero keeps COVERING the manifesto as it
+   scrolls up underneath (measured: manifesto top sat 133px inside the still-fixed
+   hero). Lifting the manifesto above the hero's z-index means that even on a late
+   release the incoming section paints OVER the hero instead of behind it — the
+   hero just slides away cleanly. Phone-only so the desktop deck stack is untouched. */
+@media(max-width:760px){.mf-collage{z-index:11}}
+.mf-panel{position:relative;background:var(--ink);overflow:visible;
+  margin:0 clamp(30px,8vw,120px);padding:clamp(30px,4vw,56px) clamp(28px,4vw,60px) clamp(28px,4vw,52px)}
+/* HEADING for the chant section — the manifesto opens on this. Full headline
+   scale (near the "Where…" beats), cream. */
+.mf-lede{font-weight:900;letter-spacing:-.03em;line-height:.94;color:var(--cream);
+  font-size:clamp(2rem,min(6vw,7vh),5.4rem);max-width:16ch;margin-bottom:clamp(50px,9vh,120px)}
+/* wide variant: same size as the beat headings (.mf-beat h3), full width — the
+   sentence flows and wraps only at the column edge, no forced line break. */
+.mf-lede-wide{font-size:clamp(2.4rem,min(6.5vw,8vh),5.4rem);max-width:none;margin-top:clamp(50px,9vh,120px);margin-bottom:0}
+
+/* Each beat is a 2-column ROW (text | photo), so text and photo are in the same
+   flow and always stay aligned at every window size — no absolute drift, no
+   overlap. The photo bleeds off the panel's OUTER edge via negative margin.
+   Sides alternate: -r = text left / photo right; -l = photo left / text right. */
+.mf-beat{display:grid;align-items:center;gap:clamp(20px,3vw,56px);
+  margin-top:clamp(40px,7vh,100px)}
+.mf-beat:first-of-type{margin-top:0}
+.mf-beat-r{grid-template-columns:1fr minmax(0,42%)}
+.mf-beat-l{grid-template-columns:minmax(0,42%) 1fr}
+.mf-beat h3{font-weight:900;color:var(--cream);letter-spacing:-.03em;line-height:.86;font-size:clamp(2.4rem,min(6.5vw,8vh),5.4rem)}
+.mf-beat p{margin-top:.6em;font-weight:400;color:var(--cream);font-size:clamp(1.1rem,min(1.8vw,2.4vh),1.7rem);opacity:.95;line-height:1.3;max-width:34ch}
+/* "Manifesto" eyebrow above the first beat's heading — same look as the beat's
+   description <p>, but sits ABOVE the <h3> with a gap below (no top margin) */
+/* "MANIFESTO" eyebrow — red, roman weight, uppercase, WIDE tracking (~3-letter
+   gap) as a spaced label above the first beat. Neue Haas Grotesk roman = NHG 400.
+   The right-side letter-spacing adds a trailing gap, so pull it back with a
+   negative margin to keep the block left-aligned to the heading. */
+.mf-beat .mf-beat-eyebrow{margin:0 0 1em;font-family:var(--font);font-weight:400;color:var(--red);
+  text-transform:uppercase;font-size:clamp(.85rem,1.2vw,1.15rem);line-height:1;
+  letter-spacing:1.3em;margin-right:-1.3em}
+/* the photo: fixed aspect, fills its column, bleeds off the outer panel edge */
+.mf-ph{margin:0;overflow:hidden;box-shadow:0 16px 46px rgba(0,0,0,.5);aspect-ratio:4/3}
+.mf-ph img{width:100%;height:100%;object-fit:cover;display:block}
+/* bleed the photo past the panel's padding + margin so it runs to the red frame */
+.mf-beat-r .mf-ph{margin-right:calc(-1*clamp(28px,4vw,60px) - 4vw)}
+.mf-beat-l .mf-ph{margin-left:calc(-1*clamp(28px,4vw,60px) - 4vw)}
+
+
+/* FOUR-TYPES FILMSTRIP REEL — sticky stage, active card enlarges on scroll.
+   The section is red; the sticky stage's dark interior is inset so the red bands
+   run down the edges continuous with the collage + answer above. A tall runway
+   sibling gives the scrub its scroll distance. */
+/* dark section (was a red frame) — flat ink to match the dark cards around it,
+   no seam. The inner sticky stage fills edge-to-edge but keeps the filmstrip scrub */
+.mf-unite{position:relative;background:var(--ink);color:var(--cream)}
+/* the sticky reel stage centres its content so the pinned reel has no big void
+   above or below. A small "uniting…" header stays INSIDE the stage so the reel
+   never reads as a headless floating row while it's pinned. */
+.mf-ustage{position:sticky;top:0;height:100vh;display:flex;flex-direction:column;justify-content:center;overflow:hidden;
+  padding:clamp(24px,4vh,56px) var(--gutter)}
+/* HEADING for the reel — a real section header, not a faint whisper. Heavy,
+   cream, sized to command the top of the pinned stage above the four cards. */
+.mf-uhead{font-weight:900;letter-spacing:-.03em;font-size:clamp(2.4rem,min(6.5vw,8vh),5.4rem);color:var(--cream);
+  opacity:1;margin-bottom:clamp(24px,4vh,52px);max-width:24ch;line-height:.9}
+.mf-reel{display:flex;gap:clamp(12px,1.5vw,24px);align-items:stretch}
+.mf-reel-runway{height:240vh}   /* ~60vh of scroll per card × 4 cards */
+/* the Brigade card follows the NON-card manifesto; kill its top drop-shadow AND
+   flatten its dark radial-gradient to the plain ink tone. Otherwise the gradient's
+   lighter centre (#2A2526) meets the flat #231F20 manifesto above and shows a
+   tonal seam line right at the boundary. Flat ink = seamless. */
+#misfits{box-shadow:none;background:var(--ink)}
+.mf-card{position:relative;flex:1 1 0;height:min(58vh,560px);background:#1B1818;overflow:hidden;
+  transition:flex-grow .6s var(--ease)}
+/* dim only the IMAGE when inactive — the caption copy stays full-brightness */
+/* inactive cards read fully black-and-white (and dimmed); the ACTIVE card
+   restores full colour — see .mf-card.active img below */
+.mf-card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 28%;
+  filter:grayscale(1) brightness(.55);transition:filter .6s var(--ease)}
+.mf-cap{position:absolute;left:0;right:0;bottom:0;padding:clamp(48px,7vw,90px) clamp(14px,2vw,26px) clamp(14px,2vw,26px);z-index:2;
+  background:linear-gradient(0deg,rgba(35,31,32,.94) 30%,rgba(35,31,32,.6) 68%,transparent)}
+.mf-card h4{font-weight:900;letter-spacing:-.03em;line-height:.95;font-size:clamp(1rem,min(1.6vw,2.2vh),1.9rem)}
+.mf-q{font-weight:300;font-size:var(--t-body);opacity:0;max-height:0;overflow:hidden;transition:opacity .5s,max-height .5s}
+.mf-card.active img{filter:none}
+.mf-card.active{flex-grow:2.6}
+.mf-card.active h4{font-size:clamp(1.6rem,min(2.6vw,3.4vh),3rem)}
+.mf-card.active .mf-q{opacity:.85;max-height:4em;margin-top:.4em}
+@media(max-width:760px){
+  .mf-panel{margin:0 14px}
+  /* these carry their own clamps, so the phone scale set on :root can't reach them
+     — and their min(vw,vh) term starves the same way, pinning them to their floor.
+     Restate one step below .head so the manifesto reads as a level, not a twin. */
+  .mf-beat h3,.mf-uhead{font-size:clamp(2.6rem,10.5vw,4rem)}
+  .mf-beat p{font-size:clamp(1.05rem,4.4vw,1.35rem)}
+  /* 1.3em tracking on a 390px screen wraps "MANIFESTO" — ease it back a little */
+  .mf-beat .mf-beat-eyebrow{font-size:clamp(.8rem,3.1vw,1rem);letter-spacing:.85em;margin-right:-.85em}
+  /* beats stack to one column; photo goes below its text, bleeding off the right */
+  .mf-beat,.mf-beat-r,.mf-beat-l{grid-template-columns:1fr;gap:clamp(16px,4vw,28px);margin-top:clamp(50px,10vh,90px)}
+  .mf-beat-l .mf-ph,.mf-beat-r .mf-ph{margin-left:0;margin-right:calc(-1*14px - 6vw)}
+  .mf-beat-l .mf-ph{order:1}   /* keep text first, photo after, on both sides */
+  /* FOUR-TYPES REEL, PHONE: the horizontal accordion (thin sliver + one wide
+     card) can't fit readable text at this width — panels were clipping mid-word.
+     Product decision: go VERTICAL instead — four full-width panels stacked, all
+     readable, no sliver state. That retires the whole "active card" premise, so
+     the sticky pin + scroll-scrubbed .active toggle (JS, unchanged) is neutralised
+     here: un-stick the stage, let the runway collapse, and un-shrink each card. */
+  .mf-ustage{position:static;height:auto;padding-block:clamp(24px,4vh,56px)}
+  .mf-reel{flex-direction:column;gap:clamp(20px,5vw,32px)}
+  .mf-reel-runway{height:0}
+  /* neutralise the JS's flex-grow accordion math entirely — every card is a
+     full-width row now, so "active" can't mean "wider" any more */
+  .mf-card,.mf-card.active{flex:none!important;width:100%!important;flex-grow:0!important;height:auto}
+  /* banner crop instead of the tall sliver aspect — img stays absolute/cover,
+     the card box now sets the ratio via aspect-ratio instead of a vh height */
+  .mf-card{aspect-ratio:16/10}
+  /* colour choice: ALL panels shown in full colour, all the time. On phone every
+     card is always in view (no scroll-scrubbed "active" card to pick a winner),
+     so the black-and-white/colour split has no reference point left — keeping
+     it would just make 3 of 4 panels look permanently disabled/unclickable. */
+  .mf-card img{filter:none!important}
+  /* The desktop scrub still toggles .active on scroll (harmless for layout now),
+     but .mf-card.active h4 is a LARGER size — so as the active card changed on
+     scroll, headings pulsed 21<->26px. Pin BOTH the base and active heading to one
+     size so nothing resizes on scroll. */
+  .mf-card h4,.mf-card.active h4{font-size:clamp(1.1rem,5.5vw,1.4rem)}
+  /* body copy is always shown (not just on .active) and never clamped/clipped */
+  .mf-card .mf-q,.mf-card.active .mf-q{opacity:.85!important;max-height:none!important;overflow:visible;margin-top:.4em}
+  .mf-cap{padding:clamp(24px,7vw,40px) clamp(14px,3vw,20px) clamp(14px,3vw,20px)}
+  /* SCROLL-IN REVEAL (phone only). Desktop cards are a live accordion and must
+     never start hidden, so this lives inside the media query and the JS only adds
+     .mf-card to the observer set below 760px. Each card fades + rises when it gets
+     .in; a per-card delay staggers them so the four don't pop in as one block. */
+  .mf-card{opacity:0;transform:translateY(28px);
+    transition:opacity .7s var(--ease),transform .7s var(--ease)}
+  .mf-card.in{opacity:1;transform:none}
+  .mf-card:nth-child(2){transition-delay:.08s}
+  .mf-card:nth-child(3){transition-delay:.16s}
+  .mf-card:nth-child(4){transition-delay:.24s}
+}
+/* phones: the filmstrip cards join the reveal system, so honour reduced-motion too */
+@media(max-width:760px) and (prefers-reduced-motion:reduce){
+  .mf-card{opacity:1;transform:none;transition:none}
+}
+@media(prefers-reduced-motion:reduce){.mf-rise{opacity:1;transform:none;transition:none}}
+
+/* ============ FOR BRANDS — ink field; positioning chart, red accent ============ */
+/* 2-column layout: graph left, copy right. Stacks on mobile. */
+.fb-cols{margin-top:calc(clamp(36px,6vh,84px)*var(--fz));display:grid;
+  grid-template-columns:1.1fr 1fr;gap:clamp(32px,5vw,88px);align-items:center}
+/* copy reveals with the chart now (choreography removed) — no special delay;
+   it uses its normal .reveal.d2 stagger like the rest of the section. */
+/* the plot fills the figure now — the axis labels live INSIDE it, next to their
+   own line, instead of in separate outer grid tracks (which left a big gap). */
+.fb-chart{display:block}
+/* right column: the position lead + the offer bullets */
+.fb-copy .fb-lead{font-weight:900;letter-spacing:-.02em;line-height:1.05;
+  font-size:calc(clamp(1.5rem,min(3vw,4vh),2.8rem)*var(--fz));max-width:22ch}
+.fb-copy .fb-list{margin-top:clamp(20px,3vh,36px)}
+/* axis labels sit against their own line (vertical axis at x=10%, horizontal at
+   y=90%). Both use the SAME --lbl-gap so each is an equal distance from its line
+   — one to the left of the upright, one below the baseline. */
+.fb-yaxis,.fb-xaxis{position:absolute;z-index:2;color:var(--cream);font-weight:700;
+  letter-spacing:-.01em;line-height:1.08;white-space:nowrap;opacity:.9;
+  --lbl-gap:1.5em;
+  font-size:calc(clamp(.9rem,1.5vw,1.15rem)*var(--fz))}
+/* "Scale": vertical, --lbl-gap to the LEFT of the upright, centred on it */
+.fb-yaxis{left:calc(10% - var(--lbl-gap));top:50%;writing-mode:vertical-rl;
+  transform:translate(-100%,-50%) rotate(180deg)}
+/* "Cultural Impact": --lbl-gap BELOW the baseline, centred along it */
+.fb-xaxis{top:calc(90% + var(--lbl-gap));left:52%;transform:translateX(-50%)}
+.fb-plot{position:relative;min-height:clamp(240px,34vh,420px);
+  padding:clamp(20px,3vw,40px)}
+/* faint graph-paper grid behind the chart (notebook look) */
+.fb-plot{background-image:
+    linear-gradient(rgba(231,225,212,.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(231,225,212,.055) 1px, transparent 1px);
+  background-size:28px 28px}
+/* the two AXES are drawn as a red hand-drawn "crayon" stroke by a WebGL shader
+   (see initCrayonAxes). The canvas fills the plot and draws the L on scroll-in.
+   If WebGL is unavailable, a plain CSS fallback axis (below) shows instead. */
+.fb-crayon{position:absolute;inset:0;z-index:1;pointer-events:none}
+/* CSS fallback axes (no WebGL): simple thin red L, faded in with the chart */
+.fb-axis{position:absolute;background:var(--red);z-index:0;opacity:0;transition:opacity .6s var(--ease)}
+.fb-axis-y{left:10%;bottom:10%;width:var(--hair);height:80%}
+.fb-axis-x{left:10%;bottom:10%;height:var(--hair);width:84%}
+.fb-chart.in .fb-axis{opacity:.9}
+/* when the shader is active it hides the CSS fallback axes */
+.fb-plot.has-crayon .fb-axis{display:none}
+/* alien mark + note are a stacked PAIR in the plot's top-right quadrant: alien on
+   top, note directly beneath it on the same axis (alien marks the spot, note asks
+   why it matters). Same layout at every width. */
+.fb-alien{position:absolute;top:18%;left:75%;transform:translate(-50%,-50%);z-index:2;
+  width:clamp(28px,3.8vw,52px);height:auto;opacity:0;transition:opacity .6s var(--ease)}
+.fb-chart.in .fb-alien{opacity:1}
+/* curly arrow: sits to the RIGHT of the note and curls down-left to the alien.
+   Drawn as a stroke so it can "draw itself" in with a dash animation. */
+/* Anchored to the ALIEN: the arrow's tip is at (14,104) in a 120x120 viewBox —
+   11.7% across, 86.7% down. Placing the box at the alien's centre (75%/16%) and
+   pulling it back by those fractions would land the tip dead-centre ON the logo,
+   so back it off along the arrow's approach (up and to the right) by roughly the
+   logo's radius — the point then stops just outside the mark instead of overlapping. */
+.fb-curl{display:none;   /* PARKED — remove this line to bring the arrow back */
+  position:absolute;left:75%;top:16%;z-index:3;
+  width:clamp(64px,8vw,120px);aspect-ratio:1;height:auto;color:#e5018c;pointer-events:none;
+  transform:translate(-11.7%,-86.7%)
+            translate(clamp(22px,2.9vw,40px),calc(-1*clamp(14px,1.9vw,26px)));
+  opacity:0;transition:opacity .5s var(--ease)}
+.fb-chart.in .fb-curl{opacity:1}
+/* draw the line + head on when the chart reveals */
+.fb-curl path{stroke-dasharray:var(--len,300);stroke-dashoffset:var(--len,300);
+  transition:stroke-dashoffset 1.1s var(--ease-io) .25s}
+.fb-chart.in .fb-curl path{stroke-dashoffset:0}
+.fb-curl .fb-curl-head{--len:60;transition-delay:1.1s}
+@media(max-width:760px){.fb-curl{width:clamp(44px,10vw,72px);top:-10%}}
+/* handwritten note — sits directly ABOVE the alien, sharing its horizontal
+   centre (left:75%) so the two line up vertically */
+/* note sits directly under the alien (top:18%), centred on the same 75% axis */
+.fb-note{position:absolute;left:75%;top:33%;z-index:3;color:#e5018c;
+  width:max-content;max-width:16ch;text-align:center;pointer-events:none;transform-origin:center top;
+  opacity:0;transform:translateX(-50%) rotate(-3deg);transition:opacity .6s var(--ease)}
+.fb-chart.in .fb-note{opacity:1}
+.fb-note p{font-family:'Caveat',cursive;font-weight:600;line-height:1.02;letter-spacing:.01em;
+  font-size:calc(clamp(1.25rem,2vw,1.75rem)*var(--fz));max-width:20ch;margin:0}
+@media(max-width:760px){
+  .fb-cols{grid-template-columns:1fr;gap:clamp(28px,6vh,48px)}
+  .fb-chart{max-width:none}
+  .fb-copy .fb-lead{max-width:none}
+  /* the alien-over-note stack is now the base layout; phones just nudge the axis
+     in slightly (72% vs 75%) so the note clears the right edge, and shrink both a
+     touch for the narrower plot. */
+  .fb-alien{left:72%;width:clamp(26px,6vw,38px)}
+  .fb-note{left:72%;font-size:.82em}
+}
+.fb-list{margin-top:.6em;list-style:none;max-width:44ch}
+.fb-list li{font-weight:400;font-size:var(--t-body);line-height:1.3;opacity:.9;
+  padding:.6em 0}
+.fb-list li::before{content:"#";color:#e5018c;margin-right:.6em;font-weight:700}
+/* same scale as .fb-lead; the email carries a .mark highlight (no underline) */
+.fb-write{margin-top:calc(clamp(28px,4.5vh,56px)*var(--fz));font-weight:900;letter-spacing:-.02em;
+  line-height:1.05;font-size:calc(clamp(1.5rem,min(3vw,4vh),2.8rem)*var(--fz));max-width:none}
+.fb-write a{color:inherit;text-decoration:none;transition:opacity .5s var(--ease)}
+.fb-write a:hover{opacity:.75}
+
+/* ============ WE WORK WITH — brand red field, cream type (matches THE
+   MISFITS ACTS exactly: .head/.mark heading, light-weight cream body copy,
+   currentColor hairlines, .onum-style italic numerals). ============ */
+.ww-list{margin-top:calc(clamp(28px,5vh,60px)*var(--fz))}
+.ww-row{display:flex;gap:clamp(14px,2.2vw,32px);align-items:baseline;
+  /* rule matches the number color exactly: cream at .6 (numbers are --cream, opacity:.6) */
+  border-top:var(--hair) solid rgba(231,225,212,.6);padding-block:clamp(26px,3vw,52px)}
+.ww-row:first-of-type{border-top:0}
+.ww-no{flex:0 0 auto;font-weight:900;font-style:italic;font-size:clamp(1.4rem,2vw,2.4rem);
+  color:var(--cream);opacity:.6;line-height:1}
+.ww-row p{font-weight:300;font-size:clamp(1.4rem,2vw,2.4rem);line-height:1.3;max-width:none}
+.ww-row p b{font-weight:900;font-style:normal}
+.ww-row p i{font-weight:900;font-style:italic}
+@media(max-width:760px){.ww-row{gap:14px}}
+</style>
+</head>
+<body>
+
+<!-- LIQUID GLASS refraction filter for the nav. feDisplacementMap warps the
+     backdrop using a gradient "lens" map so the content behind the bar bends at
+     the edges (Apple-style). Only Chromium supports an SVG filter INSIDE
+     backdrop-filter; Safari/Firefox fall back to plain frosted blur (see the
+     @supports rule in the .nav CSS). The map: R channel ramps L→R and G ramps
+     T→B, so pixels displace outward toward the bar's edges. -->
+<svg class="glass-defs" width="0" height="0" aria-hidden="true" style="position:absolute">
+  <defs>
+    <filter id="navGlass" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feImage x="0" y="0" width="100%" height="100%" preserveAspectRatio="none" result="dmap"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='60'%3E%3Cdefs%3E%3ClinearGradient id='x' x1='0' y1='0' x2='1' y2='0'%3E%3Cstop offset='0' stop-color='%23000'/%3E%3Cstop offset='0.5' stop-color='%23808080'/%3E%3Cstop offset='1' stop-color='%23fff'/%3E%3C/linearGradient%3E%3ClinearGradient id='y' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23000'/%3E%3Cstop offset='0.5' stop-color='%23008000'/%3E%3Cstop offset='1' stop-color='%2300ff00'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='60' fill='url(%23x)'/%3E%3Crect width='100' height='60' fill='url(%23y)' style='mix-blend-mode:screen'/%3E%3C/svg%3E"/>
+      <feDisplacementMap in="SourceGraphic" in2="dmap" scale="14" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+</svg>
+

@@ -1,0 +1,20 @@
+  <!-- WE WORK WITH — ink field, grey radial-gradient texture (same as
+       Offerings/Misfits/For Brands). .head + .mark heading (mark-w keeps
+       the highlighted text cream over the red fill), cream body copy at
+       light weight, dull hairlines, .onum-style numerals. -->
+  <section class="card dark calling tall nopin" id="calling" data-nav="dark" data-navbg="#231F20">
+    <div class="wrap">
+      <h2 class="head reveal d1" data-m>{{ calling.heading | safe }}</h2>
+
+      <p class="lede lede-wide reveal d2" data-m>{{ calling.intro }}</p>
+
+      <div class="ww-list">
+{%- for item in calling.items %}
+        <div class="ww-row reveal d{{ loop.index }}" data-m><span class="ww-no">{{ "0" if loop.index < 10 }}{{ loop.index }}</span><p>{{ item.question | safe }}</p></div>
+{%- endfor %}
+      </div>
+
+      <p class="fb-write reveal d6" data-m>{{ calling.writeLede }} <a href="mailto:{{ calling.email }}"><span class="mark mark-w" style="--hl:var(--red)">{{ calling.email }}</span></a></p>
+    </div>
+  </section>
+

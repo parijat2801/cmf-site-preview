@@ -1,0 +1,31 @@
+  <!-- ============================================================
+       MANIFESTO — collage unit (replaces old Manifesto + Quote + Audience).
+       Three movements inside ONE continuous red frame:
+         1. CHANT COLLAGE — 3 "Where…" photo-beats, red headlines over photos
+            that bleed off the panel edges.
+         2. ANSWER — resolves and hands into "uniting…".
+         3. FOUR-TYPES REEL — filmstrip; active card enlarges on scroll.
+       These are DELIBERATELY NOT .card sections: cards = '.deck > .card', so
+       plain sections here are excluded from the pin/dwell/fit/nav-theme systems
+       and simply scroll (like the proto). All classes are mf-prefixed to avoid
+       colliding with the deck's .card/.beat/.ph/.mk. ============================ -->
+  <section class="mf-collage">
+    <div class="mf-panel">
+      <!-- each beat is a 2-col ROW: text + its own photo in the SAME flow, so the
+           photo always sits beside its line and moves with it at every size. The
+           photo bleeds off the outer edge; sides alternate. -->
+{%- for beat in manifesto.beats %}
+      <div class="mf-beat mf-beat-{{ beat.side }} mf-rise">
+{%- if beat.side == "l" %}
+        <figure class="mf-ph"><img src="{{ beat.photo }}" alt="{{ beat.alt }}" decoding="async"></figure>
+        <div class="mf-txt">{% if beat.eyebrow %}<p class="mf-beat-eyebrow">{{ beat.eyebrow }}</p>{% endif %}<h3>{{ beat.headline | safe }}</h3><p>{{ beat.body }}</p></div>
+{%- else %}
+        <div class="mf-txt">{% if beat.eyebrow %}<p class="mf-beat-eyebrow">{{ beat.eyebrow }}</p>{% endif %}<h3>{{ beat.headline | safe }}</h3><p>{{ beat.body }}</p></div>
+        <figure class="mf-ph"><img src="{{ beat.photo }}" alt="{{ beat.alt }}" decoding="async"></figure>
+{%- endif %}
+      </div>
+{%- endfor %}
+      <div class="mf-lede mf-lede-wide mf-rise">{{ manifesto.lede }}</div>
+    </div>
+  </section>
+

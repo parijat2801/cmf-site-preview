@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Balloon LOD compare</title>
+<style>
+  body{margin:0;background:#231F20;color:#E7E1D4;font:14px/1.4 system-ui}
+  .row{display:flex;flex-wrap:wrap}
+  .pane{flex:1 1 320px;min-width:320px;position:relative}
+  .pane canvas{width:100%;height:64vh;display:block}
+  .tag{position:absolute;top:10px;left:12px;background:rgba(0,0,0,.55);padding:6px 10px;border-radius:6px}
+  .tag b{color:#fff}
+  p.note{padding:10px 14px;margin:0;opacity:.8}
+</style>
+</head>
+<body>
+<p class="note">Same material, lighting and rotation — only the mesh differs. Shaded on top, wireframe of the same mesh below. Drag horizontally to spin everything together.</p>
+<div class="row" id="row"></div>
+<script type="module">
+import * as THREE from './vendor/three.module.min.js';
+import { GLTFLoader } from './vendor/GLTFLoader.js';
+import { RoomEnvironment } from './vendor/RoomEnvironment.js';
+
+const MODELS = [
+  { label: 'FULL — 1.03MB', url: 'assets/brand/cmf-hunyuan-uv.glb' },
+  { label: 'LOD-50 — 561KB', url: 'lod-50.glb' },
+  { label: "LOD-25 — 318KB (SHIP)", url: "lod-25.glb" },
+  { label: "LOD-15 — 204KB (fallback)", url: "lod-15.glb" },
+  { label: 'LOD-10 — 134KB', url: 'lod-10.glb' },
+  { label: 'LOD-05 — 69KB', url: 'lod-05.glb' },
+  { label: 'LOD-02 — 32KB', url: 'lod-02.glb' },
+];
+
+const row = document.getElementById('row');
+const panes = [];
+let spin = 0, dragX = null;
+
+for (const m of MODELS) {
+  const pane = document.createElement('div'); pane.className = 'pane';
+  const canvas = document.createElement('canvas');
+  const tag = document.createElement('div'); tag.className = 'tag';
+  tag.innerHTML = `<b>${m.label}</b><br><span class="verts">loading…</span>`;
+  pane.append(canvas, tag); row.append(pane);
+
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  const scene = new THREE.Scene(); scene.background = new THREE.Color(0x231F20);
+  const cam = new THREE.PerspectiveCamera(35, 1, 0.1, 50); cam.position.set(0, 0, 11);
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  const mat = new THREE.MeshStandardMaterial({ color: 0xDB1A21, metalness: 1, roughness: 0.18 });
+  const wireMat = new THREE.MeshBasicMaterial({ color: 0xE7E1D4, wireframe: true, transparent: true, opacity: 0.5 });
+  // shaded on top, wireframe of the SAME mesh below — both inside the spinning pivot
+  const pivot = new THREE.Group(); scene.add(pivot);
+  const shadedGrp = new THREE.Group(); shadedGrp.position.y = 1.7; pivot.add(shadedGrp);
+  const wireGrp = new THREE.Group(); wireGrp.position.y = -1.7; pivot.add(wireGrp);
+
+  new GLTFLoader().load(m.url, (gltf) => {
+    let verts = 0;
+    gltf.scene.traverse(o => { if (o.isMesh) { o.material = mat; verts += o.geometry.attributes.position.count; } });
+    const box = new THREE.Box3().setFromObject(gltf.scene);
+    const size = box.getSize(new THREE.Vector3()), center = box.getCenter(new THREE.Vector3());
+    gltf.scene.position.sub(center);
+    gltf.scene.scale.setScalar(3.0 / Math.max(size.x, size.y, size.z));
+    shadedGrp.add(gltf.scene);
+    const wire = gltf.scene.clone(true);
+    wire.traverse(o => { if (o.isMesh) o.material = wireMat; });
+    wireGrp.add(wire);
+    tag.querySelector('.verts').textContent = verts.toLocaleString() + ' vertices';
+  }, undefined, (e) => { tag.querySelector('.verts').textContent = 'FAILED: ' + e.message; });
+
+  panes.push({ renderer, scene, cam, canvas, pivot });
+}
+
+addEventListener('pointerdown', e => dragX = e.clientX);
+addEventListener('pointerup', () => dragX = null);
+addEventListener('pointermove', e => { if (dragX !== null) { spin += (e.clientX - dragX) * 0.01; dragX = e.clientX; } });
+
+function frame(t) {
+  for (const p of panes) {
+    const w = p.canvas.clientWidth, h = p.canvas.clientHeight;
+    if (p.canvas.width !== w * devicePixelRatio) {
+      p.renderer.setSize(w, h, false);
+      p.cam.aspect = w / h; p.cam.updateProjectionMatrix();
+    }
+    p.pivot.rotation.y = spin + t / 4000;
+    p.renderer.render(p.scene, p.cam);
+  }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

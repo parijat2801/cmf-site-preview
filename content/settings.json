@@ -1,0 +1,32 @@
+{
+  "sections": [
+    {
+      "section": "manifesto",
+      "visible": true
+    },
+    {
+      "section": "misfits",
+      "visible": true
+    },
+    {
+      "section": "work",
+      "visible": true
+    },
+    {
+      "section": "audience",
+      "visible": true
+    },
+    {
+      "section": "for-brands",
+      "visible": true
+    },
+    {
+      "section": "offerings",
+      "visible": true
+    },
+    {
+      "section": "calling",
+      "visible": true
+    }
+  ]
+}

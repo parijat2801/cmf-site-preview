@@ -15,7 +15,15 @@ import * as THREE from './three.module.min.js';
 import { GLTFLoader } from './GLTFLoader.js';
 import { RoomEnvironment } from './RoomEnvironment.js';
 
-const MODEL = 'assets/brand/cmf-hunyuan-uv.glb';   // re-processed: smooth normals + UV unwrap
+/* Model weight tiers (design call 2026-07-24): the source sculpt spends its
+   triangle budget inefficiently (TRELLIS image-to-3D, no retopology), so the
+   quarter-resolution mesh is visually equivalent on the page. LOD-25 (310KB)
+   is the default; LOD-15 (200KB) serves save-data / low-tier visitors. The
+   full 1.03MB source stays in the repo (cmf-hunyuan-uv.glb) as the master for
+   regenerating LODs — it is never fetched by the page. */
+const LOW_TIER = (window.GFX?.tier === 'low') || !!navigator.connection?.saveData;
+const MODEL = LOW_TIER ? 'assets/brand/balloon-lod15.glb'
+                       : 'assets/brand/balloon-lod25.glb';
 
 // DPR ceiling for this canvas — read from the page's single GFX knob (see the
 // window.GFX block in index.html) so the hero balloon and the 2D shaders share
@@ -428,6 +436,17 @@ export function initHeroBalloon(canvas) {
     setRunning(inView && pageVisible);
   };
   document.addEventListener('visibilitychange', onVisibility);
+
+  /* Context loss (GPU reset, or iOS evicting the oldest context when too many
+     are alive): don't leave a frozen/blank hero — stop the loop and fall back
+     to the poster image, same path as a failed model load. No restore attempt:
+     the poster is a designed state, a half-restored scene is not. */
+  canvas.addEventListener('webglcontextlost', (e) => {
+    e.preventDefault();                       // we are NOT going to restore
+    setRunning(false); io.disconnect();
+    document.removeEventListener('visibilitychange', onVisibility);
+    canvas.dispatchEvent(new CustomEvent('balloonfailed', { bubbles: true }));
+  }, { once: true });
 
   raf = requestAnimationFrame(frame);
 

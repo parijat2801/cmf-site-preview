@@ -1,0 +1,29 @@
+{
+  "heading": "The (Mis)fits <span class=\"mark\" style=\"--hl:var(--cream)\">Acts.</span>",
+  "items": [
+    {
+      "title": "Ruhbaru",
+      "copy": "The sound of home, scaled into a cinematic live experience. From Sufi to cinematic pop, ghazal to qawwali — an intimate world of longing, devotion, memory, and renewal. <b>Come face to face · India tour 2026.</b>",
+      "linkLabel": "Follow ↗",
+      "linkHref": "https://www.instagram.com/ruhbaru.in/",
+      "photos": [
+        "assets/photo-ruhbaru.webp",
+        "assets/photo-concert.webp",
+        "assets/photo-hands.webp"
+      ],
+      "accentColor": "var(--cream)"
+    },
+    {
+      "title": "Jupiter Pe Juice",
+      "copy": "Truth wrapped in melody. Satire served fresh. A 90-minute musical satire where everyday absurdities become songs, punchlines, and cultural commentary. <b>Funny first. Truth later. Stays after.</b>",
+      "linkLabel": "Follow ↗",
+      "linkHref": "https://www.instagram.com/jupiterpejuice/",
+      "photos": [
+        "assets/photo-jupiter.webp",
+        "assets/photo-jupiter-2.webp",
+        "assets/photo-jupiter-3.webp"
+      ],
+      "accentColor": "var(--cream)"
+    }
+  ]
+}

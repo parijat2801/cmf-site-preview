@@ -1,0 +1,23 @@
+{
+  "heading": "Calling <span class=\"mark mark-w\" style=\"--hl:var(--red)\">Everybody</span>",
+  "intro": "We’re building a Cultural Operating System that moves forward with culture, with the help of those who don’t conform.",
+  "items": [
+    {
+      "question": "Are you an <b>Artist or Creator</b> who wants to <i>join the Misfit Brigade?</i>"
+    },
+    {
+      "question": "Are you a <b>Brand</b> who wants to <i>build Cultural Fluency?</i>"
+    },
+    {
+      "question": "Are you a <b>Media Partner or Agency</b> who believes that <i>Misfits are a big deal?</i>"
+    },
+    {
+      "question": "Are you a <b>Community</b> that is <i>tired of stories that keep flattening you?</i>"
+    },
+    {
+      "question": "Are you <b>Anyone</b> who feels the way we feel <i>about Misfits?</i>"
+    }
+  ],
+  "writeLede": "Write to us at",
+  "email": "hello@culturalmisfits.com"
+}
