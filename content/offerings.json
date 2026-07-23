@@ -31,7 +31,7 @@
     {
       "id": "irl-live",
       "accentColor": "var(--yellow)",
-      "title": "IRL &amp; Live Experiences",
+      "title": "IRL & Live Experiences",
       "copy": "Experiences that feel less like events and more like temporary worlds. Built around subcultures, shared identities, and creative rituals, these IRL and live experiences are where (mis)fit communities come together to express, exchange, and belong.",
       "partnerLede": "",
       "partnerList": [],
@@ -62,9 +62,9 @@
       "copy": "Led by <b class=\"lead-name\">Nirvair Rai</b>, this production and narrative arm of the Cultural (Mis)fits ecosystem collaborates with brands, media, fashion, and CSR initiatives to create authentic, culture-native content rooted in real communities.",
       "partnerLede": "Partner with us to create:",
       "partnerList": [
-        "Branded Content &amp; Films",
-        "Scripted &amp; Feature Content",
-        "CSR &amp; Purpose Driven Content"
+        "Branded Content & Films",
+        "Scripted & Feature Content",
+        "CSR & Purpose Driven Content"
       ],
       "linkLabel": "Read more ↗",
       "linkHref": "#",
