@@ -15,10 +15,10 @@
         <!-- intentional line breaks: each .ph is one sense-unit that stays whole
              (never wraps mid-phrase); .bp is the break between them. On phones the
              fit-scale shrinks type so phrases still hold one line each. -->
-        <h1 class="hbeat mega sig on" id="mega"><span class="ph">A Catalyst for Culture.</span><br class="bp"><span class="ph">A Sanctuary for the Misfits.</span><br class="bp"><span class="ph">We are Cultural <span class="mis">(Mis)</span>fits.</span></h1>
+        <h1 class="hbeat mega sig on" id="mega">{% for ph in hero.lines %}<span class="ph">{{ ph | safe }}</span>{% if not loop.last %}<br class="bp">{% endif %}{% endfor %}</h1>
       </div>
     </div>
     <!-- scroll cue: pulses once the statement has typed; fades on first scroll. -->
-    <div class="scroll" id="hscroll"><span class="lbl">Scroll</span><i class="meter" id="hmeter"></i></div>
+    <div class="scroll" id="hscroll"><span class="lbl">{{ hero.scrollLabel }}</span><i class="meter" id="hmeter"></i></div>
   </header>
 

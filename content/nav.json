@@ -1,0 +1,16 @@
+{
+  "instagram": "https://www.instagram.com/culturalmisfits.live/",
+  "links": [
+    { "label": "Misfit Brigade", "href": "#misfits" },
+    { "label": "Culturist Network", "href": "#culturist-network" },
+    { "label": "IRL &amp; Live", "href": "#irl-live" },
+    { "label": "Film Studio", "href": "#film-studio" }
+  ],
+  "menuLinks": [
+    { "label": "Misfit Brigade", "href": "#misfits" },
+    { "label": "Culturist Network", "href": "#culturist-network" },
+    { "label": "IRL &amp; Live", "href": "#irl-live" },
+    { "label": "Film Studio", "href": "#film-studio" },
+    { "label": "Contact", "href": "mailto:hello@culturalmisfits.com" }
+  ]
+}
