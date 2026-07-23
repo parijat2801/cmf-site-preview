@@ -598,6 +598,14 @@ body.no-grain::after{opacity:0}
    so the red wraps the dark panel symmetrically — a matching red edge after the
    "Mainstream…valued." line, mirroring the band above the beats. */
 .mf-collage{position:relative;background:var(--red);overflow-x:clip;padding:clamp(30px,6vh,80px) 0}
+/* PHONE: the hero pins position:fixed (z-index 10) for its dwell, then releases.
+   On a real phone the URL bar collapsing changes innerHeight, so the release
+   times late and the fixed, full-height hero keeps COVERING the manifesto as it
+   scrolls up underneath (measured: manifesto top sat 133px inside the still-fixed
+   hero). Lifting the manifesto above the hero's z-index means that even on a late
+   release the incoming section paints OVER the hero instead of behind it — the
+   hero just slides away cleanly. Phone-only so the desktop deck stack is untouched. */
+@media(max-width:760px){.mf-collage{z-index:11}}
 .mf-panel{position:relative;background:var(--ink);overflow:visible;
   margin:0 clamp(30px,8vw,120px);padding:clamp(30px,4vw,56px) clamp(28px,4vw,60px) clamp(28px,4vw,52px)}
 /* small uppercase section label above the opening line */
