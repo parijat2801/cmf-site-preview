@@ -1040,7 +1040,7 @@ body.no-grain::after{opacity:0}
   <!-- HERO — CRT card. ONE statement (the brand signature), CRT-typed once
        after power-on. The hero does not pin (nopin): it scrolls away into the
        manifesto like any other section. -->
-  <header class="card dark hero nopin" data-nav="dark" data-navbg="#231F20">
+  <header class="card dark hero nopin" data-nav="dark" data-navbg="#231F20" data-navclear>
     <!-- 3D CMF-glyph balloon (real swept-tube geometry, foil material), rendered
          B&W to sit inside the CRT hero. Falls back to a poster image if WebGL
          is unavailable — see .hero-canvas.poster and hero-balloon.js. -->
@@ -1108,7 +1108,7 @@ body.no-grain::after{opacity:0}
        Offerings so the reader meets the artists before the offerings that carry
        them. Photo wall: grayscale, hover reveals colour + the bigger image.
        Names are PLACEHOLDER until the client supplies the real roster. -->
-  <section class="card dark misfits tall nopin" id="misfits" data-nav="dark" data-navbg="#231F20">
+  <section class="card dark misfits tall nopin" id="misfits" data-nav="dark" data-navbg="#231F20" data-navclear data-nograin>
     <div class="wrap">
       <h2 class="head reveal d1" data-m>The (Mis)fit <span class="mark" style="--hl:var(--yellow)">Brigade</span></h2>
       <p class="lede lede-wide reveal d2" data-m>[Placeholder] A short line about the artists and creators we work with — the misfits shaping culture alongside us.</p>
@@ -2016,11 +2016,12 @@ if(!reduce){
     function theme(i){
       i=Math.max(0,i);
       nav.classList.toggle('thm-light',themes[i]==='light');
-      // hero (0) + manifesto (1) wear a transparent bar so their video/photo
-      // reads edge-to-edge; every other card keeps the solid field bar
-      nav.classList.toggle('transparent',i===0||i===1);
-      // drop the film grain over the manifesto photo so the image reads clean
-      document.body.classList.toggle('no-grain',i===1);
+      // data-navclear cards wear a transparent bar so their imagery reads
+      // edge-to-edge; the rest keep the solid field bar. Attribute-driven (not
+      // index-driven) so operator reordering of sections can't misplace it.
+      nav.classList.toggle('transparent','navclear' in cards[i].dataset);
+      // data-nograin cards drop the film grain so their photos read clean
+      document.body.classList.toggle('no-grain','nograin' in cards[i].dataset);
       // over a RED section (e.g. Misfits Acts), the logo's red "(Mis)" would
       // vanish into the background — flag it so the CSS recolors it to cream.
       nav.classList.toggle('over-red',(navbgs[i]||'').toUpperCase()==='#DB1A21');
