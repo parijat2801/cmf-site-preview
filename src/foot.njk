@@ -76,6 +76,11 @@
        no-op since these are small, soft-edged marks (see per-canvas note).
      maxDPR_hero   — cap for the WebGL hero balloon (real 3D geometry benefits
        more from resolution, so it gets a higher ceiling than the flat shaders).
+       The glass material renders the scene TWICE per frame (transmission samples
+       the scene behind the glyph), so on a 2x-DPR tablet DPR 2 is ~5.6MP × 2 per
+       frame — the dominant hero cost. So the ceiling is 1.5 on touch devices
+       (hover:none + pointer:coarse = phones/tablets) and 2 on pointer devices.
+       Override for on-device A/B with ?heroDPR=<number> (see the URL block below).
      decorativeFPS — frame-time gate for the highlighters + crayon axes (NOT
        the hero balloon, which should stay smooth): halves GPU work for
        slow-moving decorative effects where 30fps reads identically to 60fps.
@@ -91,13 +96,25 @@
        is clamped to 2 on all iOS (unreliable on iPhone), and
        WEBGL_debug_renderer_info strings are being sanitised — none are robust tier
        signals, so we don't gate on them. */
+// touch = phones + tablets (no hovering pointer). These carry the hero at a
+// lower DPR ceiling (see maxDPR_hero note above); pointer devices keep 2.
+const _touch = matchMedia('(hover:none) and (pointer:coarse)').matches;
 window.GFX = {
   maxDPR_shader: 1.5,
-  maxDPR_hero: 2,
+  maxDPR_hero: _touch ? 1.5 : 2,
   decorativeFPS: 30,
   pauseOffscreen: true,
   tier: 'auto',
 };
+// URL overrides for on-device A/B testing (win over the auto-resolved values
+// above). ?heroDPR=<number> forces the hero DPR ceiling. NOTE: hero-balloon.js
+// reads GFX.maxDPR_hero once at module load, so changing the param needs a full
+// page reload to take effect (it is not live).
+{
+  const _q = new URLSearchParams(location.search);
+  const _heroDPR = parseFloat(_q.get('heroDPR'));
+  if (Number.isFinite(_heroDPR) && _heroDPR > 0) window.GFX.maxDPR_hero = _heroDPR;
+}
 try {
   const { initHeroBalloon } = await import('./vendor/hero-balloon.js');
   const cv = document.getElementById('heroCanvas');
