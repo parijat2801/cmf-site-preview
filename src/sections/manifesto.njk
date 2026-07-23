@@ -1,0 +1,45 @@
+  <!-- ============================================================
+       MANIFESTO — collage unit (replaces old Manifesto + Quote + Audience).
+       Three movements inside ONE continuous red frame:
+         1. CHANT COLLAGE — 3 "Where…" photo-beats, red headlines over photos
+            that bleed off the panel edges.
+         2. ANSWER — resolves and hands into "uniting…".
+         3. FOUR-TYPES REEL — filmstrip; active card enlarges on scroll.
+       These are DELIBERATELY NOT .card sections: cards = '.deck > .card', so
+       plain sections here are excluded from the pin/dwell/fit/nav-theme systems
+       and simply scroll (like the proto). All classes are mf-prefixed to avoid
+       colliding with the deck's .card/.beat/.ph/.mk. ============================ -->
+  <section class="mf-collage">
+    <div class="mf-panel">
+      <!-- each beat is a 2-col ROW: text + its own photo in the SAME flow, so the
+           photo always sits beside its line and moves with it at every size. The
+           photo bleeds off the outer edge; sides alternate. -->
+      <div class="mf-beat mf-beat-r mf-rise">
+        <div class="mf-txt"><p class="mf-beat-eyebrow">Manifesto</p><h3>Where new <span class="mark mark-w" style="--hl:var(--red)">languages</span> are formed.</h3><p>Slang, sound, and syntax the mainstream hasn't caught up to yet.</p></div>
+        <figure class="mf-ph"><img src="assets/collage/blur.webp" alt="" decoding="async"></figure>
+      </div>
+      <div class="mf-beat mf-beat-l mf-rise">
+        <figure class="mf-ph"><img src="assets/collage/arcade.webp" alt="" decoding="async"></figure>
+        <div class="mf-txt"><h3>Where new <span class="mark mark-w" style="--hl:var(--red)">aesthetics</span> are tested.</h3><p>Looks and worlds tried on in public, long before they trend.</p></div>
+      </div>
+      <div class="mf-beat mf-beat-r mf-rise">
+        <div class="mf-txt"><h3>Where new <span class="mark mark-w" style="--hl:var(--red)">truths</span> are spoken.</h3><p>The things people actually mean, said out loud without translation.</p></div>
+        <figure class="mf-ph"><img src="assets/collage/banana.webp" alt="" decoding="async"></figure>
+      </div>
+      <div class="mf-lede mf-lede-wide mf-rise">Mainstream or niche, a space to be seen, understood, and valued.</div>
+    </div>
+  </section>
+
+  <section class="mf-unite" id="audience">
+    <div class="mf-ustage">
+      <div class="mf-uhead mf-rise">Who are we <span class="mark mark-w" style="--hl:var(--red)">building for?</span></div>
+      <div class="mf-reel" id="mf-reel">
+        <figure class="mf-card" data-mfcard tabindex="0" role="button"><img src="assets/traits/curious.webp" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Curious</h4><div class="mf-q">Do you ask why and how, more than what?</div></figcaption></figure>
+        <figure class="mf-card" data-mfcard tabindex="0" role="button"><img src="assets/traits/expressive.webp" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Expressive</h4><div class="mf-q">Do you use music, fashion and memes to introduce yourself?</div></figcaption></figure>
+        <figure class="mf-card" data-mfcard tabindex="0" role="button"><img src="assets/traits/culturally-fluid.webp" alt="" decoding="async"><figcaption class="mf-cap"><h4>The Culturally Fluid</h4><div class="mf-q">Do you live with contradictions — and are OK with it?</div></figcaption></figure>
+        <figure class="mf-card" data-mfcard tabindex="0" role="button"><img src="assets/traits/sameness.webp" alt="" decoding="async"><figcaption class="mf-cap"><h4>The (Mis)fit</h4><div class="mf-q">For every square hole, round peg. Are you tired of one-size-fits-all narratives?</div></figcaption></figure>
+      </div>
+    </div>
+    <div class="mf-reel-runway" aria-hidden="true"></div>
+  </section>
+

@@ -1,0 +1,24 @@
+<div class="deck" id="top">
+
+  <!-- HERO — CRT card. ONE statement (the brand signature), CRT-typed once
+       after power-on. The hero does not pin (nopin): it scrolls away into the
+       manifesto like any other section. -->
+  <header class="card dark hero nopin" data-nav="dark" data-navbg="#231F20">
+    <!-- 3D CMF-glyph balloon (real swept-tube geometry, foil material), rendered
+         B&W to sit inside the CRT hero. Falls back to a poster image if WebGL
+         is unavailable — see .hero-canvas.poster and hero-balloon.js. -->
+    <canvas class="hero-canvas" id="heroCanvas" aria-hidden="true"></canvas>
+    <div class="tv"><div class="scan"></div><div class="roll"></div><div class="glass"></div></div>
+    <div class="flash"></div>
+    <div class="content wrap">
+      <div class="hstage">
+        <!-- intentional line breaks: each .ph is one sense-unit that stays whole
+             (never wraps mid-phrase); .bp is the break between them. On phones the
+             fit-scale shrinks type so phrases still hold one line each. -->
+        <h1 class="hbeat mega sig on" id="mega"><span class="ph">A Catalyst for Culture.</span><br class="bp"><span class="ph">A Sanctuary for the Misfits.</span><br class="bp"><span class="ph">We are Cultural <span class="mis">(Mis)</span>fits.</span></h1>
+      </div>
+    </div>
+    <!-- scroll cue: pulses once the statement has typed; fades on first scroll. -->
+    <div class="scroll" id="hscroll"><span class="lbl">Scroll</span><i class="meter" id="hmeter"></i></div>
+  </header>
+
