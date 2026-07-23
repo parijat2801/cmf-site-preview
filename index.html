@@ -103,6 +103,9 @@ body.no-grain::after{opacity:0}
    content length instead of the spacing rhythm. Sizing them to their content
    makes every boundary exactly --sec-y (bottom) + --sec-y (top). */
 .card.nopin{box-shadow:none;min-height:0}
+/* the hero is nopin (no deck stacking) but must still fill the viewport —
+   same vh-then-dvh pair as .card so it doesn't reflow with the URL bar */
+.card.nopin.hero{min-height:100vh;min-height:100dvh}
 /* flat ink on all dark sections (no radial gradient) — a gradient's lighter
    centre meeting a flat neighbour showed a tonal SEAM at the boundary, so every
    dark surface is now the exact same colour. */
@@ -1034,11 +1037,10 @@ body.no-grain::after{opacity:0}
 
 <div class="deck" id="top">
 
-  <!-- HERO — CRT card. Three beats crossfade in the SAME slot as the reader
-       scrolls (pin+scrub+snap, like manifesto); if they don't scroll, an idle
-       timer advances them so the brand signature always lands. Beat 1 is the
-       rest state after power-on — the screen is never empty. -->
-  <header class="card dark hero" data-nav="dark" data-navbg="#231F20">
+  <!-- HERO — CRT card. ONE statement (the brand signature), CRT-typed once
+       after power-on. The hero does not pin (nopin): it scrolls away into the
+       manifesto like any other section. -->
+  <header class="card dark hero nopin" data-nav="dark" data-navbg="#231F20">
     <!-- 3D CMF-glyph balloon (real swept-tube geometry, foil material), rendered
          B&W to sit inside the CRT hero. Falls back to a poster image if WebGL
          is unavailable — see .hero-canvas.poster and hero-balloon.js. -->
@@ -1046,19 +1048,14 @@ body.no-grain::after{opacity:0}
     <div class="tv"><div class="scan"></div><div class="roll"></div><div class="glass"></div></div>
     <div class="flash"></div>
     <div class="content wrap">
-      <!-- beats stack in one grid cell; only .on is visible. id=mega keeps the
-           power-on settle hook (its animationend flips .hero.settled). -->
       <div class="hstage">
         <!-- intentional line breaks: each .ph is one sense-unit that stays whole
              (never wraps mid-phrase); .bp is the break between them. On phones the
              fit-scale shrinks type so phrases still hold one line each. -->
-        <h1 class="hbeat mega on" id="mega"><span class="ph">The connected and culturally fluid generation</span><br class="bp"><span class="ph">lives, feels and creates differently.</span></h1>
-        <p class="hbeat mega"><span class="ph">They deserve better.</span></p>
-        <p class="hbeat mega sig"><span class="ph">A Catalyst for Culture.</span><br class="bp"><span class="ph">A Sanctuary for the Misfits.</span><br class="bp"><span class="ph">We are Cultural <span class="mis">(Mis)</span>fits.</span></p>
+        <h1 class="hbeat mega sig on" id="mega"><span class="ph">A Catalyst for Culture.</span><br class="bp"><span class="ph">A Sanctuary for the Misfits.</span><br class="bp"><span class="ph">We are Cultural <span class="mis">(Mis)</span>fits.</span></h1>
       </div>
     </div>
-    <!-- idle-advance meter: fills over the dwell before the next beat auto-types.
-         Hidden the moment the reader takes over by scrolling. -->
+    <!-- scroll cue: pulses once the statement has typed; fades on first scroll. -->
     <div class="scroll" id="hscroll"><span class="lbl">Scroll</span><i class="meter" id="hmeter"></i></div>
   </header>
 
@@ -1460,7 +1457,7 @@ addEventListener('scroll',()=>{
 },{passive:true});
 
 /* ---------- hero: settle the CRT glow after power-on ---------- */
-const mega=document.getElementById('mega');   // = hero beat 1, the rest state
+const mega=document.getElementById('mega');   // = the hero statement
 // the power-on "open" clip-path animation runs on .content; when it ends the
 // broadcast has "tuned in", so soften the chroma glow. (Beat 1 no longer has
 // its own keyframe animation, so we key off .content, which does.)
@@ -1469,7 +1466,7 @@ document.querySelector('.hero .content')
 
 /* Safety net: the power-on clip-path uses forwards-fill. If the tab loads
    backgrounded, throttled rAF can leave the content clipped shut. Guarantee
-   the resting state — content open, beat 1 visible — and retry autoplay.
+   the resting state — content open, statement visible — and retry autoplay.
    The beats' own opacity is class-driven (.on), so we only need to force
    the clip-path open and make sure beat 1 carries .on. */
 (function heroFailsafe(){
@@ -1925,23 +1922,17 @@ if(!reduce){
       });
     });
 
-    /* hero: three beats crossfade in one slot. TWO drivers, but only ONE is
-       ever live. State is a single index via show(n) — idempotent, so double
-       calls can't flicker.
-         1) idle auto-advance: a setTimeout chain steps 0→1→2 then STOPS, so a
-            reader who never scrolls still reaches the brand signature.
-         2) scroll: a pinned scrub maps scroll position → beat with snap.
-       The FIRST real scroll kills the timer forever (killed=true); from then
-       the scrub owns state. The scrub's onUpdate is gated on `killed`, so
-       before the handoff the timer is the sole writer — the two never fight. */
+    /* hero: ONE statement, CRT-typed once after the power-on settles. No pin,
+       no idle advance, no beat crossfade — scrolling mid-type snaps the line
+       complete (the reader has taken over) and fades the cue. */
     const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
     const hi=cards.findIndex(c=>c.classList.contains('hero'));
     const hbeats=gsap.utils.toArray('.hero .hbeat');
 
     /* wrap each beat's text in .hink, splitting every character into a .g span so
        the reveal flows glyph-by-glyph through real inline layout (correct
-       line-by-line wrapping). We walk text nodes so the nested .mis span in beat
-       3 is preserved — its glyphs keep the red color. A caret rides the edge. */
+       line-by-line wrapping). We walk text nodes so the nested .mis span
+       is preserved — its glyphs keep the red color. A caret rides the edge. */
     const glyphs=new Map();                              // beat → [.g spans in order]
     hbeats.forEach(b=>{
       const ink=document.createElement('span'); ink.className='hink';
@@ -1969,132 +1960,40 @@ if(!reduce){
       b.append(ink);
     });
 
-    if(hi>-1 && !talls[hi] && hbeats.length && !reduce){
-      /* ---- SINGLE SOURCE OF TRUTH beat engine ----
-         Two earlier attempts leaked state (async animationend cleanup + class
-         juggling) and let beats stack. This model makes overlap STRUCTURALLY
-         impossible: one render() runs every frame; it first hard-clears EVERY
-         beat, then paints exactly ONE active beat (+ an optional decaying ghost).
-         There is no deferred cleanup to miss. State is just a few numbers:
-           active  – index of the beat that should be visible (-1 = none yet)
-           typeAt  – timestamp the active beat began typing (for the reveal)
-           ghost   – {i, at} of the beat currently phosphor-decaying, or null
-           killed  – handoff done; render locks to the signature forever         */
-      const meterEl=document.getElementById('hmeter');
+    if(hi>-1 && hbeats.length && !reduce){
       const scrollCue=document.getElementById('hscroll');
-      const N=hbeats.length, SIG=N-1;
-      const TYPE_MS=n=>Math.min(3400,950+n*34);           // slower, more deliberate typing
-      const DECAY_MS=650, DWELL=2200;                     // hold (meter fill) AFTER a beat finishes typing
-      const dur=hbeats.map(b=>TYPE_MS((b.textContent||'').length));
-
-      let active=-1, typeAt=0, ghost=null, killed=false, timer=null, raf=0, meterAt=0;
-
-      // paint one beat: light the first `p` fraction of its glyphs, set opacity.
-      const paint=(b,i,p,op,decay)=>{
-        const gs=glyphs.get(b), lit=Math.round(p*gs.length);
-        // toggle('lit', j<lit) is a no-op for already-lit glyphs, so the per-glyph
-        // hot-phosphor "strike" animation fires exactly ONCE per glyph, on the frame
-        // it's first struck — never re-fires while it stays lit.
+      const b=hbeats[0], gs=glyphs.get(b);
+      const dur=Math.min(3400,950+(b.textContent||'').length*34);   // same typing pace as before
+      let typeAt=0, raf=0, done=false;
+      // light the first `p` fraction of the glyphs; typing/done drive the caret
+      const paint=p=>{
+        const lit=Math.round(p*gs.length);
         gs.forEach((g,j)=>g.classList.toggle('lit',j<lit));
-        b.classList.toggle('on',op>0);
-        b.classList.toggle('done',p>=1&&!decay);
-        b.classList.toggle('typing',p<1&&op>0&&!decay);
-        b.classList.toggle('decay',!!decay);
-        b.style.opacity=op<1?op.toFixed(3):'';            // JS-driven fade (no CSS anim to leak)
+        b.classList.toggle('done',p>=1);
+        b.classList.toggle('typing',p<1);
       };
-      const clear=b=>{ paint(b,0,0,0,false); b.style.opacity=''; };
-
-      // the ONE render. Idempotent: clears all, then paints active (+ghost).
-      function render(now){
-        for(let i=0;i<N;i++){
-          const b=hbeats[i];
-          if(i===active){
-            const p=killed?1:Math.min(1,(now-typeAt)/dur[i]);
-            paint(b,i,p,1,false);
-          }else if(ghost&&ghost.i===i&&!killed){
-            const e=(now-ghost.at)/DECAY_MS;
-            if(e>=1){ ghost=null; clear(b); }
-            else{ const bloom=e<.14; paint(b,i,1,1-e,true);
-              b.style.filter=bloom?'brightness(1.9)':''; }
-          }else{
-            clear(b); b.style.filter='';
-          }
-        }
-      }
-      function loop(now){ render(now);
-        // keep looping while typing OR a ghost is decaying (not after kill's lock)
-        const b=hbeats[active];
-        const stillTyping=active>=0 && !killed && (now-typeAt)<dur[active];
-        if(stillTyping || ghost) raf=requestAnimationFrame(loop);
-      }
-      const kick=()=>{ cancelAnimationFrame(raf); raf=requestAnimationFrame(loop); };
-
-      // advance to beat n: the current active becomes the decaying ghost.
-      function go(n){
-        if(n===active)return;
-        if(active>=0) ghost={i:active, at:performance.now()};
-        active=n; typeAt=performance.now();
-        kick();
-      }
-
-      // idle auto-advance: type a beat, fill the meter over the dwell, advance.
-      function runMeter(onFull){ meterAt=performance.now(); scrollCue?.classList.remove('hint');
-        (function m(now){ if(killed)return;
-          const p=Math.min(1,(now-meterAt)/DWELL); meterEl?.style.setProperty('--mp',p.toFixed(3));
-          if(p<1) requestAnimationFrame(m); else onFull&&onFull();
-        })(performance.now());
-      }
-      const tick=()=>{ if(killed)return;
-        if(active<SIG){ go(active+1);
-          /* HOLD the freshly-typed beat: wait for it to finish TYPING, THEN run the
-             dwell meter. Previously the dwell was measured from when a beat started
-             typing, so a long first sentence typed for most of the dwell and barely
-             held before advancing. Now the visible hold is a full DWELL regardless
-             of how long the phrase took to type. */
-          const holdThenAdvance=()=>runMeter(()=>{ if(!killed) timer=setTimeout(tick,50); });
-          timer=setTimeout(holdThenAdvance, dur[active]);
-        }
-        else scrollCue?.classList.add('hint');
-      };
-
-      // beat 0 waits for the CRT power-on to finish (.content "open" anim → .settled)
+      const finish=()=>{ if(done)return; done=true; cancelAnimationFrame(raf);
+        paint(1); scrollCue?.classList.add('hint'); };
+      const loop=now=>{ const p=Math.min(1,(now-typeAt)/dur);
+        paint(p); if(p<1) raf=requestAnimationFrame(loop); else finish(); };
+      const startBeat=()=>{ if(typeAt)return;
+        typeAt=performance.now(); raf=requestAnimationFrame(loop); };
+      // wait for the CRT power-on to finish (.content "open" anim -> .settled)
       const heroEl=document.querySelector('.hero');
-      const startBeats=()=>{ if(killed||active>-1)return;
-        /* beat 0: let it finish typing, THEN hold a full dwell before advancing */
-        go(0); timer=setTimeout(()=>runMeter(()=>{ if(!killed) timer=setTimeout(tick,50); }), dur[0]); };
-      if(heroEl?.classList.contains('settled')){ startBeats(); }
+      if(heroEl?.classList.contains('settled')) startBeat();
       else{
-        document.querySelector('.hero .content')?.addEventListener('animationend',startBeats,{once:true});
-        setTimeout(startBeats,1600);
+        document.querySelector('.hero .content')?.addEventListener('animationend',startBeat,{once:true});
+        setTimeout(startBeat,1600);   // backstop if the power-on anim never fires
       }
-
-      // handoff: first real user scroll locks the signature FOREVER. render()'s
-      // killed branch forces active=SIG, opacity 1, no ghost — scroll-up re-pin
-      // can't resurrect anything because render always clears all-but-active.
-      const kill=()=>{ if(killed)return; killed=true;
-        if(timer){clearTimeout(timer);timer=null;}
-        ghost=null; active=SIG; scrollCue?.classList.add('took');
-        cancelAnimationFrame(raf); render(performance.now());   // one authoritative paint
-      };
+      // the reader taking over: snap the line complete, retire the cue
       ['wheel','touchmove','keydown'].forEach(ev=>
-        addEventListener(ev,e=>{ if(ev==='keydown'&&!['ArrowDown','PageDown',' ','Spacebar'].includes(e.key))return; kill(); },{passive:true,once:false}));
-      anchorTargets['top']=()=>0;
-    }else if(hi>-1 && hbeats.length && !reduce){
-      /* fallback (phones where the card is tall, or no scrub): no pin, no
-         timer. Un-grid the stage so the beats flow vertically (no overlap),
-         step them in with a stagger, and leave ALL visible so nothing is
-         stranded and nothing clips. Reduced-motion is CSS-only (all visible). */
-      document.querySelector('.hero .hstage')?.classList.add('flowed');
-      document.getElementById('hscroll')?.classList.add('took');   // no idle meter in flow mode
-      hbeats.forEach((b,i)=>{
-        b.classList.add('notype');                                 // ink shown full, no caret
-        gsap.to(b,{autoAlpha:1,y:0,duration:.7,ease:'power2.out',delay:.2+i*.5,
-          onStart:()=>b.classList.add('on')});
-      });
-    }else if(hi>-1 && hbeats.length){   // reduced-motion: every beat visible, full ink, no cue
+        addEventListener(ev,e=>{ if(ev==='keydown'&&!['ArrowDown','PageDown',' ','Spacebar'].includes(e.key))return;
+          startBeat(); finish(); scrollCue?.classList.add('took'); },{passive:true}));
+    }else if(hi>-1 && hbeats.length){   // reduced-motion: full ink, no typing, no cue
       hbeats.forEach(b=>b.classList.add('on','notype'));
       document.getElementById('hscroll')?.classList.add('took');
     }
+    anchorTargets['top']=()=>0;
 
     /* MANIFESTO COLLAGE — the four-types filmstrip reel. The .mf-ustage is
        sticky (CSS) and its sibling .mf-reel-runway (420vh) gives the scrub its
