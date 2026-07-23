@@ -1,0 +1,56 @@
+{
+  "heading": "How we bring these <span class=\"mark mark-w\" style=\"--hl:var(--red)\">narratives</span> to you.",
+  "items": [
+    {
+      "id": "culturist-network",
+      "accentColor": "var(--red)",
+      "photos": [
+        "assets/offer/net-1.webp",
+        "assets/offer/net-2.webp",
+        "assets/offer/net-3.webp"
+      ],
+      "photoCount": 3,
+      "title": "Culturist Network",
+      "copy": "Writers, anthropologists, designers, thinkers, and community-builders who document evolving cultures, identities, and truths. By bringing lived context to every story, they shape how narratives are told and co-create collective experiences.",
+      "partnerLede": "",
+      "partnerList": [],
+      "linkLabel": "Read more ↗",
+      "linkHref": "#",
+      "linkScroll": false
+    },
+    {
+      "id": "irl-live",
+      "accentColor": "var(--yellow)",
+      "photos": [
+        "assets/offer/live-1.webp",
+        "assets/offer/live-2.webp",
+        "assets/offer/live-3.webp"
+      ],
+      "photoCount": 3,
+      "title": "IRL &amp; Live Experiences",
+      "copy": "Experiences that feel less like events and more like temporary worlds. Built around subcultures, shared identities, and creative rituals, these IRL and live experiences are where (mis)fit communities come together to express, exchange, and belong.",
+      "partnerLede": "",
+      "partnerList": [],
+      "linkLabel": "Explore ↗",
+      "linkHref": "#work",
+      "linkScroll": true
+    },
+    {
+      "id": "film-studio",
+      "accentColor": "var(--green)",
+      "photos": null,
+      "photoCount": 4,
+      "title": "Film Studio",
+      "copy": "Led by <b class=\"lead-name\">Nirvair Rai</b>, this production and narrative arm of the Cultural (Mis)fits ecosystem collaborates with brands, media, fashion, and CSR initiatives to create authentic, culture-native content rooted in real communities.",
+      "partnerLede": "Partner with us to create:",
+      "partnerList": [
+        "Branded Content &amp; Films",
+        "Scripted &amp; Feature Content",
+        "CSR &amp; Purpose Driven Content"
+      ],
+      "linkLabel": "Read more ↗",
+      "linkHref": "#",
+      "linkScroll": false
+    }
+  ]
+}
