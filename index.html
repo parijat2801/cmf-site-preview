@@ -43,7 +43,7 @@
      --sec-y-tight is the deliberately smaller footer pad. Both scale on vh so the
      whole page keeps one rhythm as the viewport changes. */
   --gutter:clamp(24px,6vw,120px);--sec-y:clamp(56px,9vh,160px);--sec-y-tight:clamp(40px,6vh,104px);
-  --t-label:clamp(.7rem,.8vw,.92rem);--t-body:clamp(1rem,1.15vw,1.35rem);
+  --t-label:clamp(.78rem,.8vw,.92rem);--t-body:clamp(1rem,1.15vw,1.35rem);
   --t-lead:clamp(1.3rem,min(2.2vw,3vh),2.4rem);--t-head:clamp(2.4rem,min(7.5vw,10vh),8.5rem);
   --hair:1.5px;--font:'NHG','Helvetica Neue',Helvetica,Arial,sans-serif;
   /* ONE motion language — heavy, decelerating, no bounce. */
@@ -89,7 +89,10 @@ body.no-grain::after{opacity:0}
 /* --fz: per-card fit factor. One-screen cards ([data-fit]) get it computed by
    the engine so their content ALWAYS fits the window; display type and the
    vertical rhythm shrink together. 1 everywhere else. */
-.card{--fz:1;position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:center;
+/* min-height:100vh then 100dvh — dvh tracks the URL bar so cards don't reflow
+   mid-scroll when it collapses/expands; 100vh stays first as the fallback for
+   browsers without dvh support. */
+.card{--fz:1;position:relative;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;justify-content:center;
   padding-block:calc(var(--sec-y)*var(--fz));overflow:hidden;contain:layout paint}
 .card.tall{justify-content:flex-start}
 /* (the old top-edge drop-shadow that marked where one card slid over another has
@@ -212,6 +215,27 @@ body.no-grain::after{opacity:0}
 .nav .ig svg{display:block;width:clamp(20px,1.5vw,24px);height:auto}
 @media(max-width:760px){.nav .lk a:not(.contact):not(.ig){display:none}}
 
+/* ---------- PHONE TYPE SCALE ----------
+   Every heading on the page is sized `clamp(floor, min(Nvw, Mvh), ceiling)`. The
+   vh term exists so headlines can't swamp a short desktop window — but on a phone
+   min(vw,vh) always resolves to the vw side, and at 390px that lands UNDER the
+   floor. So every heading rendered at its floor: the manifesto h3, the section
+   .head and the reel head all collapsed to an identical 38.4px and the page lost
+   its hierarchy — three different levels reading as one.
+
+   Fixed here by restating the scale in vw only (no vh term to starve it) with
+   deliberate intervals rather than a single shared floor. At 390px this yields
+   roughly:  head 47  ·  manifesto/reel 43  ·  vertical h3 36  ·  lead 21  ·  body 16
+   — a ~1.18 ratio between heading levels, so the levels stay legible AS levels.
+   Oversized headlines are the brand's signature; the phone should read as a small
+   poster, not as the desktop page with the type turned down. */
+@media(max-width:760px){
+  :root{
+    --t-head:clamp(2.9rem,12vw,4.4rem);
+    --t-lead:clamp(1.3rem,5.4vw,1.7rem);
+  }
+}
+
 /* ============ HERO (CRT) — video field, white type, red accent ============ */
 .hero{position:relative;isolation:isolate}
 /* 3D balloon field — a WebGL canvas fills the card, sits under every other
@@ -219,6 +243,18 @@ body.no-grain::after{opacity:0}
    motion / load failure) and keeps the same B&W treatment the video had. */
 .hero .hero-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;display:block;
   background:#231F20 center/cover no-repeat}
+/* PHONE: the hero box is 100dvh, which SHRINKS as the URL bar collapses on scroll.
+   The canvas (inset:0) followed it, so its box height changed continuously during
+   scroll — and the WebGL fit() read that changing/mid-reflow height and re-sized the
+   drawing buffer to it (measured swinging 75..742px on-device), stretching the scene
+   and zooming it in/out. Pin the canvas to a STABLE height instead: 100vh is the
+   LARGE (layout) viewport that does NOT shrink with the URL bar, unlike 100dvh. Now
+   the canvas box holds constant through scroll, fit() reads one height, the buffer
+   never re-sizes, and nothing zooms. (Bottom of the canvas simply sits under the URL
+   bar area, which is exactly where a full-bleed hero image should extend anyway.) */
+@media(max-width:760px){
+  .hero .hero-canvas{height:100vh;bottom:auto}
+}
 .hero .hero-canvas.poster{background-image:url('assets/brand/balloon-glyph-1k.webp');
   background-size:auto 78%;background-position:66% 42%;filter:grayscale(1) contrast(1.05)}
 /* legibility scrim — darker on the left where the copy sits, lighter on the right */
@@ -248,6 +284,19 @@ body.no-grain::after{opacity:0}
    phrase is wider than the viewport (phones), the fit-scale (--fz) shrinks the
    type until it fits rather than breaking the phrase. */
 .hero .hbeat .ph{white-space:nowrap;display:inline}
+/* PHONE: the shrink-don't-break contract above assumes the type can always get
+   smaller. It can't any more — .mega now has a floor so the hero doesn't render at
+   body-copy size. At 390px the longest phrases are wider than the screen even at
+   that floor, so they must be allowed to wrap; overflowing off-screen is worse than
+   a break. Balanced wrapping keeps the resulting lines even rather than leaving one
+   orphaned word. */
+/* Scoped to match the .mega floor, which applies at EVERY width — so the escape
+   has to as well. Scoping this to 760px alone left a gap: at 768px the floor still
+   blocked the shrink but the phrase still couldn't wrap, and the beat rendered
+   814px wide in a 768px viewport. Tablets are narrow enough to hit that too. */
+@media(max-width:1024px){
+  .hero .hbeat .ph{white-space:normal;text-wrap:balance;overflow-wrap:break-word}
+}
 .hero .hbeat .bp{display:block;line-height:0}
 /* TYPEWRITER reveal: the active beat's text prints left-to-right, driven by
    --rv (0→1). We reveal by wrapping the text in .hink and clipping it; a caret
@@ -296,7 +345,13 @@ body.no-grain::after{opacity:0}
    that (tuned by measuring the widest line live); capped at --t-head so ultrawide
    screens don't blow it up. */
 .hero .mega{font-weight:900;letter-spacing:-.03em;line-height:1.04;color:var(--white);
-  font-size:min(var(--hfs,4.5vw),84px);
+  /* --hfs is measured by the hero fit routine so the longest beat fits its box; the
+     min() then caps it. There was no LOWER bound, so on a phone 4.5vw resolved to
+     ~18px — the opening statement rendering at body-copy size. max() floors it at a
+     real headline size. NOTE this trades against the .ph nowrap contract below: once
+     the type can't shrink any further, a phrase longer than the viewport has to wrap
+     instead of overflowing — see the phone rule after .ph. */
+  font-size:max(clamp(1.6rem,7.4vw,2.6rem),min(var(--hfs,4.5vw),84px));
   text-shadow:-1.2px 0 0 rgba(255,0,60,.4),1.2px 0 0 rgba(0,180,255,.36),0 0 22px rgba(150,200,255,.32)}
 .hero .sig{max-width:none}
 .hero .sig .mis{color:var(--red)}   /* only "(Mis)" is red — matches the footer mark */
@@ -307,6 +362,13 @@ body.no-grain::after{opacity:0}
   .hero .hbeat{opacity:1;transform:none;transition:none;margin-bottom:.6em;max-width:26ch}
 }
 @media(max-width:860px){.hero .hbeat{max-width:100%}.hero .hstage{min-height:46vh}}
+/* HERO SCRIM, PHONE. The 95deg scrim darkens the LEFT, where the desktop copy
+   sits. At phone width the copy centres over the glyph instead, so the gradient
+   no longer sits under it — restate it bottom-up so the type keeps its backing.
+   (The type deliberately still overlaps the glyph: it reads as foreground.) */
+@media(max-width:760px){
+  .hero::after{background:linear-gradient(to top,rgba(0,0,0,.9) 0%,rgba(0,0,0,.6) 34%,rgba(0,0,0,.34) 62%,rgba(0,0,0,.42) 100%)}
+}
 .hero .scroll{position:absolute;bottom:clamp(24px,3vw,44px);left:var(--gutter);color:var(--white);font-size:var(--t-label);letter-spacing:.2em;text-transform:uppercase;opacity:.7;display:flex;align-items:center;gap:.8em;z-index:12;
   transition:opacity .4s var(--ease)}
 /* the idle meter: a 46px rail that fills red 0→100% over the dwell, telling the
@@ -410,7 +472,7 @@ body.no-grain::after{opacity:0}
   gap:clamp(8px,1vw,18px);margin-top:clamp(8px,1.5vh,20px)}
 @media(max-width:1100px){.mwall{grid-template-columns:repeat(4,1fr)}}
 @media(max-width:820px){.mwall{grid-template-columns:repeat(3,1fr)}}
-@media(max-width:560px){.mwall{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.mwall{grid-template-columns:repeat(3,1fr);gap:6px}}
 .mcell{position:relative;aspect-ratio:4/5;overflow:hidden;background:#1B1818;margin:0}
 /* photos arrive already B&W, so we dim slightly at rest and lift brightness +
    scale on hover (no grayscale→colour reveal — that'd be a no-op on mono art). */
@@ -431,6 +493,25 @@ body.no-grain::after{opacity:0}
   padding:.32em .6em;border-radius:3px;line-height:1}
 .mproof{margin-top:calc(clamp(18px,3vh,40px)*var(--fz));font-weight:300;font-size:calc(var(--t-lead)*var(--fz))}
 .mproof b{font-weight:900;font-style:italic;color:var(--yellow)}
+/* phones stay 3-up (2-up made the roster read as a short list, not a wall), but a
+   3-up cell is only ~105px wide. Shrinking the OVERLAY type to fit inside the photo
+   drove the name to ~11px and the role pill to ~7px — technically non-overflowing,
+   practically unreadable. So on phones the caption moves OUT from over the photo and
+   sits beneath it, where it has the full cell width and can stay legible.
+   Must come AFTER the .mcell rules above: same specificity, so source order decides. */
+@media(max-width:560px){
+  .mcell{aspect-ratio:auto;overflow:visible;background:none}
+  .mcell img{aspect-ratio:4/5;height:auto;background:#1B1818}   /* photo keeps the portrait crop */
+  .mcell .mname{position:static;display:block;margin-top:6px;font-size:.82rem;letter-spacing:-.02em;line-height:1.12;text-shadow:none}
+  /* the tag is a secondary label UNDER the name. It must always start its own row:
+     as inline-block it rode up beside any short name ("Nicki Wells" SINGER,
+     "Ravi-Ra" MUSICIAN) and overlapped it. `display:table` gives it a shrink-to-fit
+     block box — it hugs its text like the old inline-block pill, but as a block it
+     can never share the name's line. */
+  .mcell .mrole{position:static;display:table;margin-top:5px;font-size:.58rem;letter-spacing:.05em;padding:.26em .4em;
+    white-space:normal}   /* PHOTOGRAPHER must still fit 105px — wrap rather than clip */
+  .mcell .mno{top:5px;left:5px;width:12px}
+}
 @media(hover:none){.mcell img{filter:brightness(.9)}}
 @media(prefers-reduced-motion:reduce){.mcell:hover img{transform:none}}
 
@@ -529,6 +610,14 @@ body.no-grain::after{opacity:0}
    so the red wraps the dark panel symmetrically — a matching red edge after the
    "Mainstream…valued." line, mirroring the band above the beats. */
 .mf-collage{position:relative;background:var(--red);overflow-x:clip;padding:clamp(30px,6vh,80px) 0}
+/* PHONE: the hero pins position:fixed (z-index 10) for its dwell, then releases.
+   On a real phone the URL bar collapsing changes innerHeight, so the release
+   times late and the fixed, full-height hero keeps COVERING the manifesto as it
+   scrolls up underneath (measured: manifesto top sat 133px inside the still-fixed
+   hero). Lifting the manifesto above the hero's z-index means that even on a late
+   release the incoming section paints OVER the hero instead of behind it — the
+   hero just slides away cleanly. Phone-only so the desktop deck stack is untouched. */
+@media(max-width:760px){.mf-collage{z-index:11}}
 .mf-panel{position:relative;background:var(--ink);overflow:visible;
   margin:0 clamp(30px,8vw,120px);padding:clamp(30px,4vw,56px) clamp(28px,4vw,60px) clamp(28px,4vw,52px)}
 /* small uppercase section label above the opening line */
@@ -610,11 +699,59 @@ body.no-grain::after{opacity:0}
 .mf-card.active .mf-q{opacity:.85;max-height:4em;margin-top:.4em}
 @media(max-width:760px){
   .mf-panel{margin:0 14px}
+  /* these carry their own clamps, so the phone scale set on :root can't reach them
+     — and their min(vw,vh) term starves the same way, pinning them to their floor.
+     Restate one step below .head so the manifesto reads as a level, not a twin. */
+  .mf-beat h3,.mf-uhead{font-size:clamp(2.6rem,10.5vw,4rem)}
+  .mf-beat p{font-size:clamp(1.05rem,4.4vw,1.35rem)}
+  /* 1.3em tracking on a 390px screen wraps "MANIFESTO" — ease it back a little */
+  .mf-beat .mf-beat-eyebrow{font-size:clamp(.8rem,3.1vw,1rem);letter-spacing:.85em;margin-right:-.85em}
   /* beats stack to one column; photo goes below its text, bleeding off the right */
   .mf-beat,.mf-beat-r,.mf-beat-l{grid-template-columns:1fr;gap:clamp(16px,4vw,28px);margin-top:clamp(50px,10vh,90px)}
   .mf-beat-l .mf-ph,.mf-beat-r .mf-ph{margin-left:0;margin-right:calc(-1*14px - 6vw)}
   .mf-beat-l .mf-ph{order:1}   /* keep text first, photo after, on both sides */
-  .mf-card{height:44vh}.mf-card h4{font-size:clamp(.85rem,3.5vw,1.2rem)}.mf-card.active{flex-grow:3.4}
+  /* FOUR-TYPES REEL, PHONE: the horizontal accordion (thin sliver + one wide
+     card) can't fit readable text at this width — panels were clipping mid-word.
+     Product decision: go VERTICAL instead — four full-width panels stacked, all
+     readable, no sliver state. That retires the whole "active card" premise, so
+     the sticky pin + scroll-scrubbed .active toggle (JS, unchanged) is neutralised
+     here: un-stick the stage, let the runway collapse, and un-shrink each card. */
+  .mf-ustage{position:static;height:auto;padding-block:clamp(24px,4vh,56px)}
+  .mf-reel{flex-direction:column;gap:clamp(20px,5vw,32px)}
+  .mf-reel-runway{height:0}
+  /* neutralise the JS's flex-grow accordion math entirely — every card is a
+     full-width row now, so "active" can't mean "wider" any more */
+  .mf-card,.mf-card.active{flex:none!important;width:100%!important;flex-grow:0!important;height:auto}
+  /* banner crop instead of the tall sliver aspect — img stays absolute/cover,
+     the card box now sets the ratio via aspect-ratio instead of a vh height */
+  .mf-card{aspect-ratio:16/10}
+  /* colour choice: ALL panels shown in full colour, all the time. On phone every
+     card is always in view (no scroll-scrubbed "active" card to pick a winner),
+     so the black-and-white/colour split has no reference point left — keeping
+     it would just make 3 of 4 panels look permanently disabled/unclickable. */
+  .mf-card img{filter:none!important}
+  /* The desktop scrub still toggles .active on scroll (harmless for layout now),
+     but .mf-card.active h4 is a LARGER size — so as the active card changed on
+     scroll, headings pulsed 21<->26px. Pin BOTH the base and active heading to one
+     size so nothing resizes on scroll. */
+  .mf-card h4,.mf-card.active h4{font-size:clamp(1.1rem,5.5vw,1.4rem)}
+  /* body copy is always shown (not just on .active) and never clamped/clipped */
+  .mf-card .mf-q,.mf-card.active .mf-q{opacity:.85!important;max-height:none!important;overflow:visible;margin-top:.4em}
+  .mf-cap{padding:clamp(24px,7vw,40px) clamp(14px,3vw,20px) clamp(14px,3vw,20px)}
+  /* SCROLL-IN REVEAL (phone only). Desktop cards are a live accordion and must
+     never start hidden, so this lives inside the media query and the JS only adds
+     .mf-card to the observer set below 760px. Each card fades + rises when it gets
+     .in; a per-card delay staggers them so the four don't pop in as one block. */
+  .mf-card{opacity:0;transform:translateY(28px);
+    transition:opacity .7s var(--ease),transform .7s var(--ease)}
+  .mf-card.in{opacity:1;transform:none}
+  .mf-card:nth-child(2){transition-delay:.08s}
+  .mf-card:nth-child(3){transition-delay:.16s}
+  .mf-card:nth-child(4){transition-delay:.24s}
+}
+/* phones: the filmstrip cards join the reveal system, so honour reduced-motion too */
+@media(max-width:760px) and (prefers-reduced-motion:reduce){
+  .mf-card{opacity:1;transform:none;transition:none}
 }
 @media(prefers-reduced-motion:reduce){.mf-rise{opacity:1;transform:none;transition:none}}
 
@@ -637,7 +774,7 @@ body.no-grain::after{opacity:0}
 .fb-yaxis,.fb-xaxis{position:absolute;z-index:2;color:var(--cream);font-weight:700;
   letter-spacing:-.01em;line-height:1.08;white-space:nowrap;opacity:.9;
   --lbl-gap:1.5em;
-  font-size:calc(clamp(.82rem,1.5vw,1.15rem)*var(--fz))}
+  font-size:calc(clamp(.9rem,1.5vw,1.15rem)*var(--fz))}
 /* "Scale": vertical, --lbl-gap to the LEFT of the upright, centred on it */
 .fb-yaxis{left:calc(10% - var(--lbl-gap));top:50%;writing-mode:vertical-rl;
   transform:translate(-100%,-50%) rotate(180deg)}
@@ -661,8 +798,10 @@ body.no-grain::after{opacity:0}
 .fb-chart.in .fb-axis{opacity:.9}
 /* when the shader is active it hides the CSS fallback axes */
 .fb-plot.has-crayon .fb-axis{display:none}
-/* alien mark in the top-right quadrant — fades in with everything else */
-.fb-alien{position:absolute;top:16%;left:75%;transform:translate(-50%,-50%);z-index:2;
+/* alien mark + note are a stacked PAIR in the plot's top-right quadrant: alien on
+   top, note directly beneath it on the same axis (alien marks the spot, note asks
+   why it matters). Same layout at every width. */
+.fb-alien{position:absolute;top:18%;left:75%;transform:translate(-50%,-50%);z-index:2;
   width:clamp(28px,3.8vw,52px);height:auto;opacity:0;transition:opacity .6s var(--ease)}
 .fb-chart.in .fb-alien{opacity:1}
 /* curly arrow: sits to the RIGHT of the note and curls down-left to the alien.
@@ -687,8 +826,9 @@ body.no-grain::after{opacity:0}
 @media(max-width:760px){.fb-curl{width:clamp(44px,10vw,72px);top:-10%}}
 /* handwritten note — sits directly ABOVE the alien, sharing its horizontal
    centre (left:75%) so the two line up vertically */
-.fb-note{position:absolute;left:75%;top:-16%;z-index:3;color:#e5018c;
-  width:max-content;max-width:22ch;text-align:center;pointer-events:none;transform-origin:center bottom;
+/* note sits directly under the alien (top:18%), centred on the same 75% axis */
+.fb-note{position:absolute;left:75%;top:33%;z-index:3;color:#e5018c;
+  width:max-content;max-width:16ch;text-align:center;pointer-events:none;transform-origin:center top;
   opacity:0;transform:translateX(-50%) rotate(-3deg);transition:opacity .6s var(--ease)}
 .fb-chart.in .fb-note{opacity:1}
 .fb-note p{font-family:'Caveat',cursive;font-weight:600;line-height:1.02;letter-spacing:.01em;
@@ -697,8 +837,11 @@ body.no-grain::after{opacity:0}
   .fb-cols{grid-template-columns:1fr;gap:clamp(28px,6vh,48px)}
   .fb-chart{max-width:none}
   .fb-copy .fb-lead{max-width:none}
-  /* give the note room above a shorter mobile plot */
-  .fb-note{top:-24%;font-size:1em}
+  /* the alien-over-note stack is now the base layout; phones just nudge the axis
+     in slightly (72% vs 75%) so the note clears the right edge, and shrink both a
+     touch for the narrower plot. */
+  .fb-alien{left:72%;width:clamp(26px,6vw,38px)}
+  .fb-note{left:72%;font-size:.82em}
 }
 .fb-list{margin-top:.6em;list-style:none;max-width:44ch}
 .fb-list li{font-weight:400;font-size:var(--t-body);line-height:1.3;opacity:.9;
@@ -1131,6 +1274,36 @@ body.no-grain::after{opacity:0}
 <!-- 3D hero balloon: init in its own module so a WebGL failure can't take down
      the main hero/scroll engine. On success it clears the poster fallback. -->
 <script type="module">
+/* GFX — the one knob for decorative-GPU quality across the page (hero balloon,
+   crayon axes, text highlighters). Deliberately NOT a hard mobile kill-switch
+   (product call: newer phones can carry full quality) — instead every canvas
+   pauses off-screen + respects DPR caps, so cost scales down smoothly instead
+   of being switched off by device class. window.GFX (not a module-scoped
+   const) because each shader lives in its OWN <script type="module"> and
+   modules don't share scope — this is the one object all three read.
+     maxDPR_shader — cap for the 2D fragment-shader canvases (highlighters +
+       crayon axes). 1.5 keeps fill-rate sane on 3x-DPR phones; visually a
+       no-op since these are small, soft-edged marks (see per-canvas note).
+     maxDPR_hero   — cap for the WebGL hero balloon (real 3D geometry benefits
+       more from resolution, so it gets a higher ceiling than the flat shaders).
+     decorativeFPS — frame-time gate for the highlighters + crayon axes (NOT
+       the hero balloon, which should stay smooth): halves GPU work for
+       slow-moving decorative effects where 30fps reads identically to 60fps.
+     pauseOffscreen — IntersectionObserver gate; every rAF loop below checks it.
+     tier — 'auto' runs the coarse-but-robust signal (matchMedia max-width:860px
+       + prefers-reduced-motion) documented at the call sites; force 'low' or
+       'high' here (e.g. from the console: GFX.tier='low') to test either path
+       without spoofing a device. Kept coarse deliberately: deviceMemory is
+       Chrome-only, hardwareConcurrency is clamped to 2 on all iOS (unreliable
+       on iPhone), and WEBGL_debug_renderer_info strings are being sanitised —
+       none of those are robust tier signals, so we don't gate on them. */
+window.GFX = {
+  maxDPR_shader: 1.5,
+  maxDPR_hero: 2,
+  decorativeFPS: 30,
+  pauseOffscreen: true,
+  tier: 'auto',
+};
 try {
   const { initHeroBalloon } = await import('./vendor/hero-balloon.js');
   const cv = document.getElementById('heroCanvas');
@@ -1159,7 +1332,13 @@ try{ pretext=await import('./vendor/pretext.esm.js'); }catch(_){ }
 /* For Brands is a plain reveal section (the staged chart choreography + replay
    were removed) — its reveals and the .fb-chart go through the same once-only
    observer as the rest of the site, fading in together on scroll-in. */
-const pendingReveals=new Set(document.querySelectorAll('.reveal, .mf-rise, .fb-chart'));
+/* The four filmstrip cards join the reveal set ONLY on phones. On desktop they're
+   a live scroll-scrubbed accordion (they must never start hidden); on phones they're
+   a static vertical stack with no motion, so they get the same scroll-in reveal as
+   the rest of the mobile page — staggered via .mf-card:nth-child in CSS. */
+const revealSel='.reveal, .mf-rise, .fb-chart'+
+  (matchMedia('(max-width:760px)').matches?', .mf-card':'');
+const pendingReveals=new Set(document.querySelectorAll(revealSel));
 function fireReveal(el){ el.classList.add('in'); pendingReveals.delete(el); io.unobserve(el); }
 const io=new IntersectionObserver((es)=>{
   es.forEach(e=>{ if(e.isIntersecting)fireReveal(e.target); });
@@ -1429,7 +1608,19 @@ const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
 if(!reduce){
   gsap.registerPlugin(ScrollTrigger);
 
-  const lenis=new Lenis({lerp:.12});
+  /* MOBILE PINNING (see docs/plans research):
+     - Lenis smooth-scroll FIGHTS iOS/Android native momentum on touch, and that
+       fight is a prime cause of pins jumping. So Lenis smoothing is OFF on touch
+       (syncTouch:false) — native scroll drives the phone, ScrollTrigger reads it.
+       This also avoids the Lenis-vs-normalizeScroll conflict (can't run both).
+     - ignoreMobileResize:true stops the URL-bar collapse/expand from firing a
+       full pin refresh mid-scroll (which is what slid the manifesto under the
+       fixed hero). Pairs with the invalidateOnRefresh:true already on each pin. */
+  const isTouch=matchMedia('(hover:none) and (pointer:coarse)').matches;
+  ScrollTrigger.config({ignoreMobileResize:true});
+  /* syncTouch:false = let native momentum handle touch; smoothWheel stays on so a
+     trackpad/mouse on desktop keeps the Lenis feel. */
+  const lenis=new Lenis({lerp:.12,syncTouch:!isTouch});
   lenisRef=lenis;
   lenis.on('scroll',ScrollTrigger.update);
   gsap.ticker.add(t=>lenis.raf(t*1000));
@@ -1654,7 +1845,7 @@ if(!reduce){
       const scrollCue=document.getElementById('hscroll');
       const N=hbeats.length, SIG=N-1;
       const TYPE_MS=n=>Math.min(3400,950+n*34);           // slower, more deliberate typing
-      const DECAY_MS=650, DWELL=3400;                     // longer hold on each beat before advancing
+      const DECAY_MS=650, DWELL=2200;                     // hold (meter fill) AFTER a beat finishes typing
       const dur=hbeats.map(b=>TYPE_MS((b.textContent||'').length));
 
       let active=-1, typeAt=0, ghost=null, killed=false, timer=null, raf=0, meterAt=0;
@@ -1715,14 +1906,23 @@ if(!reduce){
         })(performance.now());
       }
       const tick=()=>{ if(killed)return;
-        if(active<SIG){ go(active+1); runMeter(()=>{ if(!killed) timer=setTimeout(tick,50); }); }
+        if(active<SIG){ go(active+1);
+          /* HOLD the freshly-typed beat: wait for it to finish TYPING, THEN run the
+             dwell meter. Previously the dwell was measured from when a beat started
+             typing, so a long first sentence typed for most of the dwell and barely
+             held before advancing. Now the visible hold is a full DWELL regardless
+             of how long the phrase took to type. */
+          const holdThenAdvance=()=>runMeter(()=>{ if(!killed) timer=setTimeout(tick,50); });
+          timer=setTimeout(holdThenAdvance, dur[active]);
+        }
         else scrollCue?.classList.add('hint');
       };
 
       // beat 0 waits for the CRT power-on to finish (.content "open" anim → .settled)
       const heroEl=document.querySelector('.hero');
       const startBeats=()=>{ if(killed||active>-1)return;
-        go(0); timer=setTimeout(tick,DWELL); };
+        /* beat 0: let it finish typing, THEN hold a full dwell before advancing */
+        go(0); timer=setTimeout(()=>runMeter(()=>{ if(!killed) timer=setTimeout(tick,50); }), dur[0]); };
       if(heroEl?.classList.contains('settled')){ startBeats(); }
       else{
         document.querySelector('.hero .content')?.addEventListener('animationend',startBeats,{once:true});
@@ -1829,7 +2029,24 @@ if(!reduce){
 
   /* re-measure after fonts arrive (metrics change line counts) */
   document.fonts.ready.then(()=>ScrollTrigger.refresh());
-  let rto;addEventListener('resize',()=>{clearTimeout(rto);rto=setTimeout(()=>ScrollTrigger.refresh(),200);});
+  /* On mobile the URL bar collapsing changes innerHeight by ~60-120px mid-scroll.
+     Refreshing pins on that recomputes every trigger and visibly jumps the page,
+     so only refresh when the width changes (a real layout change, incl. rotation)
+     or the height moves more than the browser chrome ever would. */
+  /* ScrollTrigger ALSO auto-refreshes on resize by itself, so gating our own
+     listener wasn't enough — a URL-bar nudge still refreshed once, via GSAP.
+     Drop "resize" from its auto-refresh events so the guard below is the single
+     decision point. (visibilitychange/DOMContentLoaded/load stay: they're the
+     safe ones.) Verified: without this, a height-only change still fired 1 refresh. */
+  ScrollTrigger.config({autoRefreshEvents:'visibilitychange,DOMContentLoaded,load'});
+  let lastW=innerWidth,lastH=innerHeight;
+  const URLBAR_SLOP=140;
+  let rto;addEventListener('resize',()=>{
+    const dw=Math.abs(innerWidth-lastW),dh=Math.abs(innerHeight-lastH);
+    if(dw===0&&dh<=URLBAR_SLOP)return;   // URL bar only — ignore
+    lastW=innerWidth;lastH=innerHeight;
+    clearTimeout(rto);rto=setTimeout(()=>ScrollTrigger.refresh(),200);
+  });
 }
 </script>
 
@@ -1856,6 +2073,18 @@ if(!reduce){
   const R = { draw:0.9, wet:0.95, wetw:0.02, dry:3, tipr:0.006, edge:0,
               streak:0.78, bub:0.4, alpha:0.68, skewMag:0.05 };
   const OVERHANG=6, VPAD=8;
+
+  // GFX: the page's one quality knob (see window.GFX in the hero-balloon module
+  // block) — DPR cap + the 30fps gate for this decorative shader. Fallbacks let
+  // this module keep working even if that script hasn't run yet for some reason.
+  const GFX = window.GFX || { maxDPR_shader:1.5, decorativeFPS:30, pauseOffscreen:true };
+  // ShaderMount's own `minPixelRatio` is a FLOOR (renderScale = max(dpr, floor)),
+  // so it can't cap a 3x-DPR phone down to 1.5 — the actual ceiling knob it
+  // exposes is `maxPixelCount` (total rendered pixels). Convert our DPR cap into
+  // a pixel-count ceiling for a given CSS-pixel box so devicePixelRatio 3
+  // renders at ~1.5x instead of 3x on these small word-sized canvases.
+  const maxPixelsFor = (cssW, cssH) => Math.max(1, cssW) * Math.max(1, cssH) * GFX.maxDPR_shader * GFX.maxDPR_shader;
+  const FRAME_MS = 1000 / GFX.decorativeFPS;   // 30fps gate → skip GPU writes on off-cadence frames
 
   const frag = `#version 300 es
   precision mediump float;
@@ -1920,7 +2149,12 @@ if(!reduce){
       u_alpha:R.alpha, u_wet:R.wet, u_wetWidth:R.wetw, u_streak:R.streak, u_bubbles:R.bub,
       u_tipRag:R.tipr, u_edgeRag:R.edge, u_skew:skew, u_seed:seed });
     let mount;
-    try { mount=new ShaderMount(el, frag, u(0,null), undefined, 0.0); }
+    // minPixelRatio:1 (was the library default of 2 — a FLOOR, so leaving it at
+    // 2 would force 2x even on 1x screens); the real ceiling comes from
+    // maxPixelCount below, sized to the mark's own box so the DPR cap holds
+    // regardless of how big any individual highlighted word is.
+    const box=el.getBoundingClientRect();
+    try { mount=new ShaderMount(el, frag, u(0,null), undefined, 0.0, 0, 1, maxPixelsFor(box.width||300, box.height||80)); }
     catch(_) { el.classList.remove('mark-shader'); return; }  // this mark → CSS fallback
     const cv=el.querySelector('canvas');
     if(cv){ cv.style.position='absolute'; cv.style.zIndex='-1'; cv.style.pointerEvents='none';
@@ -1960,7 +2194,15 @@ if(!reduce){
   });
 
   // single rAF drives every armed, visible mark's u_progress 0→1
+  // frame-time gate (GFX.decorativeFPS): these strokes sweep over ~1s, so 30fps
+  // reads identically to 60fps — halves GPU writes for a purely decorative effect.
+  // document.hidden check: a backgrounded tab keeps intersecting (IO doesn't fire
+  // on tab-hide), so without this the writes would continue while unseen.
+  let lastTick=0;
   const tick = (now) => {
+    if(document.hidden){ requestAnimationFrame(tick); return; }
+    if(now-lastTick<FRAME_MS){ requestAnimationFrame(tick); return; }
+    lastTick=now;
     marks.forEach(m=>{
       if(!m.armed || !m.visible || !m.cv) return;
       const p=Math.min(1,(now-m.start)/(R.draw*1000));
@@ -1979,6 +2221,10 @@ if(!reduce){
   // word wider — u_res would stay stale and the stroke clips (e.g. "lan" instead
   // of "languages"). Call this on fonts-ready and resize to correct the size.
   const resync=()=>marks.forEach(m=>{ if(!m.cv) return;
+    // re-derive the DPR-cap pixel ceiling for the mark's CURRENT box (a word
+    // reflow can change its size) before re-measuring, so the cap stays correct.
+    const box=m.el.getBoundingClientRect();
+    try{ m.mount.setMaxPixelCount && m.mount.setMaxPixelCount(maxPixelsFor(box.width||300, box.height||80)); }catch(_){}
     // force ShaderMount to re-measure its canvas buffer + u_resolution from the
     // (now-final) box, THEN re-push our u_res at the current progress.
     try{ m.mount.handleResize && m.mount.handleResize(); }catch(_){}
@@ -2010,6 +2256,13 @@ if(!reduce){
   // recipe from the crayon-axes lab
   const R={draw:1.2,thick:0.028,rough:0.56,grain:0.78,gscale:40,streak:0.2,alpha:0.96,waver:0.004};
   const COLOR=[0.898,0.004,0.549];   // #e5018c magenta
+
+  // GFX: the page's one quality knob (see window.GFX in the hero-balloon module
+  // block). Same DPR-cap math as the highlighter module (ShaderMount's
+  // minPixelRatio is a floor, not a ceiling — maxPixelCount is the real cap).
+  const GFX = window.GFX || { maxDPR_shader:1.5, decorativeFPS:30, pauseOffscreen:true };
+  const maxPixelsFor = (cssW, cssH) => Math.max(1, cssW) * Math.max(1, cssH) * GFX.maxDPR_shader * GFX.maxDPR_shader;
+  const FRAME_MS = 1000 / GFX.decorativeFPS;   // 30fps gate for this one-shot draw-in
 
   const frag = `#version 300 es
   precision mediump float;
@@ -2064,15 +2317,30 @@ if(!reduce){
     u_alpha:R.alpha,u_thick:R.thick,u_rough:R.rough,u_grain:R.grain,u_gscale:R.gscale,u_streak:R.streak,u_waver:R.waver});
 
   let mount,cv;
-  try{ mount=new ShaderMount(plot, frag, u(0,null), undefined, 0.0); cv=plot.querySelector('canvas'); }
+  // minPixelRatio:1 (library default is 2, a FLOOR not a ceiling) + maxPixelCount
+  // sized to the plot's own box, so the DPR cap actually holds on 3x phones.
+  const plotBox=plot.getBoundingClientRect();
+  try{ mount=new ShaderMount(plot, frag, u(0,null), undefined, 0.0, 0, 1, maxPixelsFor(plotBox.width||600, plotBox.height||480)); cv=plot.querySelector('canvas'); }
   catch(_){ return; }                                   // fall back to CSS axes
   if(!cv) return;
   cv.classList.add('fb-crayon'); plot.classList.add('has-crayon');   // hide CSS axes
 
-  let raf=0,start=0,armed=false;
-  function step(now){ if(!start)start=now; const p=Math.min(1,(now-start)/(R.draw*1000));
+  // offscreen guard: this is a one-shot draw-in (step() stops itself at p>=1),
+  // but a fast scroll-past mid-draw could otherwise keep it rendering unseen —
+  // and a doc-hidden tab would too, since IO doesn't fire on tab-hide.
+  let plotVisible=true;
+  const plotIO=new IntersectionObserver(es=>{ plotVisible=es[0].isIntersecting; },{threshold:0});
+  plotIO.observe(plot);
+
+  let raf=0,start=0,armed=false,lastStep=0,pausedAt=0;
+  function step(now){
+    if(document.hidden||!plotVisible){ if(!pausedAt)pausedAt=now; raf=requestAnimationFrame(step); return; }   // paused, not stopped
+    if(pausedAt){ start+=now-pausedAt; pausedAt=0; }    // shift start forward so the sweep resumes where it left off, no jump-cut
+    if(now-lastStep<FRAME_MS){ raf=requestAnimationFrame(step); return; }           // 30fps gate
+    lastStep=now;
+    if(!start)start=now; const p=Math.min(1,(now-start)/(R.draw*1000));
     mount.setUniforms(u(p,cv)); if(p<1) raf=requestAnimationFrame(step); }
-  function play(){ cancelAnimationFrame(raf); start=0; raf=requestAnimationFrame(step); }
+  function play(){ cancelAnimationFrame(raf); start=0; lastStep=0; pausedAt=0; raf=requestAnimationFrame(step); }
   function reset(){ cancelAnimationFrame(raf); mount.setUniforms(u(0,cv)); }
 
   // draw when .fb-chart gains .in; reset on leave so it replays on re-enter
@@ -2081,10 +2349,14 @@ if(!reduce){
   new MutationObserver(check).observe(chart,{attributes:true,attributeFilter:['class']});
   check();
   // keep the draw sized correctly after fonts/layout settle
-  const resync=()=>{ try{ mount.handleResize&&mount.handleResize(); }catch(_){}; mount.setUniforms(u(armed?1:0,cv)); };
+  const resync=()=>{
+    const box=plot.getBoundingClientRect();
+    try{ mount.setMaxPixelCount&&mount.setMaxPixelCount(maxPixelsFor(box.width||600, box.height||480)); }catch(_){}
+    try{ mount.handleResize&&mount.handleResize(); }catch(_){}; mount.setUniforms(u(armed?1:0,cv)); };
   if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>{ resync(); setTimeout(resync,150); });
   addEventListener('resize',resync);
 })();
 </script>
+
 </body>
 </html>
