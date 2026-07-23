@@ -1,0 +1,262 @@
+backend:
+  name: github
+  repo: parijat2801/cmf-site-preview
+  branch: main
+  auth_endpoint: api/oauth
+  # base_url: https://REPLACE-WITH-DEPLOYED-VERCEL-URL.vercel.app
+  # set to the deployed Vercel URL
+
+# Uploaded images land in assets/, referenced from content as "assets/...".
+media_folder: "assets"
+public_folder: "assets"
+
+collections:
+  - name: "content"
+    label: "Site content"
+    files:
+      - name: "settings"
+        label: "Page structure"
+        file: "content/settings.json"
+        format: json
+        fields:
+          - label: "Page sections"
+            name: "sections"
+            widget: list
+            hint: "Drag to reorder the page sections (hero and footer are fixed and not listed here)."
+            field:
+              label: "Section"
+              name: "section"
+              widget: select
+              options:
+                - "manifesto"
+                - "misfits"
+                - "offerings"
+                - "work"
+                - "for-brands"
+                - "calling"
+
+      - name: "site"
+        label: "Site meta (browser tab / link previews)"
+        file: "content/site.json"
+        format: json
+        fields:
+          - { label: "Title", name: "title", widget: string, hint: "Shown in the browser tab and search results." }
+          - { label: "Description", name: "description", widget: text, hint: "Used for search engines and link previews (may contain &amp; entities — keep them as-is)." }
+          - { label: "Canonical URL", name: "url", widget: string, hint: "The site's live web address." }
+          - { label: "Preview image", name: "image", widget: image, hint: "Shown when the link is shared on social media." }
+          - { label: "Site name", name: "siteName", widget: string }
+
+      - name: "nav"
+        label: "Navigation bar"
+        file: "content/nav.json"
+        format: json
+        fields:
+          - { label: "Instagram URL", name: "instagram", widget: string }
+          - label: "Links (desktop bar)"
+            name: "links"
+            widget: list
+            hint: "The links shown inline in the desktop navigation bar."
+            fields:
+              - { label: "Label", name: "label", widget: string, hint: "May contain &amp; — keep it as-is." }
+              - { label: "Link target", name: "href", widget: string, hint: "A page anchor like #misfits, or a full URL/mailto link." }
+          - label: "Links (mobile menu)"
+            name: "menuLinks"
+            widget: list
+            hint: "The links shown in the mobile/expanded menu, usually the same as above plus Contact."
+            fields:
+              - { label: "Label", name: "label", widget: string, hint: "May contain &amp; — keep it as-is." }
+              - { label: "Link target", name: "href", widget: string, hint: "A page anchor like #misfits, or a full URL/mailto link." }
+
+      - name: "hero"
+        label: "Hero statement"
+        file: "content/hero.json"
+        format: json
+        fields:
+          - label: "Hero statement lines"
+            name: "lines"
+            widget: list
+            hint: "Each item is one line of the big opening statement, shown one after another."
+            field:
+              label: "Line"
+              name: "line"
+              widget: text
+              hint: "Contains styling markup — edit the words, keep any <span> tags intact."
+          - { label: "Scroll hint label", name: "scrollLabel", widget: string }
+
+      - name: "calling"
+        label: "Calling — Everybody"
+        file: "content/calling.json"
+        format: json
+        fields:
+          - { label: "Heading", name: "heading", widget: text, hint: "Contains styling markup — edit the words, keep the <span> tags intact." }
+          - { label: "Intro paragraph", name: "intro", widget: text }
+          - label: "Questions"
+            name: "items"
+            widget: list
+            hint: "Each item is one \"Are you a...\" question. Add, remove, or drag to reorder."
+            fields:
+              - { label: "Question", name: "question", widget: text, hint: "Contains <b> and <i> tags for emphasis — edit the words, keep the tags intact." }
+          - { label: "Write-to-us lede", name: "writeLede", widget: string, hint: "Short phrase shown before the email address, e.g. \"Write to us at\"." }
+          - { label: "Contact email", name: "email", widget: string }
+
+      - name: "misfits"
+        label: "Misfits Brigade — intro"
+        file: "content/misfits.json"
+        format: json
+        fields:
+          - { label: "Heading", name: "heading", widget: text, hint: "Contains styling markup — edit the words, keep the <span> tags intact." }
+          - { label: "Intro line", name: "intro", widget: text }
+          - label: "Misfits Brigade — artists"
+            name: "items"
+            widget: list
+            hint: "One entry per artist. Add, remove, or drag to reorder — the \"order\" number is shown on the card so update it to match the new position."
+            fields:
+              - { label: "Photo", name: "photo", widget: image }
+              - { label: "Name", name: "name", widget: string }
+              - { label: "Role", name: "role", widget: string, hint: "Short role/craft label, e.g. \"Dancer\", \"Singer\"." }
+              - { label: "Order number", name: "order", widget: string, hint: "Two-digit display number, e.g. \"01\", \"02\" — keep in sync with the card's position." }
+              - { label: "Bio", name: "bio", widget: text, hint: "May contain HTML entities like &#x27; for an apostrophe — keep them as-is." }
+
+      - name: "offerings"
+        label: "Offerings — how we bring narratives to you"
+        file: "content/offerings.json"
+        format: json
+        fields:
+          - { label: "Heading", name: "heading", widget: text, hint: "Contains styling markup — edit the words, keep the <span> tags intact." }
+          - label: "Offerings"
+            name: "items"
+            widget: list
+            hint: "One entry per offering (Culturist Network, IRL & Live, Film Studio). Add, remove, or drag to reorder."
+            fields:
+              - { label: "Section ID", name: "id", widget: string, hint: "Must match the page anchor used elsewhere, e.g. \"culturist-network\". Don't change unless you know what links to it." }
+              - { label: "Accent color", name: "accentColor", widget: string, hint: "A CSS color value, e.g. var(--red) or a hex code. Not a color picker — type the exact value." }
+              - label: "Photos"
+                name: "photos"
+                widget: list
+                required: false
+                hint: "Set of photos for this offering's card. Leave empty/remove if this offering has no photo grid (photoCount still controls the layout)."
+                field: { label: "Photo", name: "photo", widget: image }
+              - { label: "Photo count", name: "photoCount", widget: number, hint: "How many photo slots the card layout reserves, independent of how many photos are actually set." }
+              - { label: "Title", name: "title", widget: string, hint: "May contain &amp; — keep it as-is." }
+              - { label: "Copy", name: "copy", widget: text, hint: "Contains <b> tags for emphasis — edit the words, keep the tags intact." }
+              - { label: "Partner lede", name: "partnerLede", widget: string, required: false, hint: "Short intro line before the partner list, e.g. \"Partner with us to create:\". Leave blank if this offering has no partner list." }
+              - label: "Partner list"
+                name: "partnerList"
+                widget: list
+                required: false
+                hint: "Bullet items shown under the partner lede. Leave empty if not used for this offering."
+                field: { label: "Item", name: "item", widget: string, hint: "May contain &amp; — keep it as-is." }
+              - { label: "Link label", name: "linkLabel", widget: string, hint: "e.g. \"Read more ↗\" or \"Explore ↗\"." }
+              - { label: "Link target", name: "linkHref", widget: string, hint: "A page anchor like #work, or \"#\" if the link isn't wired up yet." }
+              - { label: "Link scrolls the page", name: "linkScroll", widget: boolean, hint: "On = clicking smooth-scrolls to an anchor on this page. Off = treated as a normal link." }
+
+      - name: "work"
+        label: "Misfits Acts"
+        file: "content/work.json"
+        format: json
+        fields:
+          - { label: "Heading", name: "heading", widget: text, hint: "Contains styling markup — edit the words, keep the <span> tags intact." }
+          - label: "Acts"
+            name: "items"
+            widget: list
+            hint: "One entry per act (Ruhbaru, Jupiter Pe Juice). Add, remove, or drag to reorder."
+            fields:
+              - { label: "Title", name: "title", widget: string }
+              - { label: "Copy", name: "copy", widget: text, hint: "Contains <b> tags for emphasis — edit the words, keep the tags intact." }
+              - { label: "Link label", name: "linkLabel", widget: string, hint: "e.g. \"Follow ↗\"." }
+              - { label: "Link URL", name: "linkHref", widget: string }
+              - label: "Photos"
+                name: "photos"
+                widget: list
+                field: { label: "Photo", name: "photo", widget: image }
+              - { label: "Accent color", name: "accentColor", widget: string, hint: "A CSS color value, e.g. var(--cream) or a hex code. Not a color picker — type the exact value." }
+
+      - name: "for_brands"
+        label: "For Brands"
+        file: "content/for_brands.json"
+        format: json
+        fields:
+          - { label: "Heading", name: "heading", widget: text, hint: "Contains styling markup — edit the words, keep the <span> tags intact." }
+          - { label: "Chart Y-axis label", name: "chartYAxisLabel", widget: string }
+          - { label: "Chart X-axis label", name: "chartXAxisLabel", widget: string }
+          - { label: "Alien image alt text", name: "alienAlt", widget: string, required: false }
+          - { label: "Note", name: "note", widget: text }
+          - { label: "Lead paragraph", name: "lead", widget: text }
+          - label: "Bullet list"
+            name: "list"
+            widget: list
+            hint: "Short capability bullets shown under the lead paragraph."
+            field: { label: "Item", name: "item", widget: string }
+          - { label: "Write-to-us lede", name: "writeLede", widget: string, hint: "Short phrase shown before the email address, e.g. \"Write to us at\"." }
+          - { label: "Contact email", name: "email", widget: string }
+
+      - name: "manifesto"
+        label: "Manifesto"
+        file: "content/manifesto.json"
+        format: json
+        fields:
+          - label: "Manifesto beats"
+            name: "beats"
+            widget: list
+            hint: "Each beat is one full-bleed statement with a photo. Add, remove, or drag to reorder."
+            fields:
+              - { label: "Eyebrow", name: "eyebrow", widget: string, required: false, hint: "Small label shown above the first beat only, e.g. \"Manifesto\". Leave blank for later beats." }
+              - { label: "Headline", name: "headline", widget: text, hint: "Contains styling markup — edit the words, keep the <span> tags intact." }
+              - { label: "Body", name: "body", widget: text }
+              - { label: "Photo", name: "photo", widget: image }
+              - { label: "Photo alt text", name: "alt", widget: string, required: false }
+              - label: "Photo side"
+                name: "side"
+                widget: select
+                hint: "Which side of the layout the photo sits on."
+                options:
+                  - { label: "Right", value: "r" }
+                  - { label: "Left", value: "l" }
+          - { label: "Lede", name: "lede", widget: text, hint: "Short line shown between the beats and the \"who are we building for\" section." }
+          - { label: "\"Who are we building for\" heading", name: "uniteHeading", widget: text, hint: "Contains styling markup — edit the words, keep the <span> tags intact." }
+          - label: "Audience types"
+            name: "types"
+            widget: list
+            hint: "The four cards describing who the site is built for. Add, remove, or drag to reorder."
+            fields:
+              - { label: "Photo", name: "photo", widget: image }
+              - { label: "Title", name: "title", widget: string }
+              - { label: "Question", name: "question", widget: string }
+
+      - name: "footer"
+        label: "Footer"
+        file: "content/footer.json"
+        format: json
+        fields:
+          - { label: "About heading", name: "aboutHeading", widget: string }
+          - { label: "About blurb", name: "aboutBlurb", widget: text }
+          - label: "Home links"
+            name: "homeLinks"
+            widget: list
+            fields:
+              - { label: "Label", name: "label", widget: string }
+              - { label: "Link target", name: "href", widget: string, hint: "A page anchor like #top." }
+          - label: "Nav links"
+            name: "navLinks"
+            widget: list
+            fields:
+              - { label: "Label", name: "label", widget: string, hint: "May contain &amp; — keep it as-is." }
+              - { label: "Link target", name: "href", widget: string, hint: "A page anchor like #culturist-network." }
+          - label: "Social links"
+            name: "socialLinks"
+            widget: list
+            fields:
+              - { label: "Label", name: "label", widget: string, hint: "e.g. Instagram, Facebook, Youtube." }
+              - { label: "Link target", name: "href", widget: string, hint: "Full URL to the social profile." }
+          - { label: "Copyright line", name: "copyright", widget: string }
+          - { label: "Tagline", name: "tagline", widget: string }
+
+      # content/verticals.json is intentionally NOT included as an editable file here.
+      # Its JSON root is a bare array ([{...}, {...}, {...}]), but every Decap/Sveltia
+      # file-collection entry is saved as a JSON *object* keyed by field names — there
+      # is no way to make Sveltia write a bare array back to disk. Adding fields for it
+      # would save as {"<field>": [...]} and break build.mjs (throwOnUndefined expects
+      # `verticals` itself to be the array — see src/foot.njk:258, `{{ verticals | dump }}`).
+      # Fix needs either a small build-time unwrap step or restructuring the site to read
+      # verticals.items instead of the bare array; out of scope for this CMS-only task.
+

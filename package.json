@@ -18,5 +18,8 @@
   "private": "true",
   "dependencies": {
     "nunjucks": "^3.2.4"
+  },
+  "devDependencies": {
+    "@gltf-transform/cli": "^4.4.1"
   }
 }
