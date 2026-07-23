@@ -7,6 +7,8 @@ export default function handler(_req, res) {
   if (!clientId) { res.status(500).send('GITHUB_CLIENT_ID not configured'); return; }
   const url = new URL('https://github.com/login/oauth/authorize');
   url.searchParams.set('client_id', clientId);
-  url.searchParams.set('scope', 'repo,user');
+  // least privilege: public_repo suffices while the repo is public. If the repo
+  // is ever made private, set GITHUB_OAUTH_SCOPE=repo,user in Vercel env.
+  url.searchParams.set('scope', process.env.GITHUB_OAUTH_SCOPE || 'public_repo,user');
   res.redirect(302, url.toString());
 }
