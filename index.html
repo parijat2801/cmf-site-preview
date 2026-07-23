@@ -1827,7 +1827,7 @@ if(!reduce){
       const scrollCue=document.getElementById('hscroll');
       const N=hbeats.length, SIG=N-1;
       const TYPE_MS=n=>Math.min(3400,950+n*34);           // slower, more deliberate typing
-      const DECAY_MS=650, DWELL=3400;                     // longer hold on each beat before advancing
+      const DECAY_MS=650, DWELL=2200;                     // hold (meter fill) AFTER a beat finishes typing
       const dur=hbeats.map(b=>TYPE_MS((b.textContent||'').length));
 
       let active=-1, typeAt=0, ghost=null, killed=false, timer=null, raf=0, meterAt=0;
@@ -1888,14 +1888,23 @@ if(!reduce){
         })(performance.now());
       }
       const tick=()=>{ if(killed)return;
-        if(active<SIG){ go(active+1); runMeter(()=>{ if(!killed) timer=setTimeout(tick,50); }); }
+        if(active<SIG){ go(active+1);
+          /* HOLD the freshly-typed beat: wait for it to finish TYPING, THEN run the
+             dwell meter. Previously the dwell was measured from when a beat started
+             typing, so a long first sentence typed for most of the dwell and barely
+             held before advancing. Now the visible hold is a full DWELL regardless
+             of how long the phrase took to type. */
+          const holdThenAdvance=()=>runMeter(()=>{ if(!killed) timer=setTimeout(tick,50); });
+          timer=setTimeout(holdThenAdvance, dur[active]);
+        }
         else scrollCue?.classList.add('hint');
       };
 
       // beat 0 waits for the CRT power-on to finish (.content "open" anim → .settled)
       const heroEl=document.querySelector('.hero');
       const startBeats=()=>{ if(killed||active>-1)return;
-        go(0); timer=setTimeout(tick,DWELL); };
+        /* beat 0: let it finish typing, THEN hold a full dwell before advancing */
+        go(0); timer=setTimeout(()=>runMeter(()=>{ if(!killed) timer=setTimeout(tick,50); }), dur[0]); };
       if(heroEl?.classList.contains('settled')){ startBeats(); }
       else{
         document.querySelector('.hero .content')?.addEventListener('animationend',startBeats,{once:true});
