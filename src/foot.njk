@@ -743,7 +743,13 @@ if(!reduce){
     if(cv){ cv.style.position='absolute'; cv.style.zIndex='-1'; cv.style.pointerEvents='none';
       cv.style.left=(-OVERHANG)+'px'; cv.style.top=(-VPAD)+'px';
       cv.style.width='calc(100% + '+(OVERHANG*2)+'px)';
-      cv.style.height='calc(100% + '+(VPAD*2)+'px)'; }
+      cv.style.height='calc(100% + '+(VPAD*2)+'px)';
+      // context loss (iOS evicts the oldest context when too many are alive):
+      // this mark drops back to the CSS swipe highlight instead of going blank
+      cv.addEventListener('webglcontextlost',e=>{ e.preventDefault();
+        el.classList.remove('mark-shader');
+        try{ mount.dispose&&mount.dispose(); }catch(_){}
+        cv.remove(); },{once:true}); }
 
     // trigger element: the chart label keys off .fb-chart.in; the manifesto beats
     // reveal via .mf-rise; everything else via its nearest .reveal ancestor. All
@@ -907,6 +913,11 @@ if(!reduce){
   catch(_){ return; }                                   // fall back to CSS axes
   if(!cv) return;
   cv.classList.add('fb-crayon'); plot.classList.add('has-crayon');   // hide CSS axes
+  // context loss → put the CSS hairline axes back instead of leaving no axes
+  cv.addEventListener('webglcontextlost',e=>{ e.preventDefault();
+    plot.classList.remove('has-crayon');
+    try{ mount.dispose&&mount.dispose(); }catch(_){}
+    cv.remove(); },{once:true});
 
   // offscreen guard: this is a one-shot draw-in (step() stops itself at p>=1),
   // but a fast scroll-past mid-draw could otherwise keep it rendering unseen —
