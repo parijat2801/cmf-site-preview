@@ -215,6 +215,13 @@ body.no-grain::after{opacity:0}
 /* over a solid red section, also recolor the red "(Mis)" group to the nav's text
    color so it doesn't sit red-on-red (even the halo can't separate red-on-red) */
 .nav.over-red .brandlogo .mk-red{fill:currentColor}
+/* PHONE: drop the black outline halo — keep ONLY the over-red colour change. The
+   halo is a desktop safeguard against the logo sitting on busy photo backdrops; on
+   phones the client prefers the clean logo with no dark edge, relying on the
+   over-red recolour above for the one place it'd otherwise sit red-on-red. */
+@media(max-width:760px){
+  .nav .mk .brandlogo{filter:none}
+}
 .nav .lk{display:flex;gap:2em;align-items:center}
 .nav a{color:inherit;text-decoration:none;font-size:var(--t-label);font-weight:500;letter-spacing:.18em;text-transform:uppercase;opacity:1;transition:opacity .35s var(--ease)}
 .nav a:hover{opacity:.65}
