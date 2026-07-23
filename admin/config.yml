@@ -251,12 +251,26 @@ collections:
           - { label: "Copyright line", name: "copyright", widget: string }
           - { label: "Tagline", name: "tagline", widget: string }
 
-      # content/verticals.json is intentionally NOT included as an editable file here.
-      # Its JSON root is a bare array ([{...}, {...}, {...}]), but every Decap/Sveltia
-      # file-collection entry is saved as a JSON *object* keyed by field names — there
-      # is no way to make Sveltia write a bare array back to disk. Adding fields for it
-      # would save as {"<field>": [...]} and break build.mjs (throwOnUndefined expects
-      # `verticals` itself to be the array — see src/foot.njk:258, `{{ verticals | dump }}`).
-      # Fix needs either a small build-time unwrap step or restructuring the site to read
-      # verticals.items instead of the bare array; out of scope for this CMS-only task.
+      - name: "verticals"
+        label: "Vertical detail pages (Read more modals)"
+        file: "content/verticals.json"
+        format: json
+        fields:
+          - label: "Verticals"
+            name: "items"
+            widget: list
+            hint: "One entry per vertical. The ID must match the section row it belongs to — don't change IDs unless the site section changes too."
+            fields:
+              - { label: "ID", name: "id", widget: string, hint: "e.g. culturist-network, irl-live, film-studio — must match the offering row's ID." }
+              - { label: "Accent color", name: "accent", widget: string, hint: "CSS value like var(--red) or a hex code — leave as-is unless you know CSS." }
+              - label: "Slides"
+                name: "slides"
+                widget: list
+                hint: "Each slide is one image with its paragraphs of copy."
+                fields:
+                  - { label: "Image", name: "image", widget: image }
+                  - label: "Paragraphs"
+                    name: "paragraphs"
+                    widget: list
+                    field: { label: "Paragraph", name: "paragraph", widget: text }
 

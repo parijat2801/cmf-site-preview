@@ -255,7 +255,7 @@ document.querySelectorAll('.offer,.witem').forEach(o=>oio.observe(o));
    The ‹ › arrows step through slides (image + its paragraphs advance together).
    TO EXTEND: add another {image, paragraphs:[...]} object to a vertical's array;
    add more paragraph strings to any slide's `paragraphs`. That's the whole API. */
-const VERTICALS=Object.fromEntries({{ verticals | dump | safe }}.map(v=>[v.id,v]));
+const VERTICALS=Object.fromEntries({{ verticals.items | dump | safe }}.map(v=>[v.id,v]));
 const vmodal=document.getElementById('vmodal');
 const vImg=document.getElementById('vimg'), vBody=document.getElementById('vbody');
 const vTitle=document.getElementById('vtitle');
