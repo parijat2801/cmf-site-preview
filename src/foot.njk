@@ -79,14 +79,18 @@
      decorativeFPS — frame-time gate for the highlighters + crayon axes (NOT
        the hero balloon, which should stay smooth): halves GPU work for
        slow-moving decorative effects where 30fps reads identically to 60fps.
-     pauseOffscreen — IntersectionObserver gate; every rAF loop below checks it.
-     tier — 'auto' runs the coarse-but-robust signal (matchMedia max-width:860px
-       + prefers-reduced-motion) documented at the call sites; force 'low' or
-       'high' here (e.g. from the console: GFX.tier='low') to test either path
-       without spoofing a device. Kept coarse deliberately: deviceMemory is
-       Chrome-only, hardwareConcurrency is clamped to 2 on all iOS (unreliable
-       on iPhone), and WEBGL_debug_renderer_info strings are being sanitised —
-       none of those are robust tier signals, so we don't gate on them. */
+     pauseOffscreen — declared intent only; NOT read anywhere. Every rAF loop
+       already pauses off-screen unconditionally via its own IntersectionObserver,
+       so the flag is a description of that behaviour, not a switch that toggles it.
+     tier — only the explicit value 'low' does anything: the hero balloon reads
+       (GFX.tier === 'low') || navigator.connection.saveData to serve the smaller
+       LOD; 'auto' (the default) and 'high' both fall through to full quality —
+       there is no matchMedia/device-class signal behind 'auto'. Set 'low' from the
+       console (GFX.tier='low') to test the low path without spoofing a device.
+       Kept coarse deliberately: deviceMemory is Chrome-only, hardwareConcurrency
+       is clamped to 2 on all iOS (unreliable on iPhone), and
+       WEBGL_debug_renderer_info strings are being sanitised — none are robust tier
+       signals, so we don't gate on them. */
 window.GFX = {
   maxDPR_shader: 1.5,
   maxDPR_hero: 2,
@@ -766,7 +770,7 @@ if(!reduce){
   marks.forEach(m=>vis.observe(m.el));
 
   // arm/replay a mark: reset progress and (re)start its draw
-  const arm = (m) => { m.armed=true; m.start=performance.now(); m.prog=0; };
+  const arm = (m) => { m.armed=true; m.start=performance.now(); m.prog=0; startLoop(); };
   const disarm = (m) => { m.armed=false; m.prog=0; m.el.style.setProperty('--rv','0');
     if(m.cv) m.mount.setUniforms(m.u(0,m.cv)); };
 
@@ -787,10 +791,17 @@ if(!reduce){
   // reads identically to 60fps — halves GPU writes for a purely decorative effect.
   // document.hidden check: a backgrounded tab keeps intersecting (IO doesn't fire
   // on tab-hide), so without this the writes would continue while unseen.
-  let lastTick=0;
+  // The loop is DEMAND-DRIVEN: it runs only while at least one mark is still
+  // animating (armed with prog<1). A completed stroke holds at prog===1 and made
+  // no further GPU writes, but the old loop kept re-queuing forever regardless;
+  // now it stops when the work is done and arm() restarts it on the next reveal.
+  // (The hidden / frame-gate early-outs re-queue only while work remains, so a
+  // stroke paused mid-draw by a tab-hide still resumes when the tab comes back.)
+  let lastTick=0, looping=false;
+  const hasWork = () => marks.some(m => m.armed && m.prog < 1);
   const tick = (now) => {
-    if(document.hidden){ requestAnimationFrame(tick); return; }
-    if(now-lastTick<FRAME_MS){ requestAnimationFrame(tick); return; }
+    if(document.hidden){ if(hasWork()) requestAnimationFrame(tick); else looping=false; return; }
+    if(now-lastTick<FRAME_MS){ if(hasWork()) requestAnimationFrame(tick); else looping=false; return; }
     lastTick=now;
     marks.forEach(m=>{
       if(!m.armed || !m.visible || !m.cv) return;
@@ -800,9 +811,11 @@ if(!reduce){
       m.el.style.setProperty('--rv', p.toFixed(3));     // text colors in with the tip
       m.mount.setUniforms(m.u(p,m.cv));
     });
-    requestAnimationFrame(tick);
+    if(hasWork()) requestAnimationFrame(tick);
+    else looping=false;                                 // all strokes done → idle until re-armed
   };
-  requestAnimationFrame(tick);
+  const startLoop = () => { if(!looping){ looping=true; requestAnimationFrame(tick); } };
+  startLoop();
 
   // re-push uniforms for every mark at its CURRENT progress + CURRENT canvas size.
   // The rAF skips writes once a stroke completes (p===prog), so if the canvas

@@ -89,8 +89,14 @@ fs.writeFileSync('index.html', html);
 // static payload for deploys (Vercel outputDirectory = dist). vendor ships only
 // the runtime .js/.glb/etc — the TypeScript build's *.map and *.d.ts files (~556KB
 // under paper-shaders) are never fetched by the page, so filter them out.
-const shipFilter = src => !/\.(map|d\.ts)$/.test(src);
-for (const dir of ['assets', 'vendor', 'admin']) {
+// also drop the never-fetched master sculpt (assets/brand/cmf-hunyuan-uv.glb,
+// ~1MB) — the page only ever loads the LOD-15/25 derivatives; the full-res
+// source is kept in the repo purely as the master for regenerating LODs, so it
+// has no place in the deploy payload. (It carries no `assets/`-prefixed mention
+// in hero-balloon.js, so the missing-asset validator above never expects it.)
+const shipFilter = src => !/\.(map|d\.ts)$/.test(src)
+  && path.resolve(src) !== path.resolve('assets/brand/cmf-hunyuan-uv.glb');
+for (const dir of ['assets', 'vendor', 'admin', 'fonts']) {
   if (!fs.existsSync(dir)) continue;
   // clear the target first so a filtered-out file left over from a previous
   // build (Vercel builds clean, but local `npm run dev` reuses dist) can't linger
