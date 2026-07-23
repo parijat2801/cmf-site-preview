@@ -1558,7 +1558,19 @@ const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
 if(!reduce){
   gsap.registerPlugin(ScrollTrigger);
 
-  const lenis=new Lenis({lerp:.12});
+  /* MOBILE PINNING (see docs/plans research):
+     - Lenis smooth-scroll FIGHTS iOS/Android native momentum on touch, and that
+       fight is a prime cause of pins jumping. So Lenis smoothing is OFF on touch
+       (syncTouch:false) — native scroll drives the phone, ScrollTrigger reads it.
+       This also avoids the Lenis-vs-normalizeScroll conflict (can't run both).
+     - ignoreMobileResize:true stops the URL-bar collapse/expand from firing a
+       full pin refresh mid-scroll (which is what slid the manifesto under the
+       fixed hero). Pairs with the invalidateOnRefresh:true already on each pin. */
+  const isTouch=matchMedia('(hover:none) and (pointer:coarse)').matches;
+  ScrollTrigger.config({ignoreMobileResize:true});
+  /* syncTouch:false = let native momentum handle touch; smoothWheel stays on so a
+     trackpad/mouse on desktop keeps the Lenis feel. */
+  const lenis=new Lenis({lerp:.12,syncTouch:!isTouch});
   lenisRef=lenis;
   lenis.on('scroll',ScrollTrigger.update);
   gsap.ticker.add(t=>lenis.raf(t*1000));
