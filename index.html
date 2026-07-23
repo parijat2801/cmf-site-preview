@@ -1750,14 +1750,6 @@ if(!reduce){
            holds for its dwell, then releases (pinSpacing:true reserves that room). */
         end:()=>selfSpace?'+='+dwells[i]:'+='+(dwells[i]+(talls[i]?vh():card.offsetHeight)),
         pin:true,pinSpacing:selfSpace,invalidateOnRefresh:true,
-        /* On touch, pin via CSS transform instead of position:fixed. A fixed,
-           full-viewport pinned card (the hero, whose canvas fills it) gets visually
-           RESCALED by iOS Safari's compositor as the URL bar collapses on scroll —
-           which zoomed the whole 3D scene (bg plane + glyph together) in and out.
-           A transform-pinned element stays a normal in-flow box the compositor
-           doesn't rescale, so the zoom disappears. Desktop keeps the default 'fixed'
-           (no URL bar there, and 'transform' can jitter on some desktop combos). */
-        pinType: isTouch ? 'transform' : 'fixed',
       });
       if(selfSpace && spacers[i]) spacers[i].style.height='0px';   // pinSpacing reserves the room
       if(card.id)anchorTargets[card.id]=()=>talls[i]?st.start-(card.offsetHeight-vh()):st.start;
