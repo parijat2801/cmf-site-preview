@@ -10,8 +10,6 @@ const env = new nunjucks.Environment(new nunjucks.FileSystemLoader('src'), {
   autoescape: false,          // copy may legitimately contain entities/markup
   throwOnUndefined: true,     // a missing content field must fail the build
 });
-// slides -> comma-joined image list for the .oshot data-photos attribute
-env.addFilter('imgs', slides => slides.map(s => s.image).join(','));
 // slides -> the modal's VERTICALS data (accent rides on the offering row).
 // <-escape so no content string can ever terminate the <script> block.
 env.addFilter('modaldata', items =>
@@ -31,7 +29,7 @@ for (const f of fs.readdirSync('content')) {
 const MAY_BE_EMPTY = new Set(['eyebrow', 'partnerLede', 'alt', 'alienAlt', 'bio', 'paragraphs', 'partnerList']);
 const MIN_ITEMS = {  // path -> minimum entries
   'settings.sections': 1, 'hero.lines': 1, 'offerings.items': 1,
-  'offerings.items[].slides': 1, 'work.items': 1, 'work.items[].photos': 1,
+  'offerings.items[].photos': 1, 'work.items': 1, 'work.items[].photos': 1,
   'misfits.items': 1, 'audience.types': 1, 'manifesto.beats': 1, 'calling.items': 1,
 };
 const errors = [];

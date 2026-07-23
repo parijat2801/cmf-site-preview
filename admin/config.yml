@@ -177,13 +177,19 @@ collections:
                   - { label: "Cream", value: "var(--cream)" }
                   - { label: "Ink (near-black)", value: "var(--ink)" }
                   - { label: "White", value: "var(--white)" }
-              - label: "Images & modal pages"
+              - label: "Card photos"
+                name: "photos"
+                widget: list
+                hint: "The images the card cycles through on the page. Independent of the pop-up below."
+                field: { label: "Photo", name: "photo", widget: image, hint: "Shown as a square (1:1) crop on desktop, 4:3 on phones — keep the subject centered." }
+              - label: "Read-more pop-up pages"
                 name: "slides"
                 widget: list
-                hint: "The offering's images. The card cycles through all of them, and each one becomes a page of the Read-more pop-up — add paragraphs to an image to give its pop-up page copy (leave empty for an image-only page)."
+                required: false
+                hint: "The pages of this offering's Read-more pop-up, each an image with its paragraphs. Independent of the card photos above. If left empty, the Read-more link does nothing."
                 fields:
-                  - { label: "Image", name: "image", widget: image, hint: "Shown as a square (1:1) crop on desktop, 4:3 on phones — keep the subject centered. The pop-up shows it square." }
-                  - label: "Pop-up paragraphs"
+                  - { label: "Image", name: "image", widget: image, hint: "Shown square (1:1) in the pop-up." }
+                  - label: "Paragraphs"
                     name: "paragraphs"
                     widget: list
                     required: false

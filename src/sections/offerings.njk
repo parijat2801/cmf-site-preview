@@ -4,10 +4,10 @@
       <h2 class="head reveal d1" data-m style="margin-bottom:clamp(30px,4vw,64px)">{{ offerings.heading | safe }}</h2>
 {% for item in offerings.items %}
       <article class="offer reveal" id="{{ item.id }}" style="--co:{{ item.accentColor }}">
-        <!-- one list drives everything: the row cycles these images and the
-             Read-more modal pages are built from the same slides -->
-        <div class="oshot" data-photos="{{ item.slides | imgs }}">
-          <span class="idx">1/{{ item.slides | length }}</span>
+        <!-- card photos and the Read-more pop-up pages are independent lists;
+             operators manage each on its own -->
+        <div class="oshot" data-photos="{{ item.photos | join(',') }}">
+          <span class="idx">1/{{ item.photos | length }}</span>
         </div>
         <div class="otext" data-m>
           <h3>{{ item.title | safe }}</h3>
