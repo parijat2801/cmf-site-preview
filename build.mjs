@@ -20,6 +20,9 @@ for (const f of fs.readdirSync('content')) {
 const html = env.render('page.njk', data);
 fs.mkdirSync('dist', { recursive: true });
 fs.writeFileSync('dist/index.html', html);
+// keep the repo-root page in sync: it's what the local dev server (and any
+// root-serving static host) serves
+fs.writeFileSync('index.html', html);
 
 // static payload for deploys (Vercel outputDirectory = dist)
 for (const dir of ['assets', 'vendor', 'admin']) {

@@ -9,12 +9,13 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "node build.mjs",
-    "check": "node build.mjs && diff -q index.html dist/index.html && echo BYTE-IDENTICAL"
+    "check": "node build.mjs && diff -q index.html dist/index.html && echo BYTE-IDENTICAL",
+    "dev": "node --watch-path=content --watch-path=src build.mjs"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "private": "true",
   "dependencies": {
     "nunjucks": "^3.2.4"
