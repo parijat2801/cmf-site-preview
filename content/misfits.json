@@ -1,0 +1,69 @@
+{
+  "heading": "The (Mis)fit <span class=\"mark\" style=\"--hl:var(--yellow)\">Brigade</span>",
+  "intro": "[Placeholder] A short line about the artists and creators we work with — the misfits shaping culture alongside us.",
+  "items": [
+    {
+      "photo": "assets/brigade/1.webp",
+      "name": "Aakash Odedra",
+      "role": "Dancer",
+      "order": "01",
+      "bio": "British South Asian dancer and choreographer trained in Kathak and Bharatanatyam, founder of Aakash Odedra Company. Regarded as one of the leading Kathak dancers of his generation, he was awarded a British Empire Medal in 2021 for services to dance."
+    },
+    {
+      "photo": "assets/brigade/2.webp",
+      "name": "Eshna Kutty",
+      "role": "Hoop Artist",
+      "order": "02",
+      "bio": "Delhi-based self-taught hoop dancer and flow artist with a postgraduate background in dance movement therapy. She gained wide recognition after a hula-hoop dance video went viral, and now teaches hoop workshops across India."
+    },
+    {
+      "photo": "assets/brigade/3.webp",
+      "name": "Nicki Wells",
+      "role": "Singer",
+      "order": "03",
+      "bio": "English singer, composer and songwriter known for blending Indian classical, Western classical, folk and jazz influences. She rose to prominence as featured vocalist in Nitin Sawhney&#x27;s band and released her debut album under the name TURYA before recording as Nicki Wells."
+    },
+    {
+      "photo": "assets/brigade/4.webp",
+      "name": "Nirvair Singh Rai",
+      "role": "Photographer",
+      "order": "04",
+      "bio": "Independent visual artist and filmmaker working across documentary, fashion, and commercial photography, trained at Pathshala in Dhaka, Bangladesh. He is listed as a collaborator with Aakash Odedra Company, a UK dance organisation in the same cultural circle as this roster."
+    },
+    {
+      "photo": "assets/brigade/5.webp",
+      "name": "Ravi-Ra",
+      "role": "Musician",
+      "order": "05",
+      "bio": "Lyricist, singer-songwriter and screenwriter working in India&#x27;s film and music industry, credited in the music departments of films including Forensic (2022), Half CA (2023) and Anu Aur DI (2023)."
+    },
+    {
+      "photo": "assets/brigade/6.webp",
+      "name": "Rushil Ranjan",
+      "role": "Composer",
+      "order": "06",
+      "bio": "British composer, arranger and producer who founded the Orchestral Qawwali Project with singer Abi Sampa, blending Sufi and orchestral classical music. He is an Associate Artist of the Royal Albert Hall and has collaborated with A. R. Rahman on major concert works."
+    },
+    {
+      "photo": "assets/brigade/7.webp",
+      "name": "Gopal Datt",
+      "role": "Actor",
+      "order": "07",
+      "bio": "Indian actor and writer, full name Gopal Datt Tiwari, trained at the National School of Drama. Known for comedic roles in web series such as TVF Pitchers and Bachelors, and films including Tere Naam and the National Award-winning Filmistaan."
+    },
+    {
+      "photo": "assets/brigade/8.webp",
+      "name": "Parikshit Balochi",
+      "role": "Radio Host",
+      "order": "08",
+      "bio": "Dubai-based radio presenter and travel blogger, host of the breakfast show on Bollywood music station City 101.6. Originally from India, he has since travelled to over 80 countries and built a career in broadcasting and travel content."
+    },
+    {
+      "photo": "assets/brigade/9.webp",
+      "name": "Abi Sampa",
+      "role": "Singer",
+      "order": "09",
+      "bio": "London-born Sufi and Carnatic-trained singer and veena player of Sri Lankan Tamil heritage, first Asian-tradition singer to appear on The Voice UK (2013). She co-founded the Orchestral Qawwali Project with composer Rushil Ranjan and qualified as a dentist in 2011."
+    }
+  ]
+}
