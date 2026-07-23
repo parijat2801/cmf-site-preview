@@ -236,20 +236,29 @@ body.no-grain::after{opacity:0}
 /* ---- desktop: the more-menu button + dropdown don't exist ---- */
 .navmore{display:none}
 .navmenu{display:none}
-/* ---- PHONE nav: two controls only — a small Instagram, and a "more" menu that
-        opens the three vertical links + mail. Hide the inline verticals AND the
-        Contact button from the bar (Contact moves into the menu). ---- */
-@media(max-width:760px){
+/* ---- COMPACT nav (phones AND tablets, up to 1024px): two controls only — a small
+        Instagram + a "more" menu holding the verticals + mail. The inline link bar
+        needs ~1024px to fit all four verticals + Contact without colliding with the
+        logo (at 768–900px it wrapped/overlapped), so tablets use the menu too. ---- */
+@media(max-width:1024px){
   .nav .lk a:not(.ig){display:none}          /* verticals + Contact button off the bar */
   /* IG lives inside .lk and .navmore is a separate nav child; with the nav's
      space-between that stranded IG in the CENTRE. Push .lk hard to the right so it
      sits flush against the more button — logo left, [IG][more] grouped right. */
   .nav .lk{gap:0;margin-left:auto}
-  .navmore{margin-left:.2em}
+  /* fat-finger spacing: both controls get a ~44px tap area and a real gap between
+     them, so the two targets don't overlap and a thumb can't miss-hit. */
+  .nav .ig{width:44px;height:44px;justify-content:center;margin-right:0}
+  /* match the more button's visual weight: bump the IG glyph up and thicken its
+     stroke a touch so the two controls read as equal-sized siblings, not a small
+     icon beside a heavy menu button. */
+  .nav .ig svg{width:27px;stroke-width:2}
+  .navmore{margin-left:14px}
   /* the more button: two short bars (a compact menu glyph), same currentColor as the nav */
-  .navmore{display:inline-flex;flex-direction:column;justify-content:center;gap:5px;
-    width:40px;height:40px;padding:0 8px;margin-left:.3em;background:none;border:0;cursor:pointer;color:inherit}
-  .navmore-bar{display:block;height:2px;width:100%;background:currentColor;border-radius:2px;
+  .navmore{display:inline-flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;
+    width:44px;height:44px;padding:0;margin-right:-10px;background:none;border:0;cursor:pointer;color:inherit}
+  /* bars: 27px wide (matches the IG glyph) so the two controls read equal weight */
+  .navmore-bar{display:block;height:2px;width:27px;background:currentColor;border-radius:2px;
     transition:transform .3s var(--ease),opacity .3s var(--ease)}
   /* open state: bars cross into an X */
   .navmore[aria-expanded="true"] .navmore-bar:nth-child(1){transform:translateY(3.5px) rotate(45deg)}
@@ -977,6 +986,7 @@ body.no-grain::after{opacity:0}
     </svg>
   </a>
   <div class="lk">
+    <a href="#misfits">Misfit Brigade</a>
     <a href="#culturist-network">Culturist Network</a>
     <a href="#irl-live">IRL &amp; Live</a>
     <a href="#film-studio">Film Studio</a>
@@ -995,6 +1005,7 @@ body.no-grain::after{opacity:0}
     <span class="navmore-bar"></span><span class="navmore-bar"></span>
   </button>
   <div class="navmenu" id="navMenu" hidden>
+    <a href="#misfits">Misfit Brigade</a>
     <a href="#culturist-network">Culturist Network</a>
     <a href="#irl-live">IRL &amp; Live</a>
     <a href="#film-studio">Film Studio</a>
