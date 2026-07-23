@@ -361,10 +361,15 @@ export function initHeroBalloon(canvas) {
     addEventListener('resize', fit, { passive: true });
   }
 
-  // ---- pointer parallax (no scroll term: the hero pins, glyph holds still) ----
+  // ---- pointer parallax (mouse only) ----
+  // DESKTOP only. On a phone there is no hovering pointer: every pointermove IS a
+  // finger-drag scroll, so wiring parallax to it made the glyph tilt/lurch to follow
+  // the finger as the page scrolled — that was the "jitter on scroll". Gate it on
+  // a real hovering pointer so touch scrolls never feed the parallax.
   let px = 0, py = 0, tpx = 0, tpy = 0;
-  if (!reduced) {
+  if (!reduced && !isTouch) {
     addEventListener('pointermove', e => {
+      if (e.pointerType === 'touch') return;   // belt-and-braces: ignore touch points
       tpx = (e.clientX / innerWidth - 0.5) * 2;
       tpy = (e.clientY / innerHeight - 0.5) * 2;
     }, { passive: true });
