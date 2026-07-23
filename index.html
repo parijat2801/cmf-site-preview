@@ -444,6 +444,10 @@ body.no-grain::after{opacity:0}
 @media(max-width:860px){
   .offer{grid-template-columns:1fr;gap:clamp(20px,5vw,36px)}
   .oshot{aspect-ratio:4/3;width:100%}
+  /* stack image ALWAYS above text. The desktop zig-zag swaps even rows to
+     text-first (.oshot order:2); reset that so every card reads image-then-text. */
+  .offer:nth-of-type(even) .oshot{order:0}
+  .offer:nth-of-type(even) .otext{order:0}
 }
 
 /* ============ WORK — brand red field, cream type ============ */
@@ -457,7 +461,13 @@ body.no-grain::after{opacity:0}
 .witem .oshot{aspect-ratio:5/4;width:min(100%,72vh);justify-self:start}
 .witem .fl{margin-top:1.2em;align-self:flex-start;font-weight:500;letter-spacing:.18em;text-transform:uppercase;font-size:var(--t-label);border-bottom:var(--hair) solid currentColor;padding-bottom:.25em;text-decoration:none;color:inherit;transition:opacity .5s var(--ease)}
 .witem .fl:hover{opacity:.6}
-@media(max-width:760px){.witem,.witem:nth-child(even){grid-template-columns:1fr}.witem:nth-child(even) .txt{order:0}}
+@media(max-width:760px){
+  .witem,.witem:nth-child(even){grid-template-columns:1fr}
+  /* image ALWAYS above text. The DOM order is text-then-image, and desktop swaps
+     even rows on top of that — so force image first on every row via order. */
+  .witem .oshot{order:0}
+  .witem .txt,.witem:nth-child(even) .txt{order:1}
+}
 
 /* ============ THE MISFITS — photo wall; hover floats the bigger image ============
    Cells are HEIGHT-driven (vh) so the whole section — head, 2 rows, proof
