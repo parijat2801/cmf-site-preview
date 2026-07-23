@@ -3,7 +3,7 @@
        language: hairline rules, heavy display type, one accent (red). -->
   <section class="card dark for-brands tall nopin" id="for-brands" data-nav="dark" data-navbg="#231F20">
     <div class="wrap">
-      <h2 class="head reveal d1" data-m>Cultural Relevance <span class="mark mark-w" style="--hl:#e5018c">Made Real</span></h2>
+      <h2 class="head reveal d1" data-m>{{ for_brands.heading | safe }}</h2>
 
       <div class="fb-cols">
         <figure class="fb-chart reveal d2" data-m>
@@ -13,8 +13,8 @@
             <span class="fb-axis fb-axis-y" aria-hidden="true"></span>
             <span class="fb-axis fb-axis-x" aria-hidden="true"></span>
             <!-- axis labels sit INSIDE the plot, hugging their own line -->
-            <span class="fb-yaxis">Scale</span>
-            <span class="fb-xaxis">Cultural Impact</span>
+            <span class="fb-yaxis">{{ for_brands.chartYAxisLabel }}</span>
+            <span class="fb-xaxis">{{ for_brands.chartXAxisLabel }}</span>
             <!-- hand-drawn curly arrow: loops out from the end of the note and
                  sweeps back down-left into an arrowhead pointing at the alien -->
             <!-- The box is anchored so its BOTTOM-LEFT corner sits on the alien's
@@ -33,24 +33,25 @@
                 stroke="currentColor" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             <!-- alien mark in the top-right quadrant (replaces the old 2x2 labels) -->
-            <img class="fb-alien" src="assets/brand/alien-magenta.webp" alt="" aria-hidden="true">
+            <img class="fb-alien" src="assets/brand/alien-magenta.webp" alt="{{ for_brands.alienAlt }}" aria-hidden="true">
             <!-- the handwritten note floats above the top-right quadrant -->
             <div class="fb-note" aria-hidden="true">
-              <p>If your brand isn't here, is it even culturally relevant?</p>
+              <p>{{ for_brands.note }}</p>
             </div>
           </div>
         </figure>
 
         <div class="fb-copy reveal d2" data-m>
-          <p class="fb-lead">Position your brand in social discourse and ensure it resonates culturally with people today.</p>
+          <p class="fb-lead">{{ for_brands.lead }}</p>
           <ul class="fb-list">
-            <li>Culture-nuanced brand narratives</li>
-            <li>Culture and Media native formats in mass media, social media and live experiences</li>
+{%- for li in for_brands.list %}
+            <li>{{ li | safe }}</li>
+{%- endfor %}
           </ul>
         </div>
       </div>
 
-      <p class="fb-write reveal d3" data-m>Write to us at <a href="mailto:hello@culturalmisfits.com"><span class="mark mark-w" style="--hl:#e5018c">hello@culturalmisfits.com</span></a></p>
+      <p class="fb-write reveal d3" data-m>{{ for_brands.writeLede }} <a href="mailto:{{ for_brands.email }}"><span class="mark mark-w" style="--hl:#e5018c">{{ for_brands.email }}</span></a></p>
     </div>
   </section>
 

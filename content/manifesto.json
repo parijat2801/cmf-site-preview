@@ -1,0 +1,50 @@
+{
+  "beats": [
+    {
+      "eyebrow": "Manifesto",
+      "headline": "Where new <span class=\"mark mark-w\" style=\"--hl:var(--red)\">languages</span> are formed.",
+      "body": "Slang, sound, and syntax the mainstream hasn't caught up to yet.",
+      "photo": "assets/collage/blur.webp",
+      "alt": "",
+      "side": "r"
+    },
+    {
+      "headline": "Where new <span class=\"mark mark-w\" style=\"--hl:var(--red)\">aesthetics</span> are tested.",
+      "body": "Looks and worlds tried on in public, long before they trend.",
+      "photo": "assets/collage/arcade.webp",
+      "alt": "",
+      "side": "l"
+    },
+    {
+      "headline": "Where new <span class=\"mark mark-w\" style=\"--hl:var(--red)\">truths</span> are spoken.",
+      "body": "The things people actually mean, said out loud without translation.",
+      "photo": "assets/collage/banana.webp",
+      "alt": "",
+      "side": "r"
+    }
+  ],
+  "lede": "Mainstream or niche, a space to be seen, understood, and valued.",
+  "uniteHeading": "Who are we <span class=\"mark mark-w\" style=\"--hl:var(--red)\">building for?</span>",
+  "types": [
+    {
+      "photo": "assets/traits/curious.webp",
+      "title": "The Curious",
+      "question": "Do you ask why and how, more than what?"
+    },
+    {
+      "photo": "assets/traits/expressive.webp",
+      "title": "The Expressive",
+      "question": "Do you use music, fashion and memes to introduce yourself?"
+    },
+    {
+      "photo": "assets/traits/culturally-fluid.webp",
+      "title": "The Culturally Fluid",
+      "question": "Do you live with contradictions — and are OK with it?"
+    },
+    {
+      "photo": "assets/traits/sameness.webp",
+      "title": "The (Mis)fit",
+      "question": "For every square hole, round peg. Are you tired of one-size-fits-all narratives?"
+    }
+  ]
+}

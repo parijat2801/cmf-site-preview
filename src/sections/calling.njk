@@ -4,19 +4,17 @@
        light weight, dull hairlines, .onum-style numerals. -->
   <section class="card dark calling tall nopin" id="calling" data-nav="dark" data-navbg="#231F20">
     <div class="wrap">
-      <h2 class="head reveal d1" data-m>Calling <span class="mark mark-w" style="--hl:var(--red)">Everybody</span></h2>
+      <h2 class="head reveal d1" data-m>{{ calling.heading | safe }}</h2>
 
-      <p class="lede lede-wide reveal d2" data-m>We’re building a Cultural Operating System that moves forward with culture, with the help of those who don’t conform.</p>
+      <p class="lede lede-wide reveal d2" data-m>{{ calling.intro }}</p>
 
       <div class="ww-list">
-        <div class="ww-row reveal d1" data-m><span class="ww-no">01</span><p>Are you an <b>Artist or Creator</b> who wants to <i>join the Misfit Brigade?</i></p></div>
-        <div class="ww-row reveal d2" data-m><span class="ww-no">02</span><p>Are you a <b>Brand</b> who wants to <i>build Cultural Fluency?</i></p></div>
-        <div class="ww-row reveal d3" data-m><span class="ww-no">03</span><p>Are you a <b>Media Partner or Agency</b> who believes that <i>Misfits are a big deal?</i></p></div>
-        <div class="ww-row reveal d4" data-m><span class="ww-no">04</span><p>Are you a <b>Community</b> that is <i>tired of stories that keep flattening you?</i></p></div>
-        <div class="ww-row reveal d5" data-m><span class="ww-no">05</span><p>Are you <b>Anyone</b> who feels the way we feel <i>about Misfits?</i></p></div>
+{%- for item in calling.items %}
+        <div class="ww-row reveal d{{ loop.index }}" data-m><span class="ww-no">{{ "0" if loop.index < 10 }}{{ loop.index }}</span><p>{{ item.question | safe }}</p></div>
+{%- endfor %}
       </div>
 
-      <p class="fb-write reveal d6" data-m>Write to us at <a href="mailto:hello@culturalmisfits.com"><span class="mark mark-w" style="--hl:var(--red)">hello@culturalmisfits.com</span></a></p>
+      <p class="fb-write reveal d6" data-m>{{ calling.writeLede }} <a href="mailto:{{ calling.email }}"><span class="mark mark-w" style="--hl:var(--red)">{{ calling.email }}</span></a></p>
     </div>
   </section>
 
