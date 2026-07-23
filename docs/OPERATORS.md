@@ -32,10 +32,13 @@ keep them under ~300KB so the site stays fast.
 
 ## Reordering page sections
 
-Open **Page structure**. The list shows the six movable sections in their
-current order — drag to rearrange, save. The hero (top) and footer are fixed
-and don't appear in the list. Don't delete entries or add duplicates; each
-section should appear exactly once.
+Open **Page structure**. The list shows the seven movable sections in their
+current order — drag to rearrange, save. Each entry also has a **Visible**
+toggle: uncheck it to hide a section from the page without losing its place
+(if you hide one, also remove its link under Navigation so the menu doesn't
+point at nothing). The hero (top) and footer are fixed and don't appear in
+the list. Don't delete entries or add duplicates; each section should appear
+exactly once.
 
 ## If something looks wrong after a save
 

@@ -23,28 +23,5 @@
       "side": "r"
     }
   ],
-  "lede": "Mainstream or niche, a space to be seen, understood, and valued.",
-  "uniteHeading": "Who are we <span class=\"mark mark-w\" style=\"--hl:var(--red)\">building for?</span>",
-  "types": [
-    {
-      "photo": "assets/traits/curious.webp",
-      "title": "The Curious",
-      "question": "Do you ask why and how, more than what?"
-    },
-    {
-      "photo": "assets/traits/expressive.webp",
-      "title": "The Expressive",
-      "question": "Do you use music, fashion and memes to introduce yourself?"
-    },
-    {
-      "photo": "assets/traits/culturally-fluid.webp",
-      "title": "The Culturally Fluid",
-      "question": "Do you live with contradictions — and are OK with it?"
-    },
-    {
-      "photo": "assets/traits/sameness.webp",
-      "title": "The (Mis)fit",
-      "question": "For every square hole, round peg. Are you tired of one-size-fits-all narratives?"
-    }
-  ]
+  "lede": "Mainstream or niche, a space to be seen, understood, and valued."
 }

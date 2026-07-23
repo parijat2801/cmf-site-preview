@@ -22,18 +22,20 @@ collections:
           - label: "Page sections"
             name: "sections"
             widget: list
-            hint: "Drag to reorder the page sections (hero and footer are fixed and not listed here)."
-            field:
-              label: "Section"
-              name: "section"
-              widget: select
-              options:
-                - "manifesto"
-                - "misfits"
-                - "offerings"
-                - "work"
-                - "for-brands"
-                - "calling"
+            hint: "Drag to reorder the page sections (hero and footer are fixed and not listed here). Uncheck Visible to hide a section without losing its place — if you hide one, consider removing its menu link under Navigation too."
+            fields:
+              - label: "Section"
+                name: "section"
+                widget: select
+                options:
+                  - { label: "Manifesto", value: "manifesto" }
+                  - { label: "Who are we building for?", value: "audience" }
+                  - { label: "Misfits Brigade (artists)", value: "misfits" }
+                  - { label: "Offerings (verticals)", value: "offerings" }
+                  - { label: "Misfits Acts (IPs)", value: "work" }
+                  - { label: "For Brands", value: "for-brands" }
+                  - { label: "We work with", value: "calling" }
+              - { label: "Visible", name: "visible", widget: boolean, default: true }
 
       - name: "site"
         label: "Site meta (browser tab / link previews)"
@@ -213,11 +215,17 @@ collections:
                   - { label: "Right", value: "r" }
                   - { label: "Left", value: "l" }
           - { label: "Lede", name: "lede", widget: text, hint: "Short line shown between the beats and the \"who are we building for\" section." }
-          - { label: "\"Who are we building for\" heading", name: "uniteHeading", widget: text, hint: "Contains styling markup — edit the words, keep the <span> tags intact." }
+
+      - name: "audience"
+        label: "Who are we building for?"
+        file: "content/audience.json"
+        format: json
+        fields:
+          - { label: "Heading", name: "heading", widget: text, hint: "Contains styling markup — edit the words, keep the <span> tags intact." }
           - label: "Audience types"
             name: "types"
             widget: list
-            hint: "The four cards describing who the site is built for. Add, remove, or drag to reorder."
+            hint: "The cards describing who the site is built for. Add, remove, or drag to reorder."
             fields:
               - { label: "Photo", name: "photo", widget: image }
               - { label: "Title", name: "title", widget: string }

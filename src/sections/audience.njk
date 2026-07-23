@@ -1,0 +1,12 @@
+  <section class="mf-unite" id="audience">
+    <div class="mf-ustage">
+      <div class="mf-uhead mf-rise">{{ audience.heading | safe }}</div>
+      <div class="mf-reel" id="mf-reel">
+{%- for item in audience.types %}
+        <figure class="mf-card" data-mfcard tabindex="0" role="button"><img src="{{ item.photo }}" alt="" decoding="async"><figcaption class="mf-cap"><h4>{{ item.title }}</h4><div class="mf-q">{{ item.question }}</div></figcaption></figure>
+{%- endfor %}
+      </div>
+    </div>
+    <div class="mf-reel-runway" aria-hidden="true"></div>
+  </section>
+

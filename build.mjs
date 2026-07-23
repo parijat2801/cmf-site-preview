@@ -28,4 +28,4 @@ fs.writeFileSync('index.html', html);
 for (const dir of ['assets', 'vendor', 'admin']) {
   if (fs.existsSync(dir)) fs.cpSync(dir, path.join('dist', dir), { recursive: true });
 }
-console.log(`built dist/index.html (${html.length}b) — sections: ${data.settings.sections.join(' → ')}`);
+console.log(`built dist/index.html (${html.length}b) — sections: ${data.settings.sections.map(s => s.visible ? s.section : `(${s.section} hidden)`).join(' → ')}`);

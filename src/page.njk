@@ -1,1 +1,1 @@
-{% include "head.njk" %}{% include "nav.njk" %}{% include "hero.njk" %}{% for s in settings.sections %}{% include "sections/" ~ s ~ ".njk" %}{% endfor %}{% include "foot.njk" %}
+{% include "head.njk" %}{% include "nav.njk" %}{% include "hero.njk" %}{% for s in settings.sections %}{% if s.visible %}{% include "sections/" ~ s.section ~ ".njk" %}{% endif %}{% endfor %}{% include "foot.njk" %}
