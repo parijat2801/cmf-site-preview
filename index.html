@@ -233,7 +233,40 @@ body.no-grain::after{opacity:0}
 .nav .ig{display:flex;align-items:center;opacity:1;line-height:0;padding:0;margin-right:-.4em;transition:opacity .35s var(--ease)}
 .nav .ig:hover{opacity:.65}
 .nav .ig svg{display:block;width:clamp(20px,1.5vw,24px);height:auto}
-@media(max-width:760px){.nav .lk a:not(.contact):not(.ig){display:none}}
+/* ---- desktop: the more-menu button + dropdown don't exist ---- */
+.navmore{display:none}
+.navmenu{display:none}
+/* ---- PHONE nav: two controls only — a small Instagram, and a "more" menu that
+        opens the three vertical links + mail. Hide the inline verticals AND the
+        Contact button from the bar (Contact moves into the menu). ---- */
+@media(max-width:760px){
+  .nav .lk a:not(.ig){display:none}          /* verticals + Contact button off the bar */
+  /* IG lives inside .lk and .navmore is a separate nav child; with the nav's
+     space-between that stranded IG in the CENTRE. Push .lk hard to the right so it
+     sits flush against the more button — logo left, [IG][more] grouped right. */
+  .nav .lk{gap:0;margin-left:auto}
+  .navmore{margin-left:.2em}
+  /* the more button: two short bars (a compact menu glyph), same currentColor as the nav */
+  .navmore{display:inline-flex;flex-direction:column;justify-content:center;gap:5px;
+    width:40px;height:40px;padding:0 8px;margin-left:.3em;background:none;border:0;cursor:pointer;color:inherit}
+  .navmore-bar{display:block;height:2px;width:100%;background:currentColor;border-radius:2px;
+    transition:transform .3s var(--ease),opacity .3s var(--ease)}
+  /* open state: bars cross into an X */
+  .navmore[aria-expanded="true"] .navmore-bar:nth-child(1){transform:translateY(3.5px) rotate(45deg)}
+  .navmore[aria-expanded="true"] .navmore-bar:nth-child(2){transform:translateY(-3.5px) rotate(-45deg)}
+  /* dropdown panel: sits under the bar, right-aligned, same glass field as the nav */
+  .navmenu{display:block;position:absolute;top:100%;right:var(--gutter);margin-top:8px;
+    min-width:200px;padding:8px;border-radius:10px;
+    background:rgba(24,20,21,.92);backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%);
+    box-shadow:0 12px 40px rgba(0,0,0,.5);
+    display:flex;flex-direction:column;gap:2px;
+    opacity:0;transform:translateY(-6px);transition:opacity .28s var(--ease),transform .28s var(--ease)}
+  .navmenu[hidden]{display:none}
+  .navmenu.open{opacity:1;transform:none}
+  .navmenu a{display:block;color:var(--cream);padding:.7em .8em;border-radius:6px;
+    font-size:var(--t-label);letter-spacing:.14em;opacity:.9}
+  .navmenu a:hover,.navmenu a:active{opacity:1;background:rgba(255,255,255,.08)}
+}
 
 /* ---------- PHONE TYPE SCALE ----------
    Every heading on the page is sized `clamp(floor, min(Nvw, Mvh), ceiling)`. The
@@ -955,6 +988,17 @@ body.no-grain::after{opacity:0}
       </svg>
     </a>
     <a class="contact" href="mailto:hello@culturalmisfits.com"><span>Contact</span></a>
+  </div>
+  <!-- PHONE-ONLY: a "more" menu button (hidden on desktop) that opens a dropdown
+       with the links the desktop bar shows inline (the three verticals + mail). -->
+  <button class="navmore" id="navMore" aria-label="Menu" aria-expanded="false" aria-controls="navMenu">
+    <span class="navmore-bar"></span><span class="navmore-bar"></span>
+  </button>
+  <div class="navmenu" id="navMenu" hidden>
+    <a href="#culturist-network">Culturist Network</a>
+    <a href="#irl-live">IRL &amp; Live</a>
+    <a href="#film-studio">Film Studio</a>
+    <a href="mailto:hello@culturalmisfits.com">Contact</a>
   </div>
 </nav>
 
@@ -1682,6 +1726,27 @@ if(!reduce){
     else if(scroll<lastY-4)nav.classList.remove('hid');
     lastY=scroll;
   });
+
+  /* PHONE nav "more" menu: toggle a dropdown of the links not shown on the bar.
+     hidden attr gates display; a rAF flip to .open drives the fade so the very
+     first open animates. Closes on: a link tap, an outside tap, or Escape. */
+  const moreBtn=document.getElementById('navMore');
+  const moreMenu=document.getElementById('navMenu');
+  if(moreBtn && moreMenu){
+    const closeMenu=()=>{ if(moreMenu.hidden) return;
+      moreMenu.classList.remove('open'); moreBtn.setAttribute('aria-expanded','false');
+      setTimeout(()=>{ if(!moreMenu.classList.contains('open')) moreMenu.hidden=true; },300); };
+    const openMenu=()=>{ moreMenu.hidden=false; moreBtn.setAttribute('aria-expanded','true');
+      requestAnimationFrame(()=>moreMenu.classList.add('open')); };
+    moreBtn.addEventListener('click',e=>{ e.stopPropagation();
+      moreMenu.hidden ? openMenu() : closeMenu(); });
+    moreMenu.addEventListener('click',e=>{ if(e.target.closest('a')) closeMenu(); });
+    document.addEventListener('click',e=>{ if(!moreMenu.hidden && !nav.contains(e.target)) closeMenu(); });
+    addEventListener('keydown',e=>{ if(e.key==='Escape') closeMenu(); });
+    /* the nav hides itself on scroll-down — close the menu with it so it can't
+       float detached */
+    lenis.on('scroll',()=>closeMenu());
+  }
 
   const cards=gsap.utils.toArray('.deck > .card');
   cards.forEach((c,i)=>c.style.zIndex=10+i);
