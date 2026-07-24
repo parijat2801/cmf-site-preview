@@ -76,28 +76,60 @@
        no-op since these are small, soft-edged marks (see per-canvas note).
      maxDPR_hero   — cap for the WebGL hero balloon (real 3D geometry benefits
        more from resolution, so it gets a higher ceiling than the flat shaders).
+       The glass material renders the scene TWICE per frame (transmission samples
+       the scene behind the glyph), so on a 2x-DPR tablet DPR 2 is ~5.6MP × 2 per
+       frame — the dominant hero cost. So the ceiling is 1.5 on touch devices
+       (hover:none + pointer:coarse = phones/tablets) and 2 on pointer devices.
+       Override for on-device A/B with ?heroDPR=<number> (see the URL block below).
      decorativeFPS — frame-time gate for the highlighters + crayon axes (NOT
        the hero balloon, which should stay smooth): halves GPU work for
        slow-moving decorative effects where 30fps reads identically to 60fps.
      pauseOffscreen — declared intent only; NOT read anywhere. Every rAF loop
        already pauses off-screen unconditionally via its own IntersectionObserver,
        so the flag is a description of that behaviour, not a switch that toggles it.
-     tier — only the explicit value 'low' does anything: the hero balloon reads
-       (GFX.tier === 'low') || navigator.connection.saveData to serve the smaller
-       LOD; 'auto' (the default) and 'high' both fall through to full quality —
-       there is no matchMedia/device-class signal behind 'auto'. Set 'low' from the
-       console (GFX.tier='low') to test the low path without spoofing a device.
-       Kept coarse deliberately: deviceMemory is Chrome-only, hardwareConcurrency
-       is clamped to 2 on all iOS (unreliable on iPhone), and
-       WEBGL_debug_renderer_info strings are being sanitised — none are robust tier
-       signals, so we don't gate on them. */
+     tier — controls which balloon LOD the hero fetches. The default 'auto' is
+       resolved HERE (below) to a concrete 'low' or 'high' before any consumer
+       reads it: 'low' when the viewport is phone-width (max-width:860px) OR the
+       reader prefers reduced motion, else 'high'. hero-balloon.js then serves the
+       smaller LOD-15 when (GFX.tier === 'low') || navigator.connection.saveData,
+       so 'auto' on a phone and saveData compose (either forces LOD-15). Explicit
+       'low'/'high' set here or from the console skip the auto-resolution. Override
+       for A/B with ?tier=low|high (see the URL block below), which wins over auto.
+       Kept coarse deliberately (viewport width + reduced-motion only): deviceMemory
+       is Chrome-only, hardwareConcurrency is clamped to 2 on all iOS (unreliable on
+       iPhone), and WEBGL_debug_renderer_info strings are being sanitised — none are
+       robust tier signals, so we don't gate on them. */
+// touch = phones + tablets (no hovering pointer). These carry the hero at a
+// lower DPR ceiling (see maxDPR_hero note above); pointer devices keep 2.
+const _touch = matchMedia('(hover:none) and (pointer:coarse)').matches;
 window.GFX = {
   maxDPR_shader: 1.5,
-  maxDPR_hero: 2,
+  maxDPR_hero: _touch ? 1.5 : 2,
   decorativeFPS: 30,
   pauseOffscreen: true,
   tier: 'auto',
 };
+// Resolve tier:'auto' to a concrete 'low'/'high' NOW, before hero-balloon.js
+// reads it — phone-width (max-width:860px) or reduced-motion → 'low' (LOD-15),
+// else 'high'. Explicit 'low'/'high' (set above or from the console) is left as
+// is. This runs before the URL override below, which can still force either.
+if (window.GFX.tier === 'auto') {
+  const _low = matchMedia('(max-width:860px)').matches
+            || matchMedia('(prefers-reduced-motion:reduce)').matches;
+  window.GFX.tier = _low ? 'low' : 'high';
+}
+// URL overrides for on-device A/B testing (win over the auto-resolved values
+// above). ?heroDPR=<number> forces the hero DPR ceiling; ?tier=low|high forces
+// the LOD tier. NOTE: hero-balloon.js reads GFX.maxDPR_hero AND GFX.tier once at
+// module load, so changing either param needs a full page reload to apply (they
+// are not live).
+{
+  const _q = new URLSearchParams(location.search);
+  const _heroDPR = parseFloat(_q.get('heroDPR'));
+  if (Number.isFinite(_heroDPR) && _heroDPR > 0) window.GFX.maxDPR_hero = _heroDPR;
+  const _tier = _q.get('tier');
+  if (_tier === 'low' || _tier === 'high') window.GFX.tier = _tier;
+}
 try {
   const { initHeroBalloon } = await import('./vendor/hero-balloon.js');
   const cv = document.getElementById('heroCanvas');
@@ -708,6 +740,32 @@ if(!reduce){
     return [ (+m[0])/255, (+m[1])/255, (+m[2])/255 ];
   };
 
+  // ---- LIFECYCLE (device-review): peak live WebGL contexts, not one-per-mark.
+  // Historically every .mark mounted a ShaderMount at init → ~10 highlighter
+  // contexts + hero + crayon = up to 12 live at once, none ever disposed, and
+  // iOS evicts the OLDEST context first (the hero) when it runs out. So marks
+  // are now mounted lazily as they near the viewport and DISPOSED once their
+  // stroke is complete AND they are well off-screen, keeping the live count low
+  // (~hero + crayon + a handful of near-viewport marks). State machine per mark:
+  //
+  //   UNMOUNTED (mount:null)  — no context. Initial state, and the resting state
+  //     for any mark scrolled far away. armed may still be true (a completed mark
+  //     that got disposed keeps prog===1, armed===true so it does NOT replay).
+  //   MOUNTED, drawing        — has a context; the rAF sweeps u_progress 0→1.
+  //   MOUNTED, complete       — prog===1, holds the final frame, no GPU writes.
+  //
+  //   mountIO (rootMargin 150%) → ensureMount(): create the context. Fires well
+  //     before the reveal (threshold .15, no margin) so the first stroke frame is
+  //     never missed. A completed mark (prog===1) re-mounts straight to its final
+  //     frame — no replay.
+  //   disposeIO (rootMargin 100%, LESS than mountIO's 150%) → when a mark leaves
+  //     that expanded box (far off-screen) AND prog>=1 → dispose(): tear the
+  //     context down, remove the canvas. On scroll-back mountIO (larger margin)
+  //     re-creates it BEFORE it re-enters view, so the strokeless gap is never
+  //     seen. Marks that never neared the viewport keep zero contexts.
+  //   reduced-motion → this whole module returned at the top, so nothing ever
+  //     mounts; the CSS swipe is the only path. contextlost still reverts a mark
+  //     to the CSS fallback (see per-canvas handler).
   const marks=[];
   document.querySelectorAll('.mark').forEach((el,i)=>{
     // resolve the accent color from the element's own --hl (falls back to red)
@@ -731,46 +789,100 @@ if(!reduce){
     const skew = +(jitter*R.skewMag).toFixed(4);
     const seed = 1.0 + i*7.13;
 
-    el.classList.add('mark-shader');                   // suppress CSS swipe, enable --rv text
     const u=(p,cv)=>({ u_res:[cv?cv.width:300, cv?cv.height:80], u_progress:p, u_color:color,
       u_alpha:R.alpha, u_wet:R.wet, u_wetWidth:R.wetw, u_streak:R.streak, u_bubbles:R.bub,
       u_tipRag:R.tipr, u_edgeRag:R.edge, u_skew:skew, u_seed:seed });
-    let mount;
-    // minPixelRatio:1 (was the library default of 2 — a FLOOR, so leaving it at
-    // 2 would force 2x even on 1x screens); the real ceiling comes from
-    // maxPixelCount below, sized to the mark's own box so the DPR cap holds
-    // regardless of how big any individual highlighted word is.
-    const box=el.getBoundingClientRect();
-    try { mount=new ShaderMount(el, frag, u(0,null), undefined, 0.0, 0, 1, maxPixelsFor(box.width||300, box.height||80)); }
-    catch(_) { el.classList.remove('mark-shader'); return; }  // this mark → CSS fallback
-    const cv=el.querySelector('canvas');
-    if(cv){ cv.style.position='absolute'; cv.style.zIndex='-1'; cv.style.pointerEvents='none';
-      cv.style.left=(-OVERHANG)+'px'; cv.style.top=(-VPAD)+'px';
-      cv.style.width='calc(100% + '+(OVERHANG*2)+'px)';
-      cv.style.height='calc(100% + '+(VPAD*2)+'px)';
-      // context loss (iOS evicts the oldest context when too many are alive):
-      // this mark drops back to the CSS swipe highlight instead of going blank
-      cv.addEventListener('webglcontextlost',e=>{ e.preventDefault();
-        el.classList.remove('mark-shader');
-        try{ mount.dispose&&mount.dispose(); }catch(_){}
-        cv.remove(); },{once:true}); }
 
     // trigger element: the chart label keys off .fb-chart.in; the manifesto beats
     // reveal via .mf-rise; everything else via its nearest .reveal ancestor. All
     // three gain .in through the same IntersectionObserver.
     const trigger = el.closest('.fb-chart') || el.closest('.reveal') || el.closest('.mf-rise') || el;
-    marks.push({ el, mount, cv, u, trigger, armed:false, start:0, prog:0, visible:true });
+    // mount:null until it nears the viewport; failed===true means a mount attempt
+    // threw or the context was lost → permanent CSS fallback, never retried.
+    marks.push({ el, mount:null, cv:null, u, trigger, armed:false, start:0, prog:0, visible:true, failed:false });
   });
   if(!marks.length) return;
 
-  // pause shaders whose mark is off-screen (cap live GPU work)
+  // create a mark's ShaderMount + canvas on demand. Idempotent (no-op if already
+  // mounted or permanently failed). If the mark is armed+complete (prog===1) —
+  // e.g. re-mounting after a scroll-back disposal — it renders straight to the
+  // final frame instead of replaying the stroke.
+  const ensureMount = (m) => {
+    if (m.mount || m.failed) return;
+    const el=m.el;
+    el.classList.add('mark-shader');                   // suppress CSS swipe, enable --rv text
+    // minPixelRatio:1 (library default 2 is a FLOOR, would force 2x on 1x
+    // screens); the real ceiling is maxPixelCount, sized to the mark's own box so
+    // the DPR cap holds regardless of how big the highlighted word is.
+    const box=el.getBoundingClientRect();
+    let mount;
+    try { mount=new ShaderMount(el, frag, m.u(0,null), undefined, 0.0, 0, 1, maxPixelsFor(box.width||300, box.height||80)); }
+    catch(_) { el.classList.remove('mark-shader'); m.failed=true; return; }  // this mark → CSS fallback
+    const cv=el.querySelector('canvas');
+    if(!cv){ try{ mount.dispose&&mount.dispose(); }catch(_){}; el.classList.remove('mark-shader'); m.failed=true; return; }
+    cv.style.position='absolute'; cv.style.zIndex='-1'; cv.style.pointerEvents='none';
+    cv.style.left=(-OVERHANG)+'px'; cv.style.top=(-VPAD)+'px';
+    cv.style.width='calc(100% + '+(OVERHANG*2)+'px)';
+    cv.style.height='calc(100% + '+(VPAD*2)+'px)';
+    // context loss (iOS evicts the oldest context when too many are alive):
+    // this mark drops back to the CSS swipe highlight instead of going blank, and
+    // is marked failed so lazy re-mount never re-creates it into the same problem.
+    cv.addEventListener('webglcontextlost',e=>{ e.preventDefault();
+      el.classList.remove('mark-shader'); m.failed=true;
+      try{ m.mount&&m.mount.dispose&&m.mount.dispose(); }catch(_){}
+      m.mount=null; m.cv=null; },{once:true});
+    m.mount=mount; m.cv=cv;
+    // paint the CURRENT progress immediately: a fresh mount of a still-drawing
+    // mark shows frame 0 (the rAF advances it); a re-mount of an ALREADY-complete
+    // mark (prog===1) shows its final frame at once — the stroke does not replay.
+    el.style.setProperty('--rv', m.prog.toFixed(3));
+    m.mount.setUniforms(m.u(m.prog,cv));
+  };
+
+  // tear a mark's context down, remove the canvas, keep the mark object so it can
+  // re-mount later. .mark-shader stays on the element (text stays lit via
+  // --mark-lit + --rv); only ever called when the mark is far off-screen, so the
+  // momentarily strokeless word is never on screen. (If it WERE visible the CSS
+  // ::before is display:none under .mark-shader, so the highlight would vanish —
+  // which is exactly why dispose is gated on being well outside the viewport.)
+  const disposeMount = (m) => {
+    if (!m.mount) return;
+    try{ m.mount.dispose&&m.mount.dispose(); }catch(_){}
+    m.mount=null; m.cv=null;
+  };
+
+  // pause shaders whose mark is off-screen (cap live GPU work). threshold 0, no
+  // margin — this is the "actually on screen right now" signal the rAF gates on.
   const vis=new IntersectionObserver(es=>es.forEach(e=>{
     const m=marks.find(x=>x.el===e.target); if(m) m.visible=e.isIntersecting;
   }),{threshold:0});
   marks.forEach(m=>vis.observe(m.el));
 
-  // arm/replay a mark: reset progress and (re)start its draw
-  const arm = (m) => { m.armed=true; m.start=performance.now(); m.prog=0; startLoop(); };
+  // MOUNT band (150% = 1.5 viewport-heights of slack): create the context well
+  // before the mark reaches the reveal line, so the first stroke frame is ready.
+  const mountIO=new IntersectionObserver(es=>es.forEach(e=>{
+    if(!e.isIntersecting) return;
+    const m=marks.find(x=>x.el===e.target); if(m) ensureMount(m);
+  }),{rootMargin:'150% 0px',threshold:0});
+  marks.forEach(m=>mountIO.observe(m.el));
+
+  // DISPOSE band (100% < the mount band's 150%): once a mark LEAVES this expanded
+  // box it is far enough off-screen that its missing stroke can't be seen — if its
+  // stroke has completed (prog>=1), tear the context down. On scroll-back the
+  // wider mount band re-fires first, re-creating the context (at prog 1, no
+  // replay) before the mark is visible again. A still-drawing mark (prog<1) is
+  // never disposed — it keeps its context so the sweep isn't interrupted.
+  const disposeIO=new IntersectionObserver(es=>es.forEach(e=>{
+    if(e.isIntersecting) return;                        // still within the dispose band — keep it
+    const m=marks.find(x=>x.el===e.target);
+    if(m && m.mount && m.prog>=1) disposeMount(m);
+  }),{rootMargin:'100% 0px',threshold:0});
+  marks.forEach(m=>disposeIO.observe(m.el));
+
+  // arm/replay a mark: reset progress and (re)start its draw. Mounts first if the
+  // reveal beat the mount band (fast flick / anchor jump) — arm() on an unmounted
+  // mark must still play the stroke, so ensure the context exists.
+  const arm = (m) => { ensureMount(m); m.armed=true; m.start=performance.now(); m.prog=0; startLoop(); };
   const disarm = (m) => { m.armed=false; m.prog=0; m.el.style.setProperty('--rv','0');
     if(m.cv) m.mount.setUniforms(m.u(0,m.cv)); };
 
